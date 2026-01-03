@@ -27,7 +27,7 @@ body, button, input, p, h2, h1, span { user-select: none; }
 
 <div id="loginBox">
 <h2 style="text-align:center; color:#0ff;">Firework Simulator Login</h2>
-<input type="text" id="username" placeholder="Username">
+<input type="text" id="username" placeholder="Username (Sign Up Only)">
 <input type="email" id="email" placeholder="Email">
 <input type="password" id="password" placeholder="Password">
 <button id="loginBtn">Login</button>
@@ -62,12 +62,13 @@ body, button, input, p, h2, h1, span { user-select: none; }
 
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// ---------- FIREBASE ----------
+// ===================== FIREBASE =====================
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -80,26 +81,26 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-let currentUser = "";
 
-// ---------- ELEMENTS ----------
+// ===================== VARIABLES =====================
 const loginBox = document.getElementById("loginBox");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
+const forgotBtn = document.getElementById("forgotBtn");
 const loginMsg = document.getElementById("loginMsg");
 const ui = document.getElementById("ui");
 const ownerMsg = document.getElementById("ownerMsg");
 const ownerCommands = document.getElementById("ownerCommands");
 const resetBtn = document.getElementById("resetBtn");
 const goLeaderboardBtn = document.getElementById("goLeaderboardBtn");
+let currentUser = "";
 
-// ---------- CANVAS ----------
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+// ===================== FIREWORK / GAME VARIABLES =====================
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
 window.addEventListener("resize",()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
 
-// ---------- GAME VARIABLES ----------
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now(), moneyMultiplier=1, rebirthCount=0;
 let colorPrice=50, delayPrice=100, rebirthPrice=500, maxClickDelay=100, autoPrice=200, autoAmount=0, autoSpeed=2.5;
 const maxAutoUpgrades = 3;
@@ -111,143 +112,124 @@ const gravity=0.04;
 const fireworkSound=document.getElementById("fireworkSound");
 let autoInterval=null;
 
-// ---------- AUTH ----------
-auth.onAuthStateChanged(user => {
-    if(user){
-        currentUser = user.uid;
-        showUI(false);
-        loadProgress();
-    }
+// ===================== BANNED WORDS =====================
+const bannedWords = ["fuck","shit","bitch","ass","sex","porn","nigger","faggot","cunt","dick","crap","tit","damn"];
+function normalizeName(name){return name.toLowerCase().replace(/[^a-z]/g,"");}
+function isUsernameClean(name){return !bannedWords.some(word=>normalizeName(name).includes(word));}
+
+// ===================== AUTH =====================
+auth.onAuthStateChanged(user=>{
+  if(user){
+    currentUser = user.uid;
+    showUI();
+    loadProgress();
+  } else {
+    loginBox.style.display = "block";
+    ui.style.display = "none";
+  }
 });
 
-// ---------- FUNCTIONS ----------
-function showUI(showOwner=false){
-    loginBox.style.display="none";
-    ui.style.display="block";
-    ownerMsg.style.display = showOwner ? "block" : "none";
-    ownerCommands.style.display = showOwner ? "block" : "none";
-}
-
-// ---------- FIREWORK CLASSES ----------
-class Firework{
-    constructor(x,targetY,colorObj){this.x=x; this.y=canvas.height; this.targetY=targetY; this.speed=Math.random()*2+4; this.colorObj=colorObj;}
-    update(){if(this.y<=this.targetY){explode(this.x,this.y,this.colorObj); return true;} this.y-=this.speed; return false;}
-    draw(){ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.colorObj.color; ctx.fill();}
-}
-class Particle{
-    constructor(x,y,colorObj){this.x=x; this.y=y; this.color=colorObj.color; this.speedX=(Math.random()-0.5)*6; this.speedY=(Math.random()-0.5)*6; this.life=100;}
-    update(){this.speedY+=gravity; this.x+=this.speedX; this.y+=this.speedY; this.life--;}
-    draw(){ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill();}
-}
-
-// ---------- FIREWORK FUNCTIONS ----------
-function explode(x,y,colorObj){
-    fireworkSound.currentTime=0; fireworkSound.play();
-    for(let i=0;i<80;i++) particles.push(new Particle(x,y,{...colorObj}));
-    money += colorObj.value*moneyMultiplier;
-    document.getElementById("money").textContent = money;
-    saveProgress(); saveScore();
-}
-
-function launchFirework(x,y,auto=false){
-    let colorObj = colors[Math.min(unlockedColors-1, colors.length-1)];
-    if(auto && unlockedColors>1){
-        if(Math.random()<0.75) colorObj={...colors[unlockedColors-1]};
-        else colorObj={...colors[Math.floor(Math.random()*(unlockedColors-1))]};
-    }
-    fireworks.push(new Firework(x,y,colorObj));
-    lastClick=Date.now();
-}
-
-// ---------- CLICK HANDLER ----------
-document.addEventListener("click", e=>{
-    if(Date.now()-lastClick >= clickDelay){
-        launchFirework(e.clientX,e.clientY);
-    }
+loginBtn.addEventListener("click", ()=>{
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if(!email || !password){ loginMsg.textContent="Enter email and password!"; return; }
+  auth.signInWithEmailAndPassword(email,password)
+    .then(userCred=>{currentUser=userCred.user.uid; showUI(); loadProgress(); loginMsg.textContent="";})
+    .catch(err=>loginMsg.textContent=err.message);
 });
 
-// ---------- PURCHASES ----------
+signupBtn.addEventListener("click", ()=>{
+  const username = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if(!username || !email || !password){ loginMsg.textContent="Enter username, email, and password!"; return; }
+  if(!isUsernameClean(username)){ loginMsg.textContent="Username contains bad words!"; return; }
+
+  auth.createUserWithEmailAndPassword(email,password)
+    .then(userCred=>{
+      const uid=userCred.user.uid; currentUser=uid;
+      db.ref("users/"+uid).set({username,email});
+      loginMsg.textContent="Account created!";
+      showUI();
+      saveProgress();
+    })
+    .catch(err=>loginMsg.textContent=err.message);
+});
+
+forgotBtn.addEventListener("click", ()=>{
+  const email = document.getElementById("email").value.trim();
+  if(!email){ loginMsg.textContent="Enter your email!"; return; }
+  auth.sendPasswordResetEmail(email).then(()=>loginMsg.textContent="Password reset email sent!").catch(err=>loginMsg.textContent=err.message);
+});
+
+// ===================== HELPER =====================
+function showUI(){
+  loginBox.style.display="none";
+  ui.style.display="block";
+}
+
+// ===================== FIREWORK CLASSES =====================
+class Firework{constructor(x,targetY,colorObj){this.x=x; this.y=canvas.height; this.targetY=targetY; this.speed=Math.random()*2+4; this.colorObj=colorObj;}
+update(){this.y-=this.speed;if(this.y<=this.targetY){explode(this.x,this.y,this.colorObj); return true;}return false;}
+draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.colorObj.color;ctx.fill();}}
+class Particle{constructor(x,y,colorObj){this.x=x; this.y=y; this.color=colorObj.color; this.speedX=(Math.random()-0.5)*6;this.speedY=(Math.random()-0.5)*6;this.life=100;}
+update(){this.speedY+=gravity; this.x+=this.speedX; this.y+=this.speedY; this.life--;}
+draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}}
+
+// ===================== GAME FUNCTIONS =====================
+function getRebirthColors(rebirthCount){
+  const scheme=[{scheme:"neon",base:60},{scheme:"pastel",base:80},{scheme:"rainbow",base:100},{scheme:"galaxy",base:120}][rebirthCount%4];
+  const numColors=Math.min(maxColorsPerRebirth+rebirthCount,50);
+  let newColors=[];
+  for(let i=0;i<numColors;i++){const hue=Math.random()*360; newColors.push({color:`hsl(${hue},${scheme.base}%,60%)`,value:i+1});}
+  return newColors;
+}
+function explode(x,y,colorObj){fireworkSound.currentTime=0;fireworkSound.play();for(let i=0;i<80;i++)particles.push(new Particle(x,y,{...colorObj}));money+=colorObj.value*moneyMultiplier;document.getElementById("money").textContent=money;saveProgress();saveScore();}
+function launchFirework(x,y,auto=false){let colorObj;if(auto && unlockedColors>1){colorObj=Math.random()<0.75?{...colors[unlockedColors-1]}:{...colors[Math.floor(Math.random()*(unlockedColors-1))]};}else{colorObj={...colors[Math.min(unlockedColors-1,colors.length-1)]};}if(moneyMultiplier>1)colorObj.color=colorObj.color.replace("60%","90%");fireworks.push(new Firework(x,y,colorObj));lastClick=Date.now();}
+document.addEventListener("click", e=>{if(Date.now()-lastClick>=clickDelay)launchFirework(e.clientX,e.clientY);});
+
+// ===================== BUTTONS =====================
+goLeaderboardBtn.addEventListener("click", ()=>{window.open("fireworkleaderboard.html","_blank");});
 function updateButtons(){
-    document.getElementById("buyColor").textContent = unlockedColors >= colors.length ? "MAX UPGRADE" : `Buy Color ($${colorPrice})`;
-    document.getElementById("reduceDelay").textContent = clickDelay <= maxClickDelay ? "MAX REDUCED" : `Reduce Delay ($${delayPrice})`;
-    document.getElementById("buyAuto").textContent = autoAmount >= maxAutoUpgrades ? "MAX UPGRADE" : `Buy Auto-Launch ($${autoPrice})`;
-    document.getElementById("rebirth").textContent = `Rebirth ($${rebirthPrice})`;
-    document.getElementById("delayDisplay").textContent = clickDelay;
-    document.getElementById("autoSpeedDisplay").textContent = autoSpeed.toFixed(2);
-    document.getElementById("unlockedColors").textContent = unlockedColors;
-    document.getElementById("moneyMultiplier").textContent = moneyMultiplier;
+  document.getElementById("buyColor").textContent=unlockedColors>=colors.length?"MAX UPGRADE":`Buy Color ($${colorPrice})`;
+  document.getElementById("reduceDelay").textContent=clickDelay<=maxClickDelay?"MAX REDUCED":`Reduce Delay ($${delayPrice})`;
+  document.getElementById("buyAuto").textContent=autoAmount>=maxAutoUpgrades?"MAX UPGRADE":`Buy Auto-Launch ($${autoPrice})`;
+  document.getElementById("rebirth").textContent=`Rebirth ($${rebirthPrice})`;
+  document.getElementById("delayDisplay").textContent=clickDelay;
+  document.getElementById("autoSpeedDisplay").textContent=autoSpeed.toFixed(2);
+  document.getElementById("unlockedColors").textContent=unlockedColors;
+  document.getElementById("moneyMultiplier").textContent=moneyMultiplier;
 }
 
-// ---------- AUTO-LAUNCH ----------
-function startAutoLaunch(){
-    if(autoInterval) clearInterval(autoInterval);
-    if(autoAmount>0){
-        autoInterval=setInterval(()=>{
-            launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2, true);
-        }, autoSpeed*1000);
-    }
-}
+// Purchase buttons
+document.getElementById("buyColor").addEventListener("click", ()=>{if(money>=colorPrice && unlockedColors<colors.length){money-=colorPrice;unlockedColors++;colorPrice=Math.floor(colorPrice*1.7);updateButtons();document.getElementById("money").textContent=money;saveProgress();}});
+document.getElementById("reduceDelay").addEventListener("click", ()=>{if(money>=delayPrice && clickDelay>maxClickDelay){money-=delayPrice;clickDelay=Math.max(clickDelay-100,maxClickDelay);delayPrice=Math.floor(delayPrice*1.7);updateButtons();document.getElementById("money").textContent=money;saveProgress();}});
+document.getElementById("rebirth").addEventListener("click", ()=>{
+if(money>=rebirthPrice){money=0;rebirthCount++;unlockedColors=1;clickDelay=1200;moneyMultiplier++;autoAmount=0;autoSpeed=2.5;autoPrice=200;clearInterval(autoInterval);autoInterval=null;rebirthPrice=Math.floor(rebirthPrice*1.7);colorPrice=50;delayPrice=100;colors=[...baseColors,...getRebirthColors(rebirthCount)];updateButtons();document.getElementById("money").textContent=money;saveProgress();saveScore();startAutoLaunch();alert("Rebirth complete! New colors unlocked and higher money multiplier!");}else{alert(`You need $${rebirthPrice} to rebirth!`);}});
+document.getElementById("buyAuto").addEventListener("click", ()=>{if(autoAmount<maxAutoUpgrades && money>=autoPrice){money-=autoPrice;autoAmount++;autoSpeed/=1.2;autoPrice=Math.floor(autoPrice*1.7);document.getElementById("money").textContent=money;updateButtons();saveProgress();startAutoLaunch();}});
 
-// ---------- SAVE / LOAD ----------
-function saveProgress(){
-    if(!currentUser) return;
-    const progress = {money, unlockedColors, clickDelay, moneyMultiplier, rebirthCount, rebirthPrice, colorPrice, delayPrice, autoAmount, autoSpeed};
-    localStorage.setItem(`firework_${currentUser}`,JSON.stringify(progress));
-}
-function loadProgress(){
-    if(!currentUser) return;
-    const saved = localStorage.getItem(`firework_${currentUser}`);
-    if(saved){
-        const p=JSON.parse(saved);
-        money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
-        moneyMultiplier=p.moneyMultiplier||1; rebirthCount=p.rebirthCount||0;
-        rebirthPrice=p.rebirthPrice||500; colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100;
-        autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
-        colors = [...baseColors];
-        updateButtons(); document.getElementById("money").textContent = money;
-        startAutoLaunch();
-    }
-}
+// Auto-launch
+function startAutoLaunch(){if(autoInterval)clearInterval(autoInterval);if(autoAmount>0){autoInterval=setInterval(()=>{launchFirework(Math.random()*canvas.width,Math.random()*canvas.height/2,true);},autoSpeed*1000);}}
 
-// ---------- FIREWORK LOOP ----------
-function animate(){
-    ctx.fillStyle="rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let i=fireworks.length-1;i>=0;i--){if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw();}
-    for(let i=particles.length-1;i>=0;i--){particles[i].update(); particles[i].draw(); if(particles[i].life<=0) particles.splice(i,1);}
-    const elapsed = Date.now()-lastClick;
-    const fill = Math.min(100,(elapsed/clickDelay)*100);
-    document.getElementById("cooldownFill").style.width=fill+"%";
-    requestAnimationFrame(animate);
-}
+// Reset
+resetBtn.addEventListener("click", ()=>{if(confirm("Are you sure you want to reset your progress?")){if(currentUser)localStorage.removeItem(`firework_${currentUser}`);money=0;unlockedColors=1;clickDelay=1200;moneyMultiplier=1;rebirthCount=0;colorPrice=50;delayPrice=100;rebirthPrice=500;autoAmount=0;autoSpeed=2.5;clearInterval(autoInterval);autoInterval=null;colors=[...baseColors];updateButtons();document.getElementById("money").textContent=money;saveProgress();saveScore();alert("Progress reset!");}});
+
+// Save/load
+function saveProgress(){if(!currentUser)return;const progress={money,unlockedColors,clickDelay,moneyMultiplier,rebirthCount,rebirthPrice,colorPrice,delayPrice,autoAmount,autoSpeed};localStorage.setItem(`firework_${currentUser}`,JSON.stringify(progress));}
+function loadProgress(){if(!currentUser)return;const saved=localStorage.getItem(`firework_${currentUser}`);if(saved){const p=JSON.parse(saved);money=p.money||0;unlockedColors=p.unlockedColors||1;clickDelay=p.clickDelay||1200;moneyMultiplier=p.moneyMultiplier||1;rebirthCount=p.rebirthCount||0;rebirthPrice=p.rebirthPrice||500;colorPrice=p.colorPrice||50;delayPrice=p.delayPrice||100;autoAmount=p.autoAmount||0;autoSpeed=p.autoSpeed||2.5;colors=[...baseColors,...getRebirthColors(rebirthCount)];updateButtons();document.getElementById("money").textContent=money;startAutoLaunch();}}
+
+// Animate loop
+function animate(){ctx.fillStyle="rgba(0,0,0,0.2)";ctx.fillRect(0,0,canvas.width,canvas.height);for(let i=fireworks.length-1;i>=0;i--){if(fireworks[i].update())fireworks.splice(i,1);else fireworks[i].draw();}for(let i=particles.length-1;i>=0;i--){particles[i].update();particles[i].draw();if(particles[i].life<=0)particles.splice(i,1);}const elapsed=Date.now()-lastClick;const fill=Math.min(100,(elapsed/clickDelay)*100);document.getElementById("cooldownFill").style.width=fill+"%";requestAnimationFrame(animate);}
 animate();
 
-// ---------- LEADERBOARD ----------
-function saveScore(){if(!currentUser) return; db.ref("scores/"+currentUser).set({money});}
+// Leaderboard
+function saveScore(){if(!currentUser)return;db.ref("scores/"+currentUser).set({money});}
 
-// ---------- OWNER COMMANDS ----------
-document.getElementById("giveMoneyBtn").addEventListener("click", ()=>{money+=1000; document.getElementById("money").textContent=money; saveProgress();});
-document.getElementById("unlockColorsBtn").addEventListener("click", ()=>{unlockedColors=colors.length; updateButtons(); saveProgress();});
-document.getElementById("maxAutoBtn").addEventListener("click", ()=>{autoAmount=maxAutoUpgrades; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgress();});
-document.getElementById("viewUsersBtn").addEventListener("click", ()=>{
-    const users = JSON.parse(localStorage.getItem("all_users") || "[]");
-    alert("Registered users:\n\n" + users.join("\n"));
-});
-
-// ---------- RESET ----------
-resetBtn.addEventListener("click", ()=>{
-    if(confirm("Are you sure you want to reset your progress?")){
-        if(currentUser) localStorage.removeItem(`firework_${currentUser}`);
-        money=0; unlockedColors=1; clickDelay=1200; moneyMultiplier=1; rebirthCount=0;
-        colorPrice=50; delayPrice=100; rebirthPrice=500; autoAmount=0; autoSpeed=2.5;
-        clearInterval(autoInterval); autoInterval=null; colors=[...baseColors];
-        updateButtons(); document.getElementById("money").textContent=money;
-        saveProgress(); saveScore(); alert("Progress reset!");
-    }
-});
-
-// ---------- LEADERBOARD BUTTON ----------
-goLeaderboardBtn.addEventListener("click", ()=>{window.open("fireworkleaderboard.html","_blank");});
-
+// Owner commands
+document.getElementById("giveMoneyBtn").addEventListener("click", ()=>{money+=1000;document.getElementById("money").textContent=money;saveProgress();});
+document.getElementById("unlockColorsBtn").addEventListener("click", ()=>{unlockedColors=colors.length;updateButtons();saveProgress();});
+document.getElementById("maxAutoBtn").addEventListener("click", ()=>{autoAmount=maxAutoUpgrades;autoSpeed=0.1;updateButtons();startAutoLaunch();saveProgress();});
+document.getElementById("viewUsersBtn").addEventListener("click", ()=>{const users=JSON.parse(localStorage.getItem("all_users")||"[]");alert("Registered users:\n\n"+users.join("\n"));});
 </script>
 </body>
 </html>
