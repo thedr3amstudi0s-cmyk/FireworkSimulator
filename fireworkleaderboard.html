@@ -4,35 +4,33 @@
 <meta charset="UTF-8">
 <title>Firework Leaderboard</title>
 <style>
-body { margin:0; font-family: Arial, sans-serif; background: radial-gradient(circle at top, #000, #111); color:white; }
-h1 { text-align:center; color:#0ff; margin-top:20px; }
-#leaderboards { display:flex; justify-content:center; gap:50px; flex-wrap:wrap; margin-top:30px; }
-table { border-collapse: collapse; width:300px; background: rgba(0,0,0,0.6); border-radius:10px; }
-th, td { padding:10px; text-align:left; border-bottom:1px solid #0ff; }
-th { background:#111; color:#0ff; }
-tr:hover { background: rgba(0,255,255,0.2); }
-#backBtn { position:fixed; top:20px; left:20px; padding:10px 15px; background:#0ff; color:#000; border:none; border-radius:5px; cursor:pointer; font-weight:bold; }
-#backBtn:hover { background:#0cc; }
+body { margin:0; padding:0; font-family:Arial, sans-serif; background: radial-gradient(circle at top, #000, #0a0a0a); color:white; text-align:center; }
+h1 { margin-top:20px; color:#0ff; }
+table { margin:20px auto; border-collapse:collapse; width:80%; max-width:600px; }
+th, td { border:1px solid #0ff; padding:10px; }
+th { background:#111; }
+td { background:#222; }
+button { padding:10px 20px; margin:10px; font-size:16px; cursor:pointer; border:none; border-radius:5px; background:cyan; color:#000; font-weight:bold; }
+button:hover { background:#0ff; }
 </style>
 </head>
 <body>
 
-<button id="backBtn">← Back to Game</button>
-<h1>Firework Leaderboards</h1>
-<div id="leaderboards">
-  <div>
-    <h2 style="text-align:center;">Top Money</h2>
-    <table id="moneyTable">
-      <tr><th>Player</th><th>Money</th></tr>
-    </table>
-  </div>
-  <div>
-    <h2 style="text-align:center;">Top Rebirths</h2>
-    <table id="rebirthTable">
-      <tr><th>Player</th><th>Rebirths</th></tr>
-    </table>
-  </div>
-</div>
+<h1>Firework Simulator Leaderboard</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Money</th>
+      <th>Rebirths</th>
+    </tr>
+  </thead>
+  <tbody id="leaderboardBody">
+    <tr><td colspan="3">Loading leaderboard...</td></tr>
+  </tbody>
+</table>
+
+<button onclick="goBack()">Back to Game</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -52,39 +50,32 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ---------- BACK BUTTON ----------
-document.getElementById("backBtn").addEventListener("click", ()=>{
-    window.location.href = "firework.html";
-});
+// ---------- GET LEADERBOARD ----------
+function loadLeaderboard(){
+    const tbody = document.getElementById("leaderboardBody");
+    tbody.innerHTML = "<tr><td colspan='3'>Loading...</td></tr>";
+    db.ref("players").once("value").then(snapshot=>{
+        const data = snapshot.val();
+        if(!data){ tbody.innerHTML="<tr><td colspan='3'>No data yet</td></tr>"; return; }
 
-// ---------- LOAD LEADERBOARD ----------
-function updateLeaderboards(){
-    db.ref("players").once("value", snapshot=>{
-        const data = snapshot.val() || {};
+        // Convert object to array and sort by money descending
+        const players = Object.entries(data).map(([username, info])=>({username, money:info.money||0, rebirths:info.rebirths||0}));
+        players.sort((a,b)=>b.money - a.money);
 
-        const moneyArr = Object.entries(data).map(([name,val])=>({name,money:val.money||0})).sort((a,b)=>b.money-a.money);
-        const moneyTable = document.getElementById("moneyTable");
-        moneyTable.innerHTML = "<tr><th>Player</th><th>Money</th></tr>";
-        moneyArr.forEach(p=>{
-            const row = moneyTable.insertRow();
-            row.insertCell(0).textContent = p.name;
-            row.insertCell(1).textContent = p.money;
-        });
-
-        const rebirthArr = Object.entries(data).map(([name,val])=>({name,rebirths:val.rebirths||0})).sort((a,b)=>b.rebirths-a.rebirths);
-        const rebirthTable = document.getElementById("rebirthTable");
-        rebirthTable.innerHTML = "<tr><th>Player</th><th>Rebirths</th></tr>";
-        rebirthArr.forEach(p=>{
-            const row = rebirthTable.insertRow();
-            row.insertCell(0).textContent = p.name;
-            row.insertCell(1).textContent = p.rebirths;
+        tbody.innerHTML = "";
+        players.forEach(p=>{
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${p.username}</td><td>${p.money}</td><td>${p.rebirths}</td>`;
+            tbody.appendChild(tr);
         });
     });
 }
 
-// Update immediately, then every 5 seconds
-updateLeaderboards();
-setInterval(updateLeaderboards,5000);
+// ---------- BACK BUTTON ----------
+function goBack(){ window.location.href="index.html"; }
+
+window.onload = loadLeaderboard;
 </script>
+
 </body>
 </html>
