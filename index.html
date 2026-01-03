@@ -6,12 +6,18 @@
 <style>
 html, body { margin:0; padding:0; overflow:hidden; font-family: Arial, sans-serif;}
 canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #000);}
-#loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    background: linear-gradient(135deg,#1a1a1a,#333); padding:40px; border-radius:15px; color:white; z-index:200; box-shadow: 0 0 20px rgba(0,255,255,0.3);}
-#loginBox input, #loginBox button{ display:block; margin:10px 0; padding:10px 15px; font-size:16px; border-radius:5px; border:none;}
+#loginBox {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background: linear-gradient(135deg,#1a1a1a,#333);
+    padding:40px; border-radius:15px; color:white; z-index:200; box-shadow: 0 0 20px rgba(0,255,255,0.3);
+}
+#loginBox input, #loginBox button{
+    display:block; margin:10px 0; padding:10px 15px; font-size:16px; border-radius:5px; border:none;
+}
 #loginBox input { width: 250px; }
 #loginBox button { background: cyan; color:#000; font-weight:bold; cursor:pointer; }
 #loginBox button:hover { background: #0ff; }
+
 #ui{position:fixed; top:10px; left:10px; color:white; z-index:100;}
 #ui button{margin:2px; padding:5px 10px; font-size:14px; cursor:pointer;}
 #ownerCommands{margin-top:10px; display:none;}
@@ -19,14 +25,18 @@ canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #
 #cooldownBar{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:300px; height:20px; background:rgba(255,255,255,0.2); border-radius:10px; overflow:hidden; z-index:150;}
 #cooldownFill{height:100%; width:0%; background:limegreen; transition:width 0.05s linear;}
 #resetBtn{position:fixed; top:10px; right:10px; z-index:150; padding:5px 10px; font-size:14px; cursor:pointer; display:none; background:red; color:white; border:none; border-radius:5px;}
+
 /* LOADER */
 #loader { position:fixed; inset:0; background:#4a90e2; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; opacity:1; transition:opacity 0.7s; }
 #loader .logo-svg { width:150px; height:80px; margin:0 auto 15px; display:block; }
 #loader .logo-svg path { stroke-dasharray: 400; stroke-dashoffset: 400; animation: drawPath 2s forwards; stroke:#fff; stroke-width:5; fill:transparent; stroke-linecap:round; transition:0.3s; }
 #loader .loader-text { color:white; font-size:1.3rem; letter-spacing:1px; margin-top:20px; }
 @keyframes drawPath { to { stroke-dashoffset:0; } }
+
 /* Prevent text selection */
-body, button, input, p, h2, h1, span { user-select: none; }
+body, button, input, p, h2, h1, span {
+    user-select: none;
+}
 </style>
 </head>
 <body>
@@ -62,6 +72,7 @@ body, button, input, p, h2, h1, span { user-select: none; }
 <p>Firework Money Multiplier: x<span id="moneyMultiplier">1</span></p>
 <p>Auto Speed: <span id="autoSpeedDisplay">2.50</span> sec</p>
 <p id="ownerMsg" style="color: cyan; display:none;">Owner Mode Active</p>
+
 <div id="ownerCommands">
 <h3>Owner Commands</h3>
 <button id="giveMoneyBtn">Give $1000</button>
@@ -71,9 +82,11 @@ body, button, input, p, h2, h1, span { user-select: none; }
 </div>
 
 <button id="resetBtn">Reset Progress</button>
-<div id="cooldownBar"><div id="cooldownFill"></div></div>
 
-<!-- AUDIO -->
+<div id="cooldownBar">
+<div id="cooldownFill"></div>
+</div>
+
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -115,7 +128,7 @@ window.addEventListener("resize",()=>{canvas.width=window.innerWidth; canvas.hei
 
 // Game variables
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now(), moneyMultiplier=1, rebirthCount=0;
-let colorPrice=50, delayPrice=100, rebirthPrice=500, maxClickDelay=100, autoPrice=200, autoAmount=0, autoSpeed=2.5;
+let colorPrice=50, delayPrice=100, rebirthPrice=500, autoPrice=200, autoAmount=0, autoSpeed=2.5;
 const maxAutoUpgrades = 3;
 const maxColorsPerRebirth = 10;
 const baseColors=[{color:"hsl(0,100%,60%)",value:1},{color:"hsl(30,100%,60%)",value:2},{color:"hsl(60,100%,60%)",value:3},{color:"hsl(120,100%,60%)",value:4},{color:"hsl(180,100%,60%)",value:5},{color:"hsl(240,100%,60%)",value:6}];
@@ -207,7 +220,7 @@ goLeaderboardBtn.addEventListener("click", () => { window.open("fireworkleaderbo
 // ---------- BUTTON FUNCTIONS ----------
 function updateButtons(){
     document.getElementById("buyColor").textContent = unlockedColors >= colors.length ? "MAX UPGRADE" : `Buy Color ($${colorPrice})`;
-    document.getElementById("reduceDelay").textContent = clickDelay <= maxClickDelay ? "MAX REDUCED" : `Reduce Delay ($${delayPrice})`;
+    document.getElementById("reduceDelay").textContent = clickDelay <= 100 ? "MAX REDUCED" : `Reduce Delay ($${delayPrice})`;
     document.getElementById("buyAuto").textContent = autoAmount >= maxAutoUpgrades ? "MAX UPGRADE" : `Buy Auto-Launch ($${autoPrice})`;
     document.getElementById("rebirth").textContent = `Rebirth ($${rebirthPrice})`;
     document.getElementById("delayDisplay").textContent = clickDelay;
@@ -224,8 +237,8 @@ document.getElementById("buyColor").addEventListener("click", ()=>{
     }
 });
 document.getElementById("reduceDelay").addEventListener("click", ()=>{
-    if(money >= delayPrice && clickDelay > maxClickDelay){
-        money -= delayPrice; clickDelay = Math.max(clickDelay-100,maxClickDelay); delayPrice = Math.floor(delayPrice*1.7);
+    if(money >= delayPrice && clickDelay > 100){
+        money -= delayPrice; clickDelay = Math.max(clickDelay-100,100); delayPrice = Math.floor(delayPrice*1.7);
         updateButtons(); document.getElementById("money").textContent = money; saveProgress();
     }
 });
@@ -245,17 +258,18 @@ document.getElementById("rebirth").addEventListener("click", ()=>{
         colorPrice = 50; 
         delayPrice = 100;
         colors = [...baseColors, ...getRebirthColors(rebirthCount)];
-        updateButtons(); 
-        document.getElementById("money").textContent = money;
-        saveProgress(); 
-        saveScore();
+        updateButtons(); document.getElementById("money").textContent = money;
+        saveProgress(); saveScore();
         startAutoLaunch();
         alert("Rebirth complete! New colors unlocked and higher money multiplier!");
-    } else { 
-        alert(`You need $${rebirthPrice} to rebirth!`); 
+    } else { alert(`You need $${rebirthPrice} to rebirth!`); }
+});
+document.getElementById("buyAuto").addEventListener("click", ()=>{
+    if(autoAmount < maxAutoUpgrades && money >= autoPrice){
+        money -= autoPrice; autoAmount++; autoSpeed /= 1.2; autoPrice = Math.floor(autoPrice*1.7);
+        document.getElementById("money").textContent = money; updateButtons(); saveProgress(); startAutoLaunch();
     }
 });
-
 
 // ---------- AUTO-LAUNCH ----------
 function startAutoLaunch(){
@@ -272,7 +286,7 @@ resetBtn.addEventListener("click", ()=>{
     if(confirm("Are you sure you want to reset your progress?")){
         if(currentUser) localStorage.removeItem(`firework_${currentUser}`);
         money = 0; unlockedColors = 1; clickDelay = 1200; moneyMultiplier = 1; rebirthCount = 0;
-        colorPrice = 50; delayPrice = 100; rebirthPrice = 500; autoAmount = 0; autoSpeed = 2.5;
+        colorPrice = 50; delayPrice = 100; rebirthPrice = 500; autoAmount = 0; autoSpeed = 2.5; autoPrice=200;
         clearInterval(autoInterval); autoInterval = null; colors = [...baseColors];
         updateButtons(); document.getElementById("money").textContent = money;
         saveProgress(); saveScore(); alert("Progress reset!");
@@ -282,7 +296,7 @@ resetBtn.addEventListener("click", ()=>{
 // ---------- SAVE / LOAD ----------
 function saveProgress(){
     if(!currentUser) return;
-    const progress = {money, unlockedColors, clickDelay, moneyMultiplier, rebirthCount, rebirthPrice, colorPrice, delayPrice, autoAmount, autoSpeed};
+    const progress = {money, unlockedColors, clickDelay, moneyMultiplier, rebirthCount, rebirthPrice, colorPrice, delayPrice, autoAmount, autoSpeed, autoPrice};
     localStorage.setItem(`firework_${currentUser}`,JSON.stringify(progress));
 }
 function loadProgress(){
@@ -293,7 +307,7 @@ function loadProgress(){
         money = p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
         moneyMultiplier=p.moneyMultiplier||1; rebirthCount=p.rebirthCount||0;
         rebirthPrice=p.rebirthPrice||500; colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100;
-                autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
+        autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5; autoPrice=p.autoPrice||200;
         colors = [...baseColors, ...getRebirthColors(rebirthCount)];
         updateButtons(); document.getElementById("money").textContent = money;
         startAutoLaunch();
@@ -311,7 +325,6 @@ function animate(){
         particles[i].update(); particles[i].draw();
         if(particles[i].life<=0) particles.splice(i,1);
     }
-    // Update cooldown bar
     const elapsed = Date.now()-lastClick;
     const fill = Math.min(100, (elapsed/clickDelay)*100);
     document.getElementById("cooldownFill").style.width = fill+"%";
@@ -339,4 +352,3 @@ document.getElementById("maxAutoBtn").addEventListener("click", ()=>{autoAmount=
 </script>
 </body>
 </html>
-
