@@ -2,80 +2,87 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Firework Leaderboard</title>
+<title>Firework Simulator Leaderboard</title>
 <style>
-body { margin:0; padding:0; font-family:Arial, sans-serif; background: radial-gradient(circle at top, #000, #0a0a0a); color:white; text-align:center; }
-h1 { margin-top:20px; color:#0ff; }
-table { margin:20px auto; border-collapse:collapse; width:80%; max-width:600px; }
-th, td { border:1px solid #0ff; padding:10px; }
-th { background:#111; }
-td { background:#222; }
-button { padding:10px 20px; margin:10px; font-size:16px; cursor:pointer; border:none; border-radius:5px; background:cyan; color:#000; font-weight:bold; }
-button:hover { background:#0ff; }
+body { margin:0; padding:20px; font-family: Arial, sans-serif; background: radial-gradient(circle at top, #0a0a0a, #000); color:white; }
+h1,h2 { color: cyan; }
+table { width:100%; border-collapse: collapse; margin-bottom:30px; }
+th, td { padding:10px; border-bottom: 1px solid #444; text-align:left; }
+th { background: #222; }
+tr:hover { background: rgba(0,255,255,0.1); }
+#backBtn { padding:10px 20px; font-size:16px; cursor:pointer; background: cyan; color:#000; border:none; border-radius:5px; margin-bottom:20px; }
+#backBtn:hover { background:#0ff; }
 </style>
 </head>
 <body>
 
 <h1>Firework Simulator Leaderboard</h1>
-<table>
-  <thead>
-    <tr>
-      <th>Username</th>
-      <th>Money</th>
-      <th>Rebirths</th>
-    </tr>
-  </thead>
-  <tbody id="leaderboardBody">
-    <tr><td colspan="3">Loading leaderboard...</td></tr>
-  </tbody>
+<button id="backBtn">Back to Game</button>
+
+<h2>Top Users by Money</h2>
+<table id="moneyLeaderboard">
+<thead>
+<tr><th>Rank</th><th>Username</th><th>Money</th></tr>
+</thead>
+<tbody></tbody>
 </table>
 
-<button onclick="goBack()">Back to Game</button>
+<h2>Top Users by Rebirths</h2>
+<table id="rebirthLeaderboard">
+<thead>
+<tr><th>Rank</th><th>Username</th><th>Rebirths</th></tr>
+</thead>
+<tbody></tbody>
+</table>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
 // ---------- FIREBASE ----------
-const firebaseConfig = {
-  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
-  authDomain: "fireworkleaderboard.firebaseapp.com",
-  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com/",
-  projectId: "fireworkleaderboard",
-  storageBucket: "fireworkleaderboard.firebasestorage.app",
-  messagingSenderId: "243474267364",
-  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
-  measurementId: "G-H07BZY385S"
-};
+const firebaseConfig = { apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4", authDomain: "fireworkleaderboard.firebaseapp.com", databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com/", projectId: "fireworkleaderboard", storageBucket: "fireworkleaderboard.firebasestorage.app", messagingSenderId: "243474267364", appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1", measurementId: "G-H07BZY385S" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ---------- GET LEADERBOARD ----------
-function loadLeaderboard(){
-    const tbody = document.getElementById("leaderboardBody");
-    tbody.innerHTML = "<tr><td colspan='3'>Loading...</td></tr>";
-    db.ref("players").once("value").then(snapshot=>{
-        const data = snapshot.val();
-        if(!data){ tbody.innerHTML="<tr><td colspan='3'>No data yet</td></tr>"; return; }
+// ---------- BACK BUTTON ----------
+document.getElementById("backBtn").addEventListener("click", ()=>{
+    window.location.href="index.html";
+});
 
-        // Convert object to array and sort by money descending
-        const players = Object.entries(data).map(([username, info])=>({username, money:info.money||0, rebirths:info.rebirths||0}));
-        players.sort((a,b)=>b.money - a.money);
+// ---------- FETCH LEADERBOARD ----------
+function updateLeaderboard(){
+    db.ref("leaderboard").once("value", snapshot=>{
+        const data = snapshot.val() || {};
+        let moneyArr = [], rebirthArr = [];
+        for(let user in data){
+            moneyArr.push({username:user, money:data[user].money || 0, rebirth:data[user].rebirth || 0});
+        }
+        // Sort money
+        moneyArr.sort((a,b)=>b.money - a.money);
+        // Sort rebirth
+        rebirthArr = moneyArr.slice().sort((a,b)=>b.rebirth - a.rebirth);
 
-        tbody.innerHTML = "";
-        players.forEach(p=>{
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${p.username}</td><td>${p.money}</td><td>${p.rebirths}</td>`;
-            tbody.appendChild(tr);
+        const moneyTbody = document.querySelector("#moneyLeaderboard tbody");
+        const rebirthTbody = document.querySelector("#rebirthLeaderboard tbody");
+        moneyTbody.innerHTML=""; rebirthTbody.innerHTML="";
+
+        moneyArr.forEach((u,i)=>{
+            let tr = document.createElement("tr");
+            tr.innerHTML = `<td>${i+1}</td><td>${u.username}</td><td>$${u.money}</td>`;
+            moneyTbody.appendChild(tr);
+        });
+
+        rebirthArr.forEach((u,i)=>{
+            let tr = document.createElement("tr");
+            tr.innerHTML = `<td>${i+1}</td><td>${u.username}</td><td>${u.rebirth}</td>`;
+            rebirthTbody.appendChild(tr);
         });
     });
 }
 
-// ---------- BACK BUTTON ----------
-function goBack(){ window.location.href="index.html"; }
-
-window.onload = loadLeaderboard;
+// Initial load
+updateLeaderboard();
+// Refresh every 5 seconds
+setInterval(updateLeaderboard, 5000);
 </script>
-
 </body>
 </html>
