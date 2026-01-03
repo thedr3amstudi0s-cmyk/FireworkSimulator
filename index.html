@@ -231,23 +231,31 @@ document.getElementById("reduceDelay").addEventListener("click", ()=>{
 });
 document.getElementById("rebirth").addEventListener("click", ()=>{
     if(money >= rebirthPrice){
-        money = 0; rebirthCount++; unlockedColors = 1; clickDelay = 1200;
-        moneyMultiplier++; autoAmount = 0; autoSpeed = 2.5; autoPrice = 200;
-        clearInterval(autoInterval); autoInterval = null;
-        rebirthPrice = Math.floor(rebirthPrice*1.7); colorPrice = 50; delayPrice = 100;
+        money = 0; 
+        rebirthCount++; 
+        unlockedColors = 1; 
+        clickDelay = 1200;
+        moneyMultiplier++; 
+        autoAmount = 0; 
+        autoSpeed = 2.5;
+        autoPrice = 200; // Reset auto-launch price
+        clearInterval(autoInterval); 
+        autoInterval = null;
+        rebirthPrice = Math.floor(rebirthPrice*1.7); 
+        colorPrice = 50; 
+        delayPrice = 100;
         colors = [...baseColors, ...getRebirthColors(rebirthCount)];
-        updateButtons(); document.getElementById("money").textContent = money;
-        saveProgress(); saveScore();
+        updateButtons(); 
+        document.getElementById("money").textContent = money;
+        saveProgress(); 
+        saveScore();
         startAutoLaunch();
         alert("Rebirth complete! New colors unlocked and higher money multiplier!");
-    } else { alert(`You need $${rebirthPrice} to rebirth!`); }
-});
-document.getElementById("buyAuto").addEventListener("click", ()=>{
-    if(autoAmount < maxAutoUpgrades && money >= autoPrice){
-        money -= autoPrice; autoAmount++; autoSpeed /= 1.2; autoPrice = Math.floor(autoPrice*1.7);
-        document.getElementById("money").textContent = money; updateButtons(); saveProgress(); startAutoLaunch();
+    } else { 
+        alert(`You need $${rebirthPrice} to rebirth!`); 
     }
 });
+
 
 // ---------- AUTO-LAUNCH ----------
 function startAutoLaunch(){
