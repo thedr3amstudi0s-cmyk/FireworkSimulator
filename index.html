@@ -6,12 +6,18 @@
 <style>
 html, body { margin:0; padding:0; overflow:hidden; font-family: Arial, sans-serif;}
 canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #000);}
-#loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    background: linear-gradient(135deg,#1a1a1a,#333); padding:40px; border-radius:15px; color:white; z-index:200; box-shadow: 0 0 20px rgba(0,255,255,0.3);}
-#loginBox input, #loginBox button{ display:block; margin:10px 0; padding:10px 15px; font-size:16px; border-radius:5px; border:none;}
+#loginBox {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background: linear-gradient(135deg,#1a1a1a,#333);
+    padding:40px; border-radius:15px; color:white; z-index:200; box-shadow: 0 0 20px rgba(0,255,255,0.3);
+}
+#loginBox input, #loginBox button{
+    display:block; margin:10px 0; padding:10px 15px; font-size:16px; border-radius:5px; border:none;
+}
 #loginBox input { width: 250px; }
 #loginBox button { background: cyan; color:#000; font-weight:bold; cursor:pointer; }
 #loginBox button:hover { background: #0ff; }
+
 #ui{position:fixed; top:10px; left:10px; color:white; z-index:100;}
 #ui button{margin:2px; padding:5px 10px; font-size:14px; cursor:pointer;}
 #ownerCommands{margin-top:10px; display:none;}
@@ -19,14 +25,18 @@ canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #
 #cooldownBar{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:300px; height:20px; background:rgba(255,255,255,0.2); border-radius:10px; overflow:hidden; z-index:150;}
 #cooldownFill{height:100%; width:0%; background:limegreen; transition:width 0.05s linear;}
 #resetBtn{position:fixed; top:10px; right:10px; z-index:150; padding:5px 10px; font-size:14px; cursor:pointer; display:none; background:red; color:white; border:none; border-radius:5px;}
+
 /* LOADER */
 #loader { position:fixed; inset:0; background:#4a90e2; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; opacity:1; transition:opacity 0.7s; }
 #loader .logo-svg { width:150px; height:80px; margin:0 auto 15px; display:block; }
 #loader .logo-svg path { stroke-dasharray: 400; stroke-dashoffset: 400; animation: drawPath 2s forwards; stroke:#fff; stroke-width:5; fill:transparent; stroke-linecap:round; transition:0.3s; }
 #loader .loader-text { color:white; font-size:1.3rem; letter-spacing:1px; margin-top:20px; }
 @keyframes drawPath { to { stroke-dashoffset:0; } }
+
 /* Prevent text selection */
-body, button, input, p, h2, h1, span { user-select: none; }
+body, button, input, p, h2, h1, span {
+    user-select: none;
+}
 </style>
 </head>
 <body>
@@ -62,6 +72,7 @@ body, button, input, p, h2, h1, span { user-select: none; }
 <p>Firework Money Multiplier: x<span id="moneyMultiplier">1</span></p>
 <p>Auto Speed: <span id="autoSpeedDisplay">2.50</span> sec</p>
 <p id="ownerMsg" style="color: cyan; display:none;">Owner Mode Active</p>
+
 <div id="ownerCommands">
 <h3>Owner Commands</h3>
 <button id="giveMoneyBtn">Give $1000</button>
@@ -71,9 +82,11 @@ body, button, input, p, h2, h1, span { user-select: none; }
 </div>
 
 <button id="resetBtn">Reset Progress</button>
-<div id="cooldownBar"><div id="cooldownFill"></div></div>
 
-<!-- AUDIO -->
+<div id="cooldownBar">
+<div id="cooldownFill"></div>
+</div>
+
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -285,50 +298,53 @@ function loadProgress(){
         money = p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
         moneyMultiplier=p.moneyMultiplier||1; rebirthCount=p.rebirthCount||0;
         rebirthPrice=p.rebirthPrice||500; colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100;
-                autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
+        autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
         colors = [...baseColors, ...getRebirthColors(rebirthCount)];
         updateButtons(); document.getElementById("money").textContent = money;
         startAutoLaunch();
     }
 }
 
-// ---------- FIREWORK LOOP ----------
+// ---------- FIREWORK ANIMATION ----------
 function animate(){
-    ctx.fillStyle="rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let i=fireworks.length-1;i>=0;i--){
-        if(fireworks[i].update()) fireworks.splice(i,1);
-        else fireworks[i].draw();
-    }
-    for(let i=particles.length-1;i>=0;i--){
-        particles[i].update(); particles[i].draw();
-        if(particles[i].life<=0) particles.splice(i,1);
-    }
-    // Update cooldown bar
-    const elapsed = Date.now()-lastClick;
-    const fill = Math.min(100, (elapsed/clickDelay)*100);
+    ctx.fillStyle="rgba(0,0,0,0.2)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    fireworks = fireworks.filter(f=>{
+        f.draw();
+        return !f.update();
+    });
+    particles = particles.filter(p=>{
+        p.update(); p.draw(); return p.life>0;
+    });
+
+    // Cooldown bar
+    const elapsed=Date.now()-lastClick;
+    const fill=Math.min(elapsed/clickDelay*100,100);
     document.getElementById("cooldownFill").style.width = fill+"%";
 
     requestAnimationFrame(animate);
 }
 animate();
 
-// ---------- FIREBASE LEADERBOARD ----------
-function saveScore(){
-    if(!currentUser) return;
-    db.ref("scores/"+currentUser).set({money});
-}
-
 // ---------- LOADER ----------
 window.addEventListener("load", ()=>{
-    const loader=document.getElementById("loader");
-    setTimeout(()=>{loader.style.opacity=0; setTimeout(()=>{loader.style.display="none";},700);},1500);
+    const loader = document.getElementById("loader");
+    loader.style.opacity=0;
+    setTimeout(()=>loader.style.display="none",700);
 });
 
+// ---------- SAVE SCORE TO FIREBASE ----------
+function saveScore(){
+    if(!currentUser) return;
+    db.ref("players/"+currentUser).set({money,rebirths:rebirthCount});
+}
+
 // ---------- OWNER COMMANDS ----------
-document.getElementById("giveMoneyBtn").addEventListener("click", ()=>{money+=1000; document.getElementById("money").textContent=money; saveProgress();});
+document.getElementById("giveMoneyBtn").addEventListener("click", ()=>{money+=1000; document.getElementById("money").textContent = money; saveProgress();});
 document.getElementById("unlockColorsBtn").addEventListener("click", ()=>{unlockedColors=colors.length; updateButtons(); saveProgress();});
 document.getElementById("maxAutoBtn").addEventListener("click", ()=>{autoAmount=maxAutoUpgrades; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgress();});
+
 </script>
 </body>
 </html>
-
