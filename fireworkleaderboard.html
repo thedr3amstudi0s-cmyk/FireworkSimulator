@@ -2,87 +2,71 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Firework Simulator Leaderboard</title>
+<title>Firework Leaderboard</title>
 <style>
-body { margin:0; padding:20px; font-family: Arial, sans-serif; background: radial-gradient(circle at top, #0a0a0a, #000); color:white; }
-h1,h2 { color: cyan; }
-table { width:100%; border-collapse: collapse; margin-bottom:30px; }
-th, td { padding:10px; border-bottom: 1px solid #444; text-align:left; }
-th { background: #222; }
-tr:hover { background: rgba(0,255,255,0.1); }
-#backBtn { padding:10px 20px; font-size:16px; cursor:pointer; background: cyan; color:#000; border:none; border-radius:5px; margin-bottom:20px; }
-#backBtn:hover { background:#0ff; }
+body { background:#0a0a0a; color:white; font-family:Arial, sans-serif; padding:20px; }
+h1 { color:#0ff; }
+table { width:100%; border-collapse: collapse; margin-top:20px; }
+th, td { padding:10px; border-bottom:1px solid #444; text-align:left; }
+th { color:#0ff; }
+button { margin-top:20px; padding:5px 10px; cursor:pointer; background:red; color:white; border:none; border-radius:5px; }
 </style>
 </head>
 <body>
-
-<h1>Firework Simulator Leaderboard</h1>
-<button id="backBtn">Back to Game</button>
-
-<h2>Top Users by Money</h2>
-<table id="moneyLeaderboard">
-<thead>
+<h1>Firework Leaderboard</h1>
+<table id="leaderboardTable">
 <tr><th>Rank</th><th>Username</th><th>Money</th></tr>
-</thead>
-<tbody></tbody>
 </table>
-
-<h2>Top Users by Rebirths</h2>
-<table id="rebirthLeaderboard">
-<thead>
-<tr><th>Rank</th><th>Username</th><th>Rebirths</th></tr>
-</thead>
-<tbody></tbody>
-</table>
+<button id="refreshBtn">Refresh Leaderboard</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-// ---------- FIREBASE ----------
-const firebaseConfig = { apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4", authDomain: "fireworkleaderboard.firebaseapp.com", databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com/", projectId: "fireworkleaderboard", storageBucket: "fireworkleaderboard.firebasestorage.app", messagingSenderId: "243474267364", appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1", measurementId: "G-H07BZY385S" };
+const firebaseConfig = {
+  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
+  authDomain: "fireworkleaderboard.firebaseapp.com",
+  projectId: "fireworkleaderboard",
+  storageBucket: "fireworkleaderboard.firebasestorage.app",
+  messagingSenderId: "243474267364",
+  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
+  measurementId: "G-H07BZY385S"
+};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ---------- BACK BUTTON ----------
-document.getElementById("backBtn").addEventListener("click", ()=>{
-    window.location.href="index.html";
-});
+function loadLeaderboard(){
+    const table = document.getElementById("leaderboardTable");
+    // Remove old rows
+    table.querySelectorAll("tr:not(:first-child)").forEach(r=>r.remove());
 
-// ---------- FETCH LEADERBOARD ----------
-function updateLeaderboard(){
-    db.ref("leaderboard").once("value", snapshot=>{
-        const data = snapshot.val() || {};
-        let moneyArr = [], rebirthArr = [];
-        for(let user in data){
-            moneyArr.push({username:user, money:data[user].money || 0, rebirth:data[user].rebirth || 0});
-        }
-        // Sort money
-        moneyArr.sort((a,b)=>b.money - a.money);
-        // Sort rebirth
-        rebirthArr = moneyArr.slice().sort((a,b)=>b.rebirth - a.rebirth);
-
-        const moneyTbody = document.querySelector("#moneyLeaderboard tbody");
-        const rebirthTbody = document.querySelector("#rebirthLeaderboard tbody");
-        moneyTbody.innerHTML=""; rebirthTbody.innerHTML="";
-
-        moneyArr.forEach((u,i)=>{
-            let tr = document.createElement("tr");
-            tr.innerHTML = `<td>${i+1}</td><td>${u.username}</td><td>$${u.money}</td>`;
-            moneyTbody.appendChild(tr);
-        });
-
-        rebirthArr.forEach((u,i)=>{
-            let tr = document.createElement("tr");
-            tr.innerHTML = `<td>${i+1}</td><td>${u.username}</td><td>${u.rebirth}</td>`;
-            rebirthTbody.appendChild(tr);
+    db.ref("scores").once("value").then(snapshot=>{
+        const scores = [];
+        snapshot.forEach(userSnap=>{
+            const uid = userSnap.key;
+            const money = userSnap.val().money || 0;
+            // Get username
+            db.ref("users/"+uid+"/username").once("value").then(usernameSnap=>{
+                const username = usernameSnap.val() || "Unknown";
+                scores.push({username,money});
+                // When all scores are collected, sort and display
+                if(scores.length === snapshot.numChildren()){
+                    scores.sort((a,b)=>b.money-a.money);
+                    scores.forEach((entry,i)=>{
+                        const row = table.insertRow();
+                        row.insertCell(0).textContent = i+1;
+                        row.insertCell(1).textContent = entry.username;
+                        row.insertCell(2).textContent = entry.money;
+                    });
+                }
+            });
         });
     });
 }
 
-// Initial load
-updateLeaderboard();
-// Refresh every 5 seconds
-setInterval(updateLeaderboard, 5000);
+document.getElementById("refreshBtn").addEventListener("click", loadLeaderboard);
+
+// Load automatically
+loadLeaderboard();
 </script>
 </body>
 </html>
