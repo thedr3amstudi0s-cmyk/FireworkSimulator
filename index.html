@@ -46,6 +46,7 @@ body, button, input, p, span { user-select: none; }
   <button id="reduceDelay">Reduce Delay ($<span id="delayPrice">100</span>)</button>
   <button id="rebirth">Rebirth ($<span id="rebirthPrice">500</span>)</button>
   <button id="buyAuto">Buy Auto-Launch ($<span id="autoPrice">200</span>)</button>
+  <button id="logoutBtn" style="background:#f90;color:black;margin-top:5px;">Logout</button>
   <button id="goLeaderboardBtn">View Leaderboard</button>
   <p>Unlocked Colors: <span id="unlockedColors">1</span></p>
   <p>Click Delay: <span id="delayDisplay">1200</span> ms</p>
@@ -110,15 +111,24 @@ const baseColors=[{color:"hsl(0,100%,60%)",value:1},{color:"hsl(30,100%,60%)",va
 let colors=[...baseColors];
 
 // -------- AUTH --------
-auth.onAuthStateChanged(user=>{
-  if(user){
-    currentUser=user.uid;
-    loginBox.style.display="none";
-    ui.style.display="block";
-    resetBtn.style.display="block";
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user.uid;
+    loginBox.style.display = "none";
+    ui.style.display = "block";
+    resetBtn.style.display = "block";
     loadProgress();
+
+    // --------- ADMIN CHECK ----------
+    if (user.email === "aaron.gatorfan@gmail.com") {
+      ownerCommands.style.display = "block"; // show admin buttons
+      console.log("Admin access granted!");
+    } else {
+      ownerCommands.style.display = "none"; // hide for others
+    }
   }
 });
+
 
 // -------- FORGOT PASSWORD --------
 document.getElementById("forgotBtn").addEventListener("click",()=>{
@@ -130,38 +140,132 @@ document.getElementById("forgotBtn").addEventListener("click",()=>{
 });
 
 // -------- LOGIN --------
-loginBtn.addEventListener("click",()=>{
-  const email=document.getElementById("email").value.trim();
-  const pass=document.getElementById("password").value.trim();
-  if(!email||!pass){ loginMsg.textContent="Enter email & password!"; return; }
-  auth.signInWithEmailAndPassword(email,pass)
-    .then(()=>loginMsg.textContent="")
-    .catch(err=>loginMsg.textContent=err.message);
+loginBtn.addEventListener("click", () => {
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  loginMsg.style.color = "yellow";
+
+  if (!email || !pass) {
+    loginMsg.textContent = "Enter email & password!";
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .then((cred) => {
+      currentUser = cred.user.uid;
+      loginMsg.textContent = "";
+      loginBox.style.display = "none";
+      ui.style.display = "block";
+      resetBtn.style.display = "block";
+      loadProgress();
+
+      // Admin check
+      if (cred.user.email === "aaron.gatorfan@gmail.com") {
+        ownerCommands.style.display = "block";
+      } else {
+        ownerCommands.style.display = "none";
+      }
+    })
+    .catch((err) => {
+      loginMsg.textContent = err.message;
+    });
 });
 
 // -------- SIGNUP --------
-const bannedWords=["fuck","shit","bitch","ass","sex","porn","nigger","faggot","cunt","dick","crap","tit","damn"];
-function normalizeName(name){return name.toLowerCase().replace(/[^a-z]/g,"");}
-function cleanName(name){return !bannedWords.some(word=>normalizeName(name).includes(word));}
+signupBtn.addEventListener("click", () => {
+  const uname = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  loginMsg.style.color = "yellow";  // default color for errors
 
-signupBtn.addEventListener("click",()=>{
-  const uname=document.getElementById("username").value.trim();
-  const email=document.getElementById("email").value.trim();
-  const pass=document.getElementById("password").value.trim();
-  if(!uname||!email||!pass){ loginMsg.textContent="Enter all fields!"; return; }
-  if(!cleanName(uname)){ loginMsg.textContent="Bad username!"; return; }
-  auth.createUserWithEmailAndPassword(email,pass)
-    .then(cred=>{
-      currentUser=cred.user.uid;
-      db.ref("users/"+currentUser).set({username:uname});
-      loginMsg.textContent="Account created!";
-      loginBox.style.display="none";
-      ui.style.display="block";
-      resetBtn.style.display="block";
+  // Check for empty fields
+  if (!uname || !email || !pass) {
+    loginMsg.textContent = "Enter all fields!";
+    return;
+  }
+
+  // Validate password length
+  if (pass.length < 6) {
+    loginMsg.textContent = "Password must be at least 6 characters!";
+    return;
+  }
+
+  // Allow letters, numbers, underscores in username
+  const unamePattern = /^[a-zA-Z0-9_]{3,16}$/;
+  if (!unamePattern.test(uname)) {
+    loginMsg.textContent = "Username must be 3-16 characters (letters, numbers, _)";
+    return;
+  }
+
+  // Firebase signup
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then((cred) => {
+      currentUser = cred.user.uid;
+
+      // Save username in database
+      db.ref("users/" + currentUser).set({ username: uname });
+
+      // Show success
+      loginMsg.style.color = "lime";
+      loginMsg.textContent = "Account created!";
+
+      // Hide login and show UI
+      loginBox.style.display = "none";
+      ui.style.display = "block";
+      resetBtn.style.display = "block";
       saveProgress();
+      
+      // Admin check
+      if (cred.user.email === "aaron.gatorfan@gmail.com") {
+        ownerCommands.style.display = "block";
+      }
     })
-    .catch(err=>loginMsg.textContent=err.message);
+    .catch((err) => {
+      // Show Firebase errors
+      loginMsg.style.color = "red";
+      loginMsg.textContent = err.message;
+    });
 });
+
+
+//------------LOG OUT---------------
+const logoutBtn = document.getElementById("logoutBtn");
+
+logoutBtn.addEventListener("click", () => {
+  auth.signOut()
+    .then(() => {
+      // Reset UI
+      loginBox.style.display = "block";
+      ui.style.display = "none";
+      ownerCommands.style.display = "none";
+      resetBtn.style.display = "none";
+
+      // Reset variables (optional, but keeps things clean)
+      money = 0;
+      unlockedColors = 1;
+      clickDelay = 1200;
+      moneyMultiplier = 1;
+      rebirthCount = 0;
+      autoAmount = 0;
+      autoSpeed = 2.5;
+      fireworks = [];
+      particles = [];
+      clearInterval(autoInterval);
+      autoInterval = null;
+
+      // Reset displays
+      document.getElementById("money").textContent = money;
+      document.getElementById("unlockedColors").textContent = unlockedColors;
+      document.getElementById("delayDisplay").textContent = clickDelay;
+      document.getElementById("moneyMultiplier").textContent = moneyMultiplier;
+      document.getElementById("autoSpeedDisplay").textContent = autoSpeed.toFixed(2);
+    })
+    .catch(err => {
+      alert("Logout failed: " + err.message);
+    });
+});
+
+
 
 // -------- FIREWORK LOGIC --------
 class Firework{constructor(x,y,colorObj){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;}
@@ -187,11 +291,14 @@ function explode(x,y,colorObj){
   saveProgress(); saveScore();
 }
 
-function launchFirework(x,y,auto=false){
-  let colorObj = colors[Math.min(unlockedColors-1,colors.length-1)];
+function launchFirework(x,y){
+  // pick a random color from unlocked colors only
+  const colorIndex = Math.floor(Math.random() * unlockedColors);
+  const colorObj = colors[colorIndex];
   fireworks.push(new Firework(x,y,colorObj));
-  lastClick=Date.now();
+  lastClick = Date.now();
 }
+
 
 document.addEventListener("click",e=>{
   if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY);
@@ -213,23 +320,36 @@ function saveProgress(){
   const progress={money,unlockedColors,clickDelay,moneyMultiplier,rebirthCount,rebirthPrice,colorPrice,delayPrice,autoAmount,autoSpeed};
   localStorage.setItem(`firework_${currentUser}`,JSON.stringify(progress));
 }
-function loadProgress(){
+
+function loadProgress() {
   if(!currentUser) return;
-  const saved=localStorage.getItem(`firework_${currentUser}`);
+  const saved = localStorage.getItem(`firework_${currentUser}`);
   if(saved){
-    const p=JSON.parse(saved);
-    money=p.money||0;
-    unlockedColors=p.unlockedColors||1;
-    clickDelay=p.clickDelay||1200;
-    moneyMultiplier=p.moneyMultiplier||1;
-    rebirthCount=p.rebirthCount||0;
-    rebirthPrice=p.rebirthPrice||500;
-    colorPrice=p.colorPrice||50;
-    delayPrice=p.delayPrice||100;
-    autoAmount=p.autoAmount||0;
-    autoSpeed=p.autoSpeed||2.5;
-    colors=[...baseColors,...getRebirthColors(rebirthCount)];
-    document.getElementById("money").textContent=money;
+    const p = JSON.parse(saved);
+
+    money = p.money || 0;
+    unlockedColors = p.unlockedColors || 1;
+    clickDelay = p.clickDelay || 1200;
+    moneyMultiplier = p.moneyMultiplier || 1;
+    rebirthCount = p.rebirthCount || 0;
+    rebirthPrice = p.rebirthPrice || 500;
+    colorPrice = p.colorPrice || 50;
+    delayPrice = p.delayPrice || 100;
+    autoAmount = p.autoAmount || 0;
+    autoSpeed = p.autoSpeed || 2.5;
+
+    // Rebuild colors array correctly
+    const rebirthColors = getRebirthColors(rebirthCount);
+    colors = [...baseColors, ...rebirthColors];
+
+    // Make sure unlockedColors does not exceed available colors
+    if(unlockedColors > colors.length) unlockedColors = colors.length;
+
+    // Update UI
+    document.getElementById("money").textContent = money;
+    document.getElementById("moneyMultiplier").textContent = moneyMultiplier;
+    document.getElementById("unlockedColors").textContent = unlockedColors;
+
     startAutoLaunch();
     updateButtons();
   }
