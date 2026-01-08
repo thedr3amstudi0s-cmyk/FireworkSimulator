@@ -1,72 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Firework Leaderboard</title>
-<style>
-body { background:#0a0a0a; color:white; font-family:Arial, sans-serif; padding:20px; }
-h1 { color:#0ff; }
-table { width:100%; border-collapse: collapse; margin-top:20px; }
-th, td { padding:10px; border-bottom:1px solid #444; text-align:left; }
-th { color:#0ff; }
-button { margin-top:20px; padding:5px 10px; cursor:pointer; background:red; color:white; border:none; border-radius:5px; }
-</style>
-</head>
-<body>
-<h1>Firework Leaderboard</h1>
-<table id="leaderboardTable">
-<tr><th>Rank</th><th>Username</th><th>Money</th></tr>
-</table>
-<button id="refreshBtn">Refresh Leaderboard</button>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
-  authDomain: "fireworkleaderboard.firebaseapp.com",
-  projectId: "fireworkleaderboard",
-  storageBucket: "fireworkleaderboard.firebasestorage.app",
-  messagingSenderId: "243474267364",
-  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
-  measurementId: "G-H07BZY385S"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+// ---------- LEADERBOARD ----------
+const tbody = document.querySelector("#leaderboard tbody");
 
-function loadLeaderboard(){
-    const table = document.getElementById("leaderboardTable");
-    // Remove old rows
-    table.querySelectorAll("tr:not(:first-child)").forEach(r=>r.remove());
+function loadLeaderboard() {
+    db.ref("scores").once("value").then(scoreSnap => {
+        const scores = scoreSnap.val();
+        if (!scores) {
+            tbody.innerHTML = '<tr><td colspan="3">No scores yet!</td></tr>';
+            return;
+        }
 
-    db.ref("scores").once("value").then(snapshot=>{
-        const scores = [];
-        snapshot.forEach(userSnap=>{
-            const uid = userSnap.key;
-            const money = userSnap.val().money || 0;
-            // Get username
-            db.ref("users/"+uid+"/username").once("value").then(usernameSnap=>{
-                const username = usernameSnap.val() || "Unknown";
-                scores.push({username,money});
-                // When all scores are collected, sort and display
-                if(scores.length === snapshot.numChildren()){
-                    scores.sort((a,b)=>b.money-a.money);
-                    scores.forEach((entry,i)=>{
-                        const row = table.insertRow();
-                        row.insertCell(0).textContent = i+1;
-                        row.insertCell(1).textContent = entry.username;
-                        row.insertCell(2).textContent = entry.money;
-                    });
-                }
+        // Get all user UIDs
+        const userIds = Object.keys(scores);
+
+        // Fetch usernames for all users
+        const promises = userIds.map(uid => 
+            db.ref("users/" + uid + "/username").once("value")
+            .then(nameSnap => ({
+                uid,
+                username: nameSnap.exists() ? nameSnap.val() : uid,
+                money: scores[uid].money || 0
+            }))
+        );
+
+        Promise.all(promises).then(users => {
+            // Sort by money descending
+            users.sort((a,b)=>b.money - a.money);
+
+            // Render table
+            tbody.innerHTML = "";
+            users.forEach((item,index)=>{
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${index+1}</td><td>${item.username}</td><td>$${item.money}</td>`;
+                tbody.appendChild(tr);
             });
         });
     });
 }
 
-document.getElementById("refreshBtn").addEventListener("click", loadLeaderboard);
-
-// Load automatically
+// Load on start
 loadLeaderboard();
+
+// Auto-refresh every 10 seconds
+setInterval(loadLeaderboard, 10000);
 </script>
-</body>
-</html>
