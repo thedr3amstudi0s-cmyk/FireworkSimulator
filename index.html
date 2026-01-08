@@ -22,6 +22,7 @@ canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #
 #cooldownBar{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.25); border-radius:9px;}
 #cooldownFill{height:100%; width:0%; background:limegreen; transition:width 0.05s;}
 #resetBtn{position:fixed; top:10px; right:10px; padding:5px 8px; background:red; color:white; border:none; border-radius:5px; display:none;}
+#logoutBtn{position:fixed; top:20px; right:10px; padding:5px 8px; background:red; color:white; border:none; border-radius:5px; display:none;}
 body, button, input, p, span { user-select: none; }
 </style>
 </head>
@@ -46,7 +47,6 @@ body, button, input, p, span { user-select: none; }
   <button id="reduceDelay">Reduce Delay ($<span id="delayPrice">100</span>)</button>
   <button id="rebirth">Rebirth ($<span id="rebirthPrice">500</span>)</button>
   <button id="buyAuto">Buy Auto-Launch ($<span id="autoPrice">200</span>)</button>
-  <button id="logoutBtn" style="background:#f90;color:black;margin-top:5px;">Logout</button>
   <button id="goLeaderboardBtn">View Leaderboard</button>
   <p>Unlocked Colors: <span id="unlockedColors">1</span></p>
   <p>Click Delay: <span id="delayDisplay">1200</span> ms</p>
@@ -61,6 +61,7 @@ body, button, input, p, span { user-select: none; }
 </div>
 
 <button id="resetBtn">Reset Progress</button>
+<button id="logoutBtn">Logout</button>
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 
@@ -119,15 +120,20 @@ auth.onAuthStateChanged(user => {
     resetBtn.style.display = "block";
     loadProgress();
 
-    // --------- ADMIN CHECK ----------
-    if (user.email === "aaron.gatorfan@gmail.com") {
-      ownerCommands.style.display = "block"; // show admin buttons
-      console.log("Admin access granted!");
-    } else {
-      ownerCommands.style.display = "none"; // hide for others
-    }
-  }
-});
+// List of admin emails
+const adminEmails = [
+  "aaron.gatorfan@gmail.com",
+  "logan.gatorfan@gmail.com"
+];
+
+// Check if the logged-in user is an admin
+if (adminEmails.includes(user.email)) {
+  ownerCommands.style.display = "block"; // show admin buttons
+  console.log("Admin access granted!");
+} else {
+  ownerCommands.style.display = "none"; // hide for others
+}
+
 
 
 // -------- FORGOT PASSWORD --------
@@ -401,4 +407,5 @@ document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Own
 </script>
 </body>
 </html>
+
 
