@@ -22,7 +22,6 @@ canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #
 #cooldownBar{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.25); border-radius:9px;}
 #cooldownFill{height:100%; width:0%; background:limegreen; transition:width 0.05s;}
 #resetBtn{position:fixed; top:10px; right:10px; padding:5px 8px; background:red; color:white; border:none; border-radius:5px; display:none;}
-#logoutBtn{position:fixed; top:20px; right:10px; padding:5px 8px; background:red; color:white; border:none; border-radius:5px; display:none;}
 body, button, input, p, span { user-select: none; }
 </style>
 </head>
@@ -61,7 +60,6 @@ body, button, input, p, span { user-select: none; }
 </div>
 
 <button id="resetBtn">Reset Progress</button>
-<button id="logoutBtn">Logout</button>
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 
@@ -234,29 +232,6 @@ signupBtn.addEventListener("click", () => {
 });
 
 
-//------------LOG OUT---------------
-const logoutBtn = document.getElementById("logoutBtn");
-
-logoutBtn.addEventListener("click", () => {
-  auth.signOut()
-    .then(() => {
-      // Reset UI
-      loginBox.style.display = "block";
-      ui.style.display = "none";
-      ownerCommands.style.display = "none";
-      resetBtn.style.display = "none";
-
-      // Reset displays
-      document.getElementById("money").textContent = money;
-      document.getElementById("unlockedColors").textContent = unlockedColors;
-      document.getElementById("delayDisplay").textContent = clickDelay;
-      document.getElementById("moneyMultiplier").textContent = moneyMultiplier;
-      document.getElementById("autoSpeedDisplay").textContent = autoSpeed.toFixed(2);
-    })
-    .catch(err => {
-      alert("Logout failed: " + err.message);
-    });
-});
 
 
 
@@ -407,5 +382,6 @@ document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Own
 </script>
 </body>
 </html>
+
 
 
