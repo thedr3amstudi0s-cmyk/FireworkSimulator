@@ -46,6 +46,7 @@ body, button, input, p, span { user-select: none; }
   <button id="reduceDelay">Reduce Delay ($<span id="delayPrice">100</span>)</button>
   <button id="rebirth">Rebirth ($<span id="rebirthPrice">500</span>)</button>
   <button id="buyAuto">Buy Auto-Launch ($<span id="autoPrice">200</span>)</button>
+  <button id="logoutBtn" style="background:#f90;color:black;margin-top:5px;">Logout</button>
   <button id="goLeaderboardBtn">View Leaderboard</button>
   <p>Unlocked Colors: <span id="unlockedColors">1</span></p>
   <p>Click Delay: <span id="delayDisplay">1200</span> ms</p>
@@ -232,6 +233,42 @@ signupBtn.addEventListener("click", () => {
 });
 
 
+//------------LOG OUT---------------
+const logoutBtn = document.getElementById("logoutBtn");
+
+logoutBtn.addEventListener("click", () => {
+  auth.signOut()
+    .then(() => {
+      // Reset UI
+      loginBox.style.display = "block";
+      ui.style.display = "none";
+      ownerCommands.style.display = "none";
+      resetBtn.style.display = "none";
+
+      // Reset variables (optional, but keeps things clean)
+      money = 0;
+      unlockedColors = 1;
+      clickDelay = 1200;
+      moneyMultiplier = 1;
+      rebirthCount = 0;
+      autoAmount = 0;
+      autoSpeed = 2.5;
+      fireworks = [];
+      particles = [];
+      clearInterval(autoInterval);
+      autoInterval = null;
+
+      // Reset displays
+      document.getElementById("money").textContent = money;
+      document.getElementById("unlockedColors").textContent = unlockedColors;
+      document.getElementById("delayDisplay").textContent = clickDelay;
+      document.getElementById("moneyMultiplier").textContent = moneyMultiplier;
+      document.getElementById("autoSpeedDisplay").textContent = autoSpeed.toFixed(2);
+    })
+    .catch(err => {
+      alert("Logout failed: " + err.message);
+    });
+});
 
 
 
@@ -382,6 +419,3 @@ document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Own
 </script>
 </body>
 </html>
-
-
-
