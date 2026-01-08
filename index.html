@@ -158,17 +158,20 @@ loginBtn.addEventListener("click", () => {
       resetBtn.style.display = "block";
       loadProgress();
 
-      // Admin check
-      if (cred.user.email === "aaron.gatorfan@gmail.com") {
-        ownerCommands.style.display = "block";
-      } else {
-        ownerCommands.style.display = "none";
-      }
-    })
-    .catch((err) => {
-      loginMsg.textContent = err.message;
-    });
-});
+// List of admin emails
+const adminEmails = [
+  "aaron.gatorfan@gmail.com",
+  "logan.gatorfan@gmail.com"
+];
+
+// Check if the logged-in user is an admin
+if (adminEmails.includes(user.email)) {
+  ownerCommands.style.display = "block"; // show admin buttons
+  console.log("Admin access granted!");
+} else {
+  ownerCommands.style.display = "none"; // hide for others
+}
+
 
 // -------- SIGNUP --------
 signupBtn.addEventListener("click", () => {
@@ -377,4 +380,5 @@ document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Own
 </script>
 </body>
 </html>
+
 
