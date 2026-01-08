@@ -119,20 +119,15 @@ auth.onAuthStateChanged(user => {
     resetBtn.style.display = "block";
     loadProgress();
 
-// List of admin emails
-const adminEmails = [
-  "aaron.gatorfan@gmail.com",
-  "logan.gatorfan@gmail.com"
-];
-
-// Check if the logged-in user is an admin
-if (adminEmails.includes(user.email)) {
-  ownerCommands.style.display = "block"; // show admin buttons
-  console.log("Admin access granted!");
-} else {
-  ownerCommands.style.display = "none"; // hide for others
-}
-
+    // --------- ADMIN CHECK ----------
+    if (user.email === "aaron.gatorfan@gmail.com") {
+      ownerCommands.style.display = "block"; // show admin buttons
+      console.log("Admin access granted!");
+    } else {
+      ownerCommands.style.display = "none"; // hide for others
+    }
+  }
+});
 
 
 // -------- FORGOT PASSWORD --------
