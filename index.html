@@ -240,19 +240,6 @@ logoutBtn.addEventListener("click", () => {
       ownerCommands.style.display = "none";
       resetBtn.style.display = "none";
 
-      // Reset variables (optional, but keeps things clean)
-      money = 0;
-      unlockedColors = 1;
-      clickDelay = 1200;
-      moneyMultiplier = 1;
-      rebirthCount = 0;
-      autoAmount = 0;
-      autoSpeed = 2.5;
-      fireworks = [];
-      particles = [];
-      clearInterval(autoInterval);
-      autoInterval = null;
-
       // Reset displays
       document.getElementById("money").textContent = money;
       document.getElementById("unlockedColors").textContent = unlockedColors;
@@ -414,3 +401,4 @@ document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Own
 </script>
 </body>
 </html>
+
