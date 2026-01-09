@@ -2,29 +2,40 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Firework Leaderboard</title>
+<title>Firework Simulator Leaderboard</title>
 <style>
-body { background:#0a0a0a; color:white; font-family:Arial, sans-serif; padding:20px; }
-h1 { color:#0ff; }
-table { width:100%; border-collapse: collapse; margin-top:20px; }
-th, td { padding:10px; border-bottom:1px solid #444; text-align:left; }
-th { color:#0ff; }
-button { margin-top:20px; padding:5px 10px; cursor:pointer; background:red; color:white; border:none; border-radius:5px; }
+body { margin:0; font-family: Arial, sans-serif; background:#111; color:white; display:flex; flex-direction:column; align-items:center;}
+h1 { margin-top:20px; color:#0ff; }
+table { border-collapse: collapse; width:80%; max-width:600px; margin-top:20px; }
+th, td { border: 1px solid #0ff; padding:10px; text-align:center; }
+th { background:#222; }
+tr:nth-child(even) { background:#1a1a1a; }
+tr:hover { background:#333; }
+button { margin-top:20px; padding:10px 20px; font-size:16px; background:cyan; color:#000; border:none; border-radius:5px; cursor:pointer;}
+button:hover { background:#0ff; }
 </style>
 </head>
 <body>
-<h1>Firework Leaderboard</h1>
-<table id="leaderboardTable">
+<h1>Firework Simulator Leaderboard</h1>
+<table id="leaderboard">
+<thead>
 <tr><th>Rank</th><th>Username</th><th>Money</th></tr>
+</thead>
+<tbody>
+<tr><td colspan="3">Loading...</td></tr>
+</tbody>
 </table>
-<button id="refreshBtn">Refresh Leaderboard</button>
+<button onclick="window.close()">Close</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
+// ---------- FIREBASE ----------
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
+  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com/",
   projectId: "fireworkleaderboard",
   storageBucket: "fireworkleaderboard.firebasestorage.app",
   messagingSenderId: "243474267364",
@@ -34,39 +45,42 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function loadLeaderboard(){
-    const table = document.getElementById("leaderboardTable");
-    // Remove old rows
-    table.querySelectorAll("tr:not(:first-child)").forEach(r=>r.remove());
+// ---------- LEADERBOARD ----------
+const tbody = document.querySelector("#leaderboard tbody");
 
-    db.ref("scores").once("value").then(snapshot=>{
-        const scores = [];
-        snapshot.forEach(userSnap=>{
-            const uid = userSnap.key;
-            const money = userSnap.val().money || 0;
-            // Get username
-            db.ref("users/"+uid+"/username").once("value").then(usernameSnap=>{
-                const username = usernameSnap.val() || "Unknown";
-                scores.push({username,money});
-                // When all scores are collected, sort and display
-                if(scores.length === snapshot.numChildren()){
-                    scores.sort((a,b)=>b.money-a.money);
-                    scores.forEach((entry,i)=>{
-                        const row = table.insertRow();
-                        row.insertCell(0).textContent = i+1;
-                        row.insertCell(1).textContent = entry.username;
-                        row.insertCell(2).textContent = entry.money;
-                    });
-                }
-            });
+async function loadLeaderboard(){
+    tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+    try {
+        const scoresSnap = await db.ref("scores").once("value");
+        const scoresData = scoresSnap.val();
+        if(!scoresData){ tbody.innerHTML='<tr><td colspan="3">No scores yet!</td></tr>'; return; }
+
+        const usernamesSnap = await db.ref("usernames").once("value");
+        const usernamesData = usernamesSnap.val() || {};
+
+        const arr = Object.keys(scoresData).map(uid => ({
+            uid,
+            username: usernamesData[uid] || "Unknown",
+            money: scoresData[uid].money || 0
+        }));
+
+        arr.sort((a,b)=>b.money - a.money);
+
+        tbody.innerHTML = "";
+        arr.forEach((item,index)=>{
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${index+1}</td><td>${item.username}</td><td>$${item.money}</td>`;
+            tbody.appendChild(tr);
         });
-    });
+
+    } catch(err){
+        tbody.innerHTML='<tr><td colspan="3">Error loading leaderboard</td></tr>';
+        console.error(err);
+    }
 }
 
-document.getElementById("refreshBtn").addEventListener("click", loadLeaderboard);
-
-// Load automatically
 loadLeaderboard();
+setInterval(loadLeaderboard, 10000);
 </script>
 </body>
 </html>
