@@ -51,7 +51,7 @@ body, button, input, p, span { user-select: none; }
   <p>Click Delay: <span id="delayDisplay">1200</span> ms</p>
   <p>Firework Money Multiplier: x<span id="moneyMultiplier">1</span></p>
   <p>Auto Speed: <span id="autoSpeedDisplay">2.50</span> sec</p>
-  <div id="ownerCommands"><h3>Admin</h3>
+  <div id="ownerCommands"><h3>Owner</h3>
     <button id="giveMoneyBtn">Give $1000</button>
     <button id="unlockColorsBtn">Unlock All Colors</button>
     <button id="maxAutoBtn">Max Auto-Launch</button>
@@ -117,7 +117,18 @@ auth.onAuthStateChanged(user => {
     ui.style.display = "block";
     resetBtn.style.display = "block";
     loadProgress();
-      
+
+    // --------- ADMIN CHECK ----------
+    if (user.email === "aaron.gatorfan@gmail.com") {
+      ownerCommands.style.display = "block"; // show admin buttons
+      console.log("Admin access granted!");
+    } else {
+      ownerCommands.style.display = "none"; // hide for others
+    }
+  }
+});
+
+
 // -------- FORGOT PASSWORD --------
 document.getElementById("forgotBtn").addEventListener("click",()=>{
   const email=document.getElementById("email").value.trim();
@@ -147,20 +158,17 @@ loginBtn.addEventListener("click", () => {
       resetBtn.style.display = "block";
       loadProgress();
 
-// List of admin emails
-const adminEmails = [
-  "aaron.gatorfan@gmail.com",
-  "logan.gatorfan@gmail.com" // you can add more admins here
-];
-
-// Check if current user is an admin
-if (user && adminEmails.includes(user.email)) {
-  ownerCommands.style.display = "block"; // show admin buttons
-  console.log("Admin access granted!");
-} else {
-  ownerCommands.style.display = "none"; // hide for non-admins
-}
-
+      // Admin check
+      if (cred.user.email === "aaron.gatorfan@gmail.com") {
+        ownerCommands.style.display = "block";
+      } else {
+        ownerCommands.style.display = "none";
+      }
+    })
+    .catch((err) => {
+      loginMsg.textContent = err.message;
+    });
+});
 
 // -------- SIGNUP --------
 signupBtn.addEventListener("click", () => {
@@ -206,6 +214,17 @@ signupBtn.addEventListener("click", () => {
       resetBtn.style.display = "block";
       saveProgress();
       
+      // Admin check
+      if (cred.user.email === "aaron.gatorfan@gmail.com") {
+        ownerCommands.style.display = "block";
+      }
+    })
+    .catch((err) => {
+      // Show Firebase errors
+      loginMsg.style.color = "red";
+      loginMsg.textContent = err.message;
+    });
+});
 
 
 
@@ -354,12 +373,10 @@ goLeaderboardBtn.addEventListener("click",()=>{window.open("fireworkleaderboard.
 document.getElementById("giveMoneyBtn").addEventListener("click",()=>{money+=1000; document.getElementById("money").textContent=money; saveProgress();});
 document.getElementById("unlockColorsBtn").addEventListener("click",()=>{unlockedColors=colors.length; updateButtons(); saveProgress();});
 document.getElementById("maxAutoBtn").addEventListener("click",()=>{autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgress();});
-document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Admin view: Only the owner can check the users");});
+document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Admin view: check Firebase users in database.");});
 </script>
 </body>
 </html>
-
-
 
 
 
