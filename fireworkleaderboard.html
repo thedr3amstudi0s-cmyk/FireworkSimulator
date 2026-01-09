@@ -29,6 +29,7 @@ button:hover { background:#0ff; }
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
 // ---------- FIREBASE ----------
 const firebaseConfig = {
@@ -47,42 +48,47 @@ const db = firebase.database();
 // ---------- LEADERBOARD ----------
 const tbody = document.querySelector("#leaderboard tbody");
 
-function loadLeaderboard(){
-    // Get scores
-    db.ref("scores").once("value").then(scoresSnap=>{
-        const scores = scoresSnap.val();
-        if(!scores){ 
-            tbody.innerHTML='<tr><td colspan="3">No scores yet!</td></tr>'; 
-            return; 
+async function loadLeaderboard(){
+    tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+
+    try {
+        // Fetch scores
+        const scoresSnap = await db.ref("scores").once("value");
+        const scoresData = scoresSnap.val();
+        if(!scoresData){
+            tbody.innerHTML='<tr><td colspan="3">No scores yet!</td></tr>';
+            return;
         }
 
-        // Get all users
-        db.ref("users").once("value").then(usersSnap=>{
-            const users = usersSnap.val();
+        // Fetch usernames
+        const usernamesSnap = await db.ref("usernames").once("value");
+        const usernamesData = usernamesSnap.val() || {};
 
-            // Combine scores with usernames
-            const arr = Object.keys(scores).map(uid=>{
-                return {
-                    username: users?.[uid]?.username || "Unknown",
-                    money: scores[uid]?.money || 0
-                };
-            });
+        // Convert to array
+        const arr = Object.keys(scoresData).map(uid => ({
+            uid,
+            username: usernamesData[uid] || "Unknown",
+            money: scoresData[uid].money || 0
+        }));
 
-            // Sort descending by money
-            arr.sort((a,b)=>b.money - a.money);
+        // Sort descending by money
+        arr.sort((a,b)=>b.money - a.money);
 
-            // Render table
-            tbody.innerHTML = "";
-            arr.forEach((item,index)=>{
-                const tr = document.createElement("tr");
-                tr.innerHTML = `<td>${index+1}</td><td>${item.username}</td><td>$${item.money}</td>`;
-                tbody.appendChild(tr);
-            });
+        // Render table
+        tbody.innerHTML = "";
+        arr.forEach((item,index)=>{
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${index+1}</td><td>${item.username}</td><td>$${item.money}</td>`;
+            tbody.appendChild(tr);
         });
-    });
+
+    } catch(err){
+        tbody.innerHTML='<tr><td colspan="3">Error loading leaderboard</td></tr>';
+        console.error(err);
+    }
 }
 
-// Load leaderboard on start
+// Load on start
 loadLeaderboard();
 
 // Auto-refresh every 10 seconds
