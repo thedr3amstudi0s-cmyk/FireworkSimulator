@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,6 +60,7 @@ body, button, input, p, span { user-select: none; }
 </div>
 
 <button id="resetBtn">Reset Progress</button>
+<button id="logoutBtn" style="position:fixed; top:50px; right:10px; padding:5px 8px; background:orange; color:white; border:none; border-radius:5px;">Logout</button>
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 
@@ -303,6 +305,41 @@ resetBtn.addEventListener("click", async ()=>{
     updateButtons(); document.getElementById("money").textContent=money; await saveProgressOnline(); saveScore(); alert("Progress reset!");
   }
 });
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  if (confirm("Are you sure you want to log out?")) {
+    auth.signOut().then(() => {
+      // Reset UI
+      loginBox.style.display = "block";
+      ui.style.display = "none";
+      resetBtn.style.display = "none";
+      ownerCommands.style.display = "none";
+
+      // Clear local variables
+      currentUser = "";
+      money = 0;
+      unlockedColors = 1;
+      clickDelay = 1200;
+      rebirthCount = 0;
+      autoAmount = 0;
+      autoSpeed = 2.5;
+      clearInterval(autoInterval);
+      autoInterval = null;
+
+      // Reset UI displays
+      document.getElementById("money").textContent = "0";
+      document.getElementById("unlockedColors").textContent = "1";
+      document.getElementById("moneyMultiplier").textContent = "1";
+      document.getElementById("delayDisplay").textContent = "1200";
+      document.getElementById("autoSpeedDisplay").textContent = "2.50";
+      
+      alert("You have been logged out!");
+    }).catch(err => {
+      alert("Error logging out: " + err.message);
+    });
+  }
+});
+
 
 function startAutoLaunch(){
   if(autoInterval) clearInterval(autoInterval);
