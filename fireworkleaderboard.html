@@ -1,35 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Firework Simulator Leaderboard</title>
+<style>
+body { margin:0; font-family: Arial, sans-serif; background:#111; color:white; display:flex; flex-direction:column; align-items:center;}
+h1 { margin-top:20px; color:#0ff; }
+table { border-collapse: collapse; width:80%; max-width:600px; margin-top:20px; }
+th, td { border: 1px solid #0ff; padding:10px; text-align:center; }
+th { background:#222; }
+tr:nth-child(even) { background:#1a1a1a; }
+tr:hover { background:#333; }
+button { margin-top:20px; padding:10px 20px; font-size:16px; background:cyan; color:#000; border:none; border-radius:5px; cursor:pointer;}
+button:hover { background:#0ff; }
+</style>
+</head>
+<body>
+<h1>Firework Simulator Leaderboard</h1>
+<table id="leaderboard">
+<thead>
+<tr><th>Rank</th><th>Username</th><th>Money</th></tr>
+</thead>
+<tbody>
+<tr><td colspan="3">Loading...</td></tr>
+</tbody>
+</table>
+<button onclick="window.close()">Close</button>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
+// ---------- FIREBASE ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
+  authDomain: "fireworkleaderboard.firebaseapp.com",
+  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com/",
+  projectId: "fireworkleaderboard",
+  storageBucket: "fireworkleaderboard.firebasestorage.app",
+  messagingSenderId: "243474267364",
+  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
+  measurementId: "G-H07BZY385S"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 // ---------- LEADERBOARD ----------
 const tbody = document.querySelector("#leaderboard tbody");
 
-function loadLeaderboard() {
-    db.ref("scores").once("value").then(scoreSnap => {
-        const scores = scoreSnap.val();
-        if (!scores) {
-            tbody.innerHTML = '<tr><td colspan="3">No scores yet!</td></tr>';
-            return;
+function loadLeaderboard(){
+    // Get scores
+    db.ref("scores").once("value").then(scoresSnap=>{
+        const scores = scoresSnap.val();
+        if(!scores){ 
+            tbody.innerHTML='<tr><td colspan="3">No scores yet!</td></tr>'; 
+            return; 
         }
 
-        // Get all user UIDs
-        const userIds = Object.keys(scores);
+        // Get all users
+        db.ref("users").once("value").then(usersSnap=>{
+            const users = usersSnap.val();
 
-        // Fetch usernames for all users
-        const promises = userIds.map(uid => 
-            db.ref("users/" + uid + "/username").once("value")
-            .then(nameSnap => ({
-                uid,
-                username: nameSnap.exists() ? nameSnap.val() : uid,
-                money: scores[uid].money || 0
-            }))
-        );
+            // Combine scores with usernames
+            const arr = Object.keys(scores).map(uid=>{
+                return {
+                    username: users?.[uid]?.username || "Unknown",
+                    money: scores[uid]?.money || 0
+                };
+            });
 
-        Promise.all(promises).then(users => {
-            // Sort by money descending
-            users.sort((a,b)=>b.money - a.money);
+            // Sort descending by money
+            arr.sort((a,b)=>b.money - a.money);
 
             // Render table
             tbody.innerHTML = "";
-            users.forEach((item,index)=>{
+            arr.forEach((item,index)=>{
                 const tr = document.createElement("tr");
                 tr.innerHTML = `<td>${index+1}</td><td>${item.username}</td><td>$${item.money}</td>`;
                 tbody.appendChild(tr);
@@ -38,9 +82,11 @@ function loadLeaderboard() {
     });
 }
 
-// Load on start
+// Load leaderboard on start
 loadLeaderboard();
 
 // Auto-refresh every 10 seconds
 setInterval(loadLeaderboard, 10000);
 </script>
+</body>
+</html>
