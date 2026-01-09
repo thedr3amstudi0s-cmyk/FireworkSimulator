@@ -50,22 +50,31 @@ const tbody = document.querySelector("#leaderboard tbody");
 
 async function loadLeaderboard(){
     tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+
     try {
+        // Fetch scores
         const scoresSnap = await db.ref("scores").once("value");
         const scoresData = scoresSnap.val();
-        if(!scoresData){ tbody.innerHTML='<tr><td colspan="3">No scores yet!</td></tr>'; return; }
+        if(!scoresData){
+            tbody.innerHTML='<tr><td colspan="3">No scores yet!</td></tr>';
+            return;
+        }
 
+        // Fetch usernames
         const usernamesSnap = await db.ref("usernames").once("value");
         const usernamesData = usernamesSnap.val() || {};
 
+        // Convert to array
         const arr = Object.keys(scoresData).map(uid => ({
             uid,
             username: usernamesData[uid] || "Unknown",
             money: scoresData[uid].money || 0
         }));
 
+        // Sort descending by money
         arr.sort((a,b)=>b.money - a.money);
 
+        // Render table
         tbody.innerHTML = "";
         arr.forEach((item,index)=>{
             const tr = document.createElement("tr");
@@ -79,7 +88,10 @@ async function loadLeaderboard(){
     }
 }
 
+// Load on start
 loadLeaderboard();
+
+// Auto-refresh every 10 seconds
 setInterval(loadLeaderboard, 10000);
 </script>
 </body>
