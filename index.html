@@ -117,19 +117,19 @@ const baseColors=[
 let colors=[...baseColors];
 
 // -------- AUTH --------
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async user => {
   if (user) {
     currentUser = user.uid;
     loginBox.style.display = "none";
     ui.style.display = "block";
     resetBtn.style.display = "block";
-    loadProgress();
+    await loadProgressOnline();
 
-    if (user.email === "aaron.gatorfan@gmail.com") ownerCommands.style.display = "block";
-    else ownerCommands.style.display = "none";
+    ownerCommands.style.display = user.email === "aaron.gatorfan@gmail.com" ? "block" : "none";
   }
 });
 
+// Forgot Password
 document.getElementById("forgotBtn").addEventListener("click",()=>{
   const email=document.getElementById("email").value.trim();
   if(!email){ loginMsg.textContent="Enter email!"; return; }
@@ -138,28 +138,28 @@ document.getElementById("forgotBtn").addEventListener("click",()=>{
     .catch(err=>loginMsg.textContent=err.message);
 });
 
-loginBtn.addEventListener("click", () => {
+// Login
+loginBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const pass = document.getElementById("password").value.trim();
   loginMsg.style.color = "yellow";
 
   if (!email || !pass) { loginMsg.textContent = "Enter email & password!"; return; }
 
-  auth.signInWithEmailAndPassword(email, pass)
-    .then((cred) => {
-      currentUser = cred.user.uid;
-      loginMsg.textContent = "";
-      loginBox.style.display = "none";
-      ui.style.display = "block";
-      resetBtn.style.display = "block";
-      loadProgress();
-
-      ownerCommands.style.display = cred.user.email === "aaron.gatorfan@gmail.com" ? "block" : "none";
-    })
-    .catch((err) => { loginMsg.textContent = err.message; });
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    currentUser = cred.user.uid;
+    loginMsg.textContent = "";
+    loginBox.style.display = "none";
+    ui.style.display = "block";
+    resetBtn.style.display = "block";
+    ownerCommands.style.display = cred.user.email === "aaron.gatorfan@gmail.com" ? "block" : "none";
+    await loadProgressOnline();
+  } catch(err){ loginMsg.textContent = err.message; }
 });
 
-signupBtn.addEventListener("click", () => {
+// Signup
+signupBtn.addEventListener("click", async () => {
   const uname = document.getElementById("username").value.trim();
   const email = document.getElementById("email").value.trim();
   const pass = document.getElementById("password").value.trim();
@@ -169,17 +169,17 @@ signupBtn.addEventListener("click", () => {
   if (pass.length < 6) { loginMsg.textContent = "Password must be at least 6 characters!"; return; }
   if (!/^[a-zA-Z0-9_]{3,16}$/.test(uname)) { loginMsg.textContent = "Username must be 3-16 characters (letters, numbers, _)"; return; }
 
-  auth.createUserWithEmailAndPassword(email, pass)
-    .then((cred) => {
-      currentUser = cred.user.uid;
-      db.ref("users/" + currentUser).set({ username: uname });
-      loginMsg.style.color = "lime";
-      loginMsg.textContent = "Account created!";
-      loginBox.style.display = "none"; ui.style.display = "block"; resetBtn.style.display = "block";
-      saveProgress();
-      if (cred.user.email === "aaron.gatorfan@gmail.com") ownerCommands.style.display = "block";
-    })
-    .catch((err) => { loginMsg.style.color = "red"; loginMsg.textContent = err.message; });
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    currentUser = cred.user.uid;
+    // Save username to Firebase
+    await db.ref("usernames/" + currentUser).set(uname);
+    loginMsg.style.color = "lime";
+    loginMsg.textContent = "Account created!";
+    loginBox.style.display = "none"; ui.style.display = "block"; resetBtn.style.display = "block";
+    await saveProgressOnline();
+    ownerCommands.style.display = cred.user.email === "aaron.gatorfan@gmail.com" ? "block" : "none";
+  } catch(err){ loginMsg.style.color = "red"; loginMsg.textContent = err.message; }
 });
 
 // -------- FIREWORK LOGIC --------
@@ -204,9 +204,10 @@ function getRebirthColors(rebirthCount){
 function explode(x,y,colorObj){
   fireworkSound.currentTime=0;fireworkSound.play();
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
-  money += colorObj.value * (rebirthCount + 1); // rebirth-based multiplier
+  money += colorObj.value * (rebirthCount + 1);
   document.getElementById("money").textContent = money;
-  saveProgress(); saveScore();
+  saveProgressOnline();
+  saveScore();
 }
 
 function launchFirework(x,y){
@@ -231,18 +232,18 @@ function animate(){
 }
 animate();
 
-// -------- SAVE / LOAD --------
-function saveProgress(){
+// -------- ONLINE SAVE/LOAD --------
+async function saveProgressOnline(){
   if(!currentUser) return;
-  const progress={money,unlockedColors,clickDelay,rebirthCount,rebirthPrice,colorPrice,delayPrice,autoAmount,autoSpeed};
-  localStorage.setItem(`firework_${currentUser}`,JSON.stringify(progress));
+  const progress = { money, unlockedColors, clickDelay, rebirthCount, rebirthPrice, colorPrice, delayPrice, autoAmount, autoSpeed };
+  await db.ref("progress/" + currentUser).set(progress);
 }
 
-function loadProgress() {
+async function loadProgressOnline(){
   if(!currentUser) return;
-  const saved = localStorage.getItem(`firework_${currentUser}`);
-  if(saved){
-    const p = JSON.parse(saved);
+  const snap = await db.ref("progress/" + currentUser).once("value");
+  const p = snap.val();
+  if(p){
     money = p.money || 0;
     unlockedColors = p.unlockedColors || 1;
     clickDelay = p.clickDelay || 1200;
@@ -254,13 +255,13 @@ function loadProgress() {
     autoSpeed = p.autoSpeed || 2.5;
     colors = [...baseColors, ...getRebirthColors(rebirthCount)];
     if(unlockedColors>colors.length) unlockedColors=colors.length;
-    document.getElementById("money").textContent=money;
-    startAutoLaunch();
+    document.getElementById("money").textContent = money;
     updateButtons();
+    startAutoLaunch();
   }
 }
 
-// -------- BUTTONS --------
+// -------- BUTTONS & UPGRADES --------
 function updateButtons(){
   document.getElementById("buyColor").textContent = unlockedColors >= colors.length ? "MAX" : `Buy Color ($${colorPrice})`;
   document.getElementById("reduceDelay").textContent = clickDelay <= 100 ? "MAX" : `Reduce Delay ($${delayPrice})`;
@@ -271,51 +272,36 @@ function updateButtons(){
   document.getElementById("unlockedColors").textContent = unlockedColors;
 }
 
-
 document.getElementById("buyColor").addEventListener("click",()=>{
-  if(money>=colorPrice && unlockedColors<colors.length){money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.7); updateButtons(); document.getElementById("money").textContent=money; saveProgress();}
+  if(money>=colorPrice && unlockedColors<colors.length){money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.7); updateButtons(); document.getElementById("money").textContent=money; saveProgressOnline();}
 });
 document.getElementById("reduceDelay").addEventListener("click",()=>{
-  if(money>=delayPrice && clickDelay>100){money-=delayPrice; clickDelay=Math.max(clickDelay-100,100); delayPrice=Math.floor(delayPrice*1.7); updateButtons(); document.getElementById("money").textContent=money; saveProgress();}
-});
-document.getElementById("rebirth").addEventListener("click", () => {
-  if (money >= rebirthPrice) {
-    // Reset everything
-    money = 0;
-    rebirthCount++;
-    unlockedColors = 1;
-    clickDelay = 1200;
-
-    // Reset auto-launch completely
-    autoAmount = 0;
-    autoSpeed = 2.5;
-    autoPrice = 200; // reset auto price
-    clearInterval(autoInterval);
-    autoInterval = null;
-
-    // Reset upgrade prices
-    colorPrice = 50;
-    delayPrice = 100;
-    rebirthPrice = Math.floor(rebirthPrice * 1.7);
-
-    // Reset colors
-    colors = [...baseColors, ...getRebirthColors(rebirthCount)];
-
-    // Update UI
-    updateButtons();
-    document.getElementById("money").textContent = money;
-
-    saveProgress();
-    saveScore();
-    startAutoLaunch(); // no auto will run now, because autoAmount=0
-
-    alert("Rebirth complete!");
-  } else {
-    alert(`Need $${rebirthPrice} to rebirth!`);
-  }
+  if(money>=delayPrice && clickDelay>100){money-=delayPrice; clickDelay=Math.max(clickDelay-100,100); delayPrice=Math.floor(delayPrice*1.7); updateButtons(); document.getElementById("money").textContent=money; saveProgressOnline();}
 });
 document.getElementById("buyAuto").addEventListener("click",()=>{
-  if(autoAmount<3 && money>=autoPrice){money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7); document.getElementById("money").textContent=money; updateButtons(); saveProgress(); startAutoLaunch();}
+  if(autoAmount<3 && money>=autoPrice){money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7); document.getElementById("money").textContent=money; updateButtons(); saveProgressOnline(); startAutoLaunch();}
+});
+
+document.getElementById("rebirth").addEventListener("click", async () => {
+  if (money >= rebirthPrice) {
+    money=0; rebirthCount++; unlockedColors=1; clickDelay=1200;
+    autoAmount=0; autoSpeed=2.5; autoPrice=200; clearInterval(autoInterval); autoInterval=null;
+    colorPrice=50; delayPrice=100; rebirthPrice=Math.floor(rebirthPrice*1.7);
+    colors=[...baseColors, ...getRebirthColors(rebirthCount)];
+    updateButtons(); document.getElementById("money").textContent=money;
+    await saveProgressOnline(); saveScore();
+    startAutoLaunch(); // no auto yet
+    alert("Rebirth complete!");
+  } else alert(`Need $${rebirthPrice} to rebirth!`);
+});
+
+resetBtn.addEventListener("click", async ()=>{
+  if(confirm("Reset progress?")){
+    money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0;
+    colorPrice=50; delayPrice=100; rebirthPrice=500; autoAmount=0; autoSpeed=2.5;
+    clearInterval(autoInterval); autoInterval=null; colors=[...baseColors];
+    updateButtons(); document.getElementById("money").textContent=money; await saveProgressOnline(); saveScore(); alert("Progress reset!");
+  }
 });
 
 function startAutoLaunch(){
@@ -323,23 +309,14 @@ function startAutoLaunch(){
   if(autoAmount>0) autoInterval=setInterval(()=>{launchFirework(Math.random()*canvas.width,Math.random()*canvas.height/2);},autoSpeed*1000);
 }
 
-resetBtn.addEventListener("click",()=>{
-  if(confirm("Reset progress?")){
-    money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0;
-    colorPrice=50; delayPrice=100; rebirthPrice=500; autoAmount=0; autoSpeed=2.5;
-    clearInterval(autoInterval); autoInterval=null;
-    colors=[...baseColors]; updateButtons(); document.getElementById("money").textContent=money; saveProgress(); saveScore(); alert("Progress reset!");
-  }
-});
-
-// -------- LEADERBOARD --------
+// Leaderboard
 function saveScore(){if(!currentUser) return; db.ref("scores/"+currentUser).set({money});}
 goLeaderboardBtn.addEventListener("click",()=>{window.open("fireworkleaderboard.html","_blank");});
 
-// -------- OWNER COMMANDS --------
-document.getElementById("giveMoneyBtn").addEventListener("click",()=>{money+=1000; document.getElementById("money").textContent=money; saveProgress();});
-document.getElementById("unlockColorsBtn").addEventListener("click",()=>{unlockedColors=colors.length; updateButtons(); saveProgress();});
-document.getElementById("maxAutoBtn").addEventListener("click",()=>{autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgress();});
+// Owner commands
+document.getElementById("giveMoneyBtn").addEventListener("click",()=>{money+=1000; document.getElementById("money").textContent=money; saveProgressOnline();});
+document.getElementById("unlockColorsBtn").addEventListener("click",()=>{unlockedColors=colors.length; updateButtons(); saveProgressOnline();});
+document.getElementById("maxAutoBtn").addEventListener("click",()=>{autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline();});
 document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Admin view: check Firebase users in database.");});
 </script>
 </body>
