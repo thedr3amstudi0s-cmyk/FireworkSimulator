@@ -25,49 +25,55 @@ button { margin-top:20px; padding:5px 10px; cursor:pointer; background:red; colo
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
+  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com/",
   projectId: "fireworkleaderboard",
   storageBucket: "fireworkleaderboard.firebasestorage.app",
   messagingSenderId: "243474267364",
   appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
   measurementId: "G-H07BZY385S"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function loadLeaderboard(){
-    const table = document.getElementById("leaderboardTable");
-    // Remove old rows
-    table.querySelectorAll("tr:not(:first-child)").forEach(r=>r.remove());
+async function loadLeaderboard(){
+  const table = document.getElementById("leaderboardTable");
+  // Remove old rows
+  table.querySelectorAll("tr:not(:first-child)").forEach(r=>r.remove());
 
-    db.ref("scores").once("value").then(snapshot=>{
-        const scores = [];
-        snapshot.forEach(userSnap=>{
-            const uid = userSnap.key;
-            const money = userSnap.val().money || 0;
-            // Get username
-            db.ref("usernames/"+uid).once("value").then(usernameSnap=>{
-                const username = usernameSnap.val() || "Unknown";
-                scores.push({username,money});
-                // When all scores are collected, sort and display
-                if(scores.length === snapshot.numChildren()){
-                    scores.sort((a,b)=>b.money-a.money);
-                    scores.forEach((entry,i)=>{
-                        const row = table.insertRow();
-                        row.insertCell(0).textContent = i+1;
-                        row.insertCell(1).textContent = entry.username;
-                        row.insertCell(2).textContent = entry.money;
-                    });
-                }
-            });
-        });
+  const scoresSnap = await db.ref("scores").once("value");
+  const promises = [];
+
+  scoresSnap.forEach(userSnap=>{
+    const uid = userSnap.key;
+    const money = userSnap.val().money || 0;
+
+    // Read username safely
+    const p = db.ref("usernames/"+uid).once("value").then(nameSnap=>{
+      return {
+        username: nameSnap.val() || "Unknown",
+        money
+      };
     });
+    promises.push(p);
+  });
+
+  const scores = await Promise.all(promises);
+  scores.sort((a,b)=>b.money-a.money);
+
+  scores.forEach((entry,i)=>{
+    const row = table.insertRow();
+    row.insertCell(0).textContent = i+1;
+    row.insertCell(1).textContent = entry.username;
+    row.insertCell(2).textContent = entry.money;
+  });
 }
 
+// Manual refresh
 document.getElementById("refreshBtn").addEventListener("click", loadLeaderboard);
 
-// Load automatically
+// Load automatically on page load
 loadLeaderboard();
 </script>
 </body>
 </html>
-
