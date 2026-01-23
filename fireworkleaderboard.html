@@ -36,43 +36,42 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-async function loadLeaderboard(){
+// ------------------- Leaderboard -------------------
+async function loadLeaderboard() {
   const table = document.getElementById("leaderboardTable");
   // Remove old rows
-  table.querySelectorAll("tr:not(:first-child)").forEach(r=>r.remove());
+  table.querySelectorAll("tr:not(:first-child)").forEach(r => r.remove());
 
+  // Get all scores
   const scoresSnap = await db.ref("scores").once("value");
-  const promises = [];
+  const scoresObj = scoresSnap.val() || {};
 
-  scoresSnap.forEach(userSnap=>{
-    const uid = userSnap.key;
-    const money = userSnap.val().money || 0;
-
-    // Read username safely
-    const p = db.ref("usernames/"+uid).once("value").then(nameSnap=>{
-      return {
-        username: nameSnap.val() || "Unknown",
-        money
-      };
-    });
-    promises.push(p);
+  // Build array of promises for each username
+  const promises = Object.entries(scoresObj).map(async ([uid, data]) => {
+    const money = data.money || 0;
+    const nameSnap = await db.ref("usernames/" + uid).once("value");
+    const username = nameSnap.val() || "Unknown";
+    return { username, money };
   });
 
-  const scores = await Promise.all(promises);
-  scores.sort((a,b)=>b.money-a.money);
+  const allScores = await Promise.all(promises);
 
-  scores.forEach((entry,i)=>{
+  // Sort descending by money
+  allScores.sort((a, b) => b.money - a.money);
+
+  // Add to table
+  allScores.forEach((entry, i) => {
     const row = table.insertRow();
-    row.insertCell(0).textContent = i+1;
+    row.insertCell(0).textContent = i + 1;
     row.insertCell(1).textContent = entry.username;
     row.insertCell(2).textContent = entry.money;
   });
 }
 
-// Manual refresh
+// Manual refresh button
 document.getElementById("refreshBtn").addEventListener("click", loadLeaderboard);
 
-// Load automatically on page load
+// Load leaderboard automatically
 loadLeaderboard();
 </script>
 </body>
