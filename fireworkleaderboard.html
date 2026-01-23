@@ -45,7 +45,7 @@ function loadLeaderboard(){
             const uid = userSnap.key;
             const money = userSnap.val().money || 0;
             // Get username
-            db.ref("users/"+uid+"/username").once("value").then(usernameSnap=>{
+            db.ref("usernames/"+uid).once("value").then(usernameSnap=>{
                 const username = usernameSnap.val() || "Unknown";
                 scores.push({username,money});
                 // When all scores are collected, sort and display
@@ -70,3 +70,4 @@ loadLeaderboard();
 </script>
 </body>
 </html>
+
