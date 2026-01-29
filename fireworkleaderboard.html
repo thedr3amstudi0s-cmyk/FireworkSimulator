@@ -15,7 +15,7 @@ button { margin-top:20px; padding:5px 10px; cursor:pointer; background:red; colo
 <body>
 <h1>Firework Leaderboard</h1>
 <table id="leaderboardTable">
-<tr><th>Rank</th><th>Username</th><th>Money</th></tr>
+<tr><th>Rank</th><th>Username</th><th>Score</th></tr>
 </table>
 <button id="refreshBtn">Refresh Leaderboard</button>
 
@@ -39,7 +39,8 @@ const db = firebase.database();
 // ------------------- Leaderboard -------------------
 async function loadLeaderboard() {
   const table = document.getElementById("leaderboardTable");
-  // Remove old rows
+
+  // Clear old rows
   table.querySelectorAll("tr:not(:first-child)").forEach(r => r.remove());
 
   // Get all scores
@@ -48,23 +49,23 @@ async function loadLeaderboard() {
 
   // Build array of promises for each username
   const promises = Object.entries(scoresObj).map(async ([uid, data]) => {
-    const money = data.money || 0;
+    const score = data.score || 0; // use 'score' instead of 'money'
     const nameSnap = await db.ref("usernames/" + uid).once("value");
     const username = nameSnap.val() || "Unknown";
-    return { username, money };
+    return { username, score };
   });
 
   const allScores = await Promise.all(promises);
 
-  // Sort descending by money
-  allScores.sort((a, b) => b.money - a.money);
+  // Sort descending by score
+  allScores.sort((a, b) => b.score - a.score);
 
   // Add to table
   allScores.forEach((entry, i) => {
     const row = table.insertRow();
     row.insertCell(0).textContent = i + 1;
     row.insertCell(1).textContent = entry.username;
-    row.insertCell(2).textContent = entry.money;
+    row.insertCell(2).textContent = entry.score;
   });
 }
 
@@ -76,5 +77,3 @@ loadLeaderboard();
 </script>
 </body>
 </html>
-
-
