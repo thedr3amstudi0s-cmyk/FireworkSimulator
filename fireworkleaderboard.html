@@ -49,7 +49,7 @@ async function loadLeaderboard() {
 
   // Build array of promises for each username
   const promises = Object.entries(scoresObj).map(async ([uid, data]) => {
-    const score = data.score || 0; // use 'score' instead of 'money'
+    const score = data.score || 0; // make sure we read 'score'
     const nameSnap = await db.ref("usernames/" + uid).once("value");
     const username = nameSnap.val() || "Unknown";
     return { username, score };
