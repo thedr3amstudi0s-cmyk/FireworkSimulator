@@ -45,7 +45,12 @@ async function loadLeaderboard(){
   const rows = [];
 
   for (const uid in progress) {
-    const money = progress[uid]?.money || 0;
+    let money = Number(progress[uid]?.money) || 0;
+
+    // clamp insane values
+    if (money < 0) money = 0;
+    if (money > 1_000_000_000) money = 1_000_000_000;
+
 
     const nameSnap = await db.ref("usernames/"+uid).once("value");
     const username = nameSnap.val() || "Unknown";
@@ -68,3 +73,4 @@ loadLeaderboard();
 
 </body>
 </html>
+
