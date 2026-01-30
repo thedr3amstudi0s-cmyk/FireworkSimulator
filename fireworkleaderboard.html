@@ -36,28 +36,28 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-async function loadLeaderboard() {
+async function loadLeaderboard(){
   const table = document.getElementById("table");
 
-  const scoresSnap = await db.ref("scores").once("value");
-  const scores = scoresSnap.val() || {};
+  const snap = await db.ref("progress").once("value");
+  const progress = snap.val() || {};
 
   const rows = [];
 
-  for (const uid in scores) {
-    const money = scores[uid]?.money || 0;
+  for (const uid in progress) {
+    const money = progress[uid]?.money || 0;
 
-    const nameSnap = await db.ref("usernames/" + uid).once("value");
+    const nameSnap = await db.ref("usernames/"+uid).once("value");
     const username = nameSnap.val() || "Unknown";
 
     rows.push({ username, money });
   }
 
-  rows.sort((a,b) => b.money - a.money);
+  rows.sort((a,b)=>b.money - a.money);
 
   rows.forEach((r,i)=>{
     const tr = table.insertRow();
-    tr.insertCell(0).textContent = i+1;
+    tr.insertCell(0).textContent = i + 1;
     tr.insertCell(1).textContent = r.username;
     tr.insertCell(2).textContent = r.money;
   });
