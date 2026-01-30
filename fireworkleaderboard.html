@@ -4,25 +4,30 @@
 <meta charset="UTF-8">
 <title>Firework Leaderboard</title>
 <style>
-body { background:#0a0a0a; color:white; font-family:Arial; padding:20px; }
-h1 { color:#0ff; }
-table { width:100%; border-collapse:collapse; margin-top:20px; }
-th, td { padding:10px; border-bottom:1px solid #444; }
+body { background:#0a0a0a; color:white; font-family:Arial, sans-serif; padding:20px; }
+h1 { color:#0ff; text-align:center; }
+table { width:100%; border-collapse: collapse; margin-top:20px; }
+th, td { padding:10px; border-bottom:1px solid #444; text-align:left; }
 th { color:#0ff; }
+button { margin-top:20px; padding:5px 10px; cursor:pointer; background:#0ff; color:black; border:none; border-radius:5px; font-weight:bold; }
+button:hover { background:cyan; }
 </style>
 </head>
 <body>
 
-<h1>🔥 Firework Leaderboard</h1>
+<h1>Firework Leaderboard</h1>
 
-<table id="table">
-<tr><th>#</th><th>Username</th><th>Money</th></tr>
+<table id="leaderboardTable">
+<tr><th>Rank</th><th>Username</th><th>Money</th></tr>
 </table>
+
+<button id="refreshBtn">Refresh Leaderboard</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
+// -------- FIREBASE CONFIG --------
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -30,47 +35,58 @@ const firebaseConfig = {
   projectId: "fireworkleaderboard",
   storageBucket: "fireworkleaderboard.firebasestorage.app",
   messagingSenderId: "243474267364",
-  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1"
+  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
+  measurementId: "G-H07BZY385S"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-async function loadLeaderboard(){
-  const table = document.getElementById("table");
+// -------- LOAD LEADERBOARD --------
+async function loadLeaderboard() {
+  const table = document.getElementById("leaderboardTable");
+  // Remove old rows
+  table.querySelectorAll("tr:not(:first-child)").forEach(r => r.remove());
 
-  const snap = await db.ref("progress").once("value");
-  const progress = snap.val() || {};
+  try {
+    // Fetch all scores
+    const scoresSnap = await db.ref("scores").once("value");
+    const scoresObj = scoresSnap.val() || {};
 
-  const rows = [];
+    // Fetch all usernames
+    const usernamesSnap = await db.ref("usernames").once("value");
+    const usernamesObj = usernamesSnap.val() || {};
 
-  for (const uid in progress) {
-    let money = Number(progress[uid]?.money) || 0;
+    // Combine scores and usernames
+    const leaderboard = Object.entries(scoresObj).map(([uid, data]) => {
+      const money = data.money || 0;
+      const username = usernamesObj[uid] || "Unknown";
+      return { uid, username, money };
+    });
 
-    // clamp insane values
-    if (money < 0) money = 0;
-    if (money > 1_000_000_000) money = 1_000_000_000;
+    // Sort descending by money
+    leaderboard.sort((a, b) => b.money - a.money);
 
+    // Populate table
+    leaderboard.forEach((entry, i) => {
+      const row = table.insertRow();
+      row.insertCell(0).textContent = i + 1;
+      row.insertCell(1).textContent = entry.username;
+      row.insertCell(2).textContent = entry.money;
+    });
 
-    const nameSnap = await db.ref("usernames/"+uid).once("value");
-    const username = nameSnap.val() || "Unknown";
-
-    rows.push({ username, money });
+  } catch(err) {
+    console.error("Error loading leaderboard:", err);
+    alert("Failed to load leaderboard. Check console for details.");
   }
-
-  rows.sort((a,b)=>b.money - a.money);
-
-  rows.forEach((r,i)=>{
-    const tr = table.insertRow();
-    tr.insertCell(0).textContent = i + 1;
-    tr.insertCell(1).textContent = r.username;
-    tr.insertCell(2).textContent = r.money;
-  });
 }
 
+// -------- REFRESH BUTTON --------
+document.getElementById("refreshBtn").addEventListener("click", loadLeaderboard);
+
+// Load leaderboard automatically
 loadLeaderboard();
 </script>
 
 </body>
 </html>
-
