@@ -21,6 +21,22 @@ canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #
 #cooldownBar{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.25); border-radius:9px;}
 #cooldownFill{height:100%; width:0%; background:limegreen; transition:width 0.05s;}
 #resetBtn{position:fixed; top:10px; right:10px; padding:5px 8px; background:red; color:white; border:none; border-radius:5px; display:none;}
+#eventBanner {
+  display:none;
+  position:fixed;
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,#ff6,#6ff);
+  color:black;
+  padding:8px 14px;
+  border-radius:10px;
+  font-weight:bold;
+  z-index:9999;
+  box-shadow:0 0 20px rgba(0,0,0,0.6);
+  text-align:center;
+  min-width:220px;
+}
 body, button, input, p, span { user-select: none; }
 </style>
 </head>
@@ -54,8 +70,24 @@ body, button, input, p, span { user-select: none; }
     <button id="giveMoneyBtn">Give $10000</button>
     <button id="unlockColorsBtn">Unlock All Colors</button>
     <button id="maxAutoBtn">Max Auto-Launch</button>
-    <button id="viewUsersBtn">View Users</button>
+    <button id="toggleDouble">Toggle Double Money</button>
+    <button id="toggleRainbow">Toggle Rainbow Mode</button>
+    <button id="toggleChain">Toggle Chain Reaction</button>
+    <button id="toggleCosmic">Toggle Cosmic Mode</button>
+    <button id="toggleLucky">Toggle Lucky Explosions</button>
+    <button id="toggleChaos">Toggle Chaos Roll</button>
+    <button id="triggerAdminStorm">Trigger Admin Storm</button>
+    <button id="toggleBlackout">Toggle Blackout</button>
+    <button id="toggleGlitch">Toggle Glitch Event</button>
+    <button id="adminAnnounce">Global Announcement</button>
+    <p style="font-size:12px;color:#ccc;">(Owner-only controls)</p>
   </div>
+</div>
+
+<div id="eventBanner">
+  <div id="eventName"></div>
+  <div id="eventDesc" style="font-size:12px;margin-top:6px;"></div>
+  <div id="eventTimer" style="font-size:11px;margin-top:4px;color:#222;"></div>
 </div>
 
 <button id="resetBtn">Reset Progress</button>
@@ -83,7 +115,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// -------- GLOBAL VARIABLES --------
+// -------- GLOBAL VARIABLES & UI HANDLES --------
 const loginBox = document.getElementById("loginBox");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
@@ -94,6 +126,10 @@ const ownerCommands = document.getElementById("ownerCommands");
 const goLeaderboardBtn = document.getElementById("goLeaderboardBtn");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const eventBanner = document.getElementById("eventBanner");
+const eventNameEl = document.getElementById("eventName");
+const eventDescEl = document.getElementById("eventDesc");
+const eventTimerEl = document.getElementById("eventTimer");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 window.addEventListener("resize",()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
@@ -102,7 +138,7 @@ let currentUser="";
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now(), rebirthCount=0;
 let colorPrice=50, delayPrice=100, rebirthPrice=500, autoPrice=200, autoAmount=0, autoSpeed=2.5;
 let fireworks=[], particles=[];
-const gravity=0.04;
+let gravity=0.04;
 const fireworkSound=document.getElementById("fireworkSound");
 let autoInterval=null;
 
@@ -117,6 +153,59 @@ const baseColors=[
 ];
 let colors=[...baseColors];
 
+// -------- EVENTS STATE --------
+let EVENTS_STATE = {
+  active: false,
+  // toggles
+  chainReaction: false,
+  doubleMoney: false,
+  rainbowMode: false,
+  cosmicMode: false,
+  luckyExplosions: false,
+  chaosRoll: false,
+  goldenFirework: false, // passive rare spawn
+  adminStorm: false,
+  blackout: false,
+  glitch: false,
+  // meta
+  name: "",
+  description: "",
+  endsAt: null
+};
+
+let eventIntervalHandles = []; // for timers etc.
+
+// ---------- Helper: show banner ----------
+function showEventBanner(name, desc, endsAt){
+  eventNameEl.textContent = name;
+  eventDescEl.textContent = desc || "";
+  if(!endsAt){
+    eventTimerEl.textContent = "";
+  } else {
+    const update = ()=>{
+      const left = Math.max(0, endsAt - Date.now());
+      if(left<=0){
+        eventTimerEl.textContent = "Ending...";
+        return;
+      }
+      eventTimerEl.textContent = "Ends in " + Math.ceil(left/1000) + "s";
+    };
+    update();
+    const id = setInterval(update,1000);
+    eventIntervalHandles.push(id);
+  }
+  eventBanner.style.display = "block";
+}
+function hideEventBanner(){
+  eventBanner.style.display = "none";
+  eventNameEl.textContent = "";
+  eventDescEl.textContent = "";
+  eventTimerEl.textContent = "";
+  // clear timers
+  eventIntervalHandles.forEach(i=>clearInterval(i));
+  eventIntervalHandles = [];
+}
+
 // -------- AUTH & LOGIN --------
 auth.onAuthStateChanged(async user => {
   if (user) {
@@ -124,8 +213,15 @@ auth.onAuthStateChanged(async user => {
     loginBox.style.display = "none";
     ui.style.display = "block";
     resetBtn.style.display = "block";
+    // owner check - change to your email or uid if needed
+    ownerCommands.style.display = (user.email === "aaron.gatorfan@gmail.com" || user.uid === "ADMIN_UID_OR_EMAIL") ? "block" : "none";
     await loadProgressOnline();
-    ownerCommands.style.display = user.email === "aaron.gatorfan@gmail.com" ? "block" : "none";
+  } else {
+    // not logged in
+    currentUser = "";
+    loginBox.style.display = "block";
+    ui.style.display = "none";
+    resetBtn.style.display = "none";
   }
 });
 
@@ -151,7 +247,7 @@ loginBtn.addEventListener("click", async () => {
     loginBox.style.display = "none";
     ui.style.display = "block";
     resetBtn.style.display = "block";
-    ownerCommands.style.display = cred.user.user === "Dreamcrusher41" ? "block" : "none";
+    ownerCommands.style.display = (cred.user.email === "aaron.gatorfan@gmail.com" || cred.user.uid === "ADMIN_UID_OR_EMAIL") ? "block" : "none";
     await loadProgressOnline();
   } catch(err){ loginMsg.textContent = err.message; }
 });
@@ -168,58 +264,252 @@ signupBtn.addEventListener("click", async () => {
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     currentUser = cred.user.uid;
-    await db.ref("usernames/" + currentUser).set(uname);
+    // Save username to /users (as requested earlier)
+    await db.ref("users/" + currentUser).set({ username: uname });
     loginMsg.style.color = "lime";
     loginMsg.textContent = "Account created!";
     loginBox.style.display = "none"; ui.style.display = "block"; resetBtn.style.display = "block";
     await saveProgressOnline();
-    ownerCommands.style.display = cred.user.email === "aaron.gatorfan@gmail.com" ? "block" : "none";
+    ownerCommands.style.display = (cred.user.email === "aaron.gatorfan@gmail.com" || cred.user.uid === "ADMIN_UID_OR_EMAIL") ? "block" : "none";
   } catch(err){ loginMsg.style.color = "red"; loginMsg.textContent = err.message; }
 });
 
-// -------- FIREWORK LOGIC --------
-class Firework{constructor(x,y,colorObj){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;}
-update(){this.y-=this.speed;if(this.y<=this.targetY){explode(this.x,this.y,this.colorObj);return true;}return false;}
+// -------- FIREWORK CLASSES --------
+class Firework{constructor(x,y,colorObj,owner=false){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;this.owner=owner;}
+update(){this.y-=this.speed;if(this.y<=this.targetY){explode(this.x,this.y,this.colorObj,this.owner);return true;}return false;}
 draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.colorObj.color;ctx.fill();}}
 class Particle{constructor(x,y,colorObj){this.x=x;this.y=y;this.color=colorObj.color;this.speedX=(Math.random()-0.5)*6;this.speedY=(Math.random()-0.5)*6;this.life=100;}
 update(){this.speedY+=gravity;this.x+=this.speedX;this.y+=this.speedY;this.life--;}
 draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}}
 
-function getRebirthColors(rebirthCount){
-  const scheme=[{base:60},{base:80},{base:100},{base:120}][rebirthCount%4];
-  const numColors=Math.min(10+rebirthCount,50);
-  let newColors=[];
-  for(let i=0;i<numColors;i++){
-    const hue=Math.random()*360;
-    newColors.push({color:`hsl(${hue},${scheme.base}%,60%)`, value:i+1});
-  }
-  return newColors;
-}
+// -------- EVENT HANDLING (listen to /events) --------
+db.ref("events").on("value", snap => {
+  const e = snap.val();
+  // reset eventIntervalHandles
+  eventIntervalHandles.forEach(i=>clearInterval(i));
+  eventIntervalHandles = [];
 
-function explode(x,y,colorObj){
-  fireworkSound.currentTime=0;fireworkSound.play();
-  for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
-  money += colorObj.value * (rebirthCount + 1);
+  if (!e || !e.active) {
+    EVENTS_STATE = {...EVENTS_STATE, active:false, chainReaction:false, doubleMoney:false, rainbowMode:false, cosmicMode:false, luckyExplosions:false, chaosRoll:false, goldenFirework:false, adminStorm:false, blackout:false, glitch:false, name:"", description:"", endsAt:null};
+    hideEventBanner();
+    return;
+  }
+
+  EVENTS_STATE.active = true;
+  EVENTS_STATE.chainReaction = !!e.chainReaction;
+  EVENTS_STATE.doubleMoney = !!e.doubleMoney;
+  EVENTS_STATE.rainbowMode = !!e.rainbowMode;
+  EVENTS_STATE.cosmicMode = !!e.cosmicMode;
+  EVENTS_STATE.luckyExplosions = !!e.luckyExplosions;
+  EVENTS_STATE.chaosRoll = !!e.chaosRoll;
+  EVENTS_STATE.goldenFirework = !!e.goldenFirework;
+  EVENTS_STATE.adminStorm = !!e.adminStorm;
+  EVENTS_STATE.blackout = !!e.blackout;
+  EVENTS_STATE.glitch = !!e.glitch;
+
+  EVENTS_STATE.name = e.name || "Event Active";
+  EVENTS_STATE.description = e.description || "";
+  EVENTS_STATE.endsAt = e.endsAt || null;
+
+  // show banner
+  showEventBanner(EVENTS_STATE.name, EVENTS_STATE.description, EVENTS_STATE.endsAt);
+
+  // admin storm: if active, spawn random launches for this client for the duration
+  if (EVENTS_STATE.adminStorm && !e.adminStormExpiresHandled) {
+    // set a short-lived storm if endsAt present
+    const duration = Math.max(5000, (EVENTS_STATE.endsAt ? EVENTS_STATE.endsAt - Date.now() : 20000));
+    const stormInterval = setInterval(()=>{
+      // spawn a few random fireworks (they give normal rewards)
+      for(let i=0;i<3;i++){
+        launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2);
+      }
+    }, 800);
+    eventIntervalHandles.push(stormInterval);
+  }
+
+  // glitch effect: apply altered gravity periodically
+  if (EVENTS_STATE.glitch) {
+    const glitchInterval = setInterval(()=> {
+      gravity = (Math.random()*0.3)-0.1; // -0.1 .. 0.2
+      setTimeout(()=>{ gravity = 0.04; }, 800);
+    }, 2000);
+    eventIntervalHandles.push(glitchInterval);
+  }
+});
+
+// -------- CORE: award money with multipliers & chain reaction --------
+function awardAndSave(amount){
+  // clamp sanity
+  if (!Number.isFinite(amount)) return;
+  if (amount < 0) amount = 0;
+  money += Math.floor(amount);
   document.getElementById("money").textContent = money;
   saveProgressOnline();
   saveScore();
 }
 
+// chain reaction helper (recursively spawn children and award)
+function doChainReaction(baseValue, level=1, maxLevel=2){
+  if (!EVENTS_STATE.chainReaction || level > maxLevel) return;
+  // for each parent spawn 2 children
+  const numChildren = 2;
+  for(let i=0;i<numChildren;i++){
+    // small explosion reward is ceil(parent / 2)
+    const childBase = Math.ceil(baseValue / 2);
+    // apply same multipliers to child as to parent (we will call computeAndAward with isChild flag)
+    computeAndAward(childBase, true, level+1);
+    // spawn tiny particles visually
+    for(let p=0;p<20;p++) particles.push(new Particle((Math.random()*100)+canvas.width/2, (Math.random()*canvas.height/2), {color:"hsl("+(Math.random()*360)+",100%,60%)"}));
+  }
+}
+
+// computeAndAward(base, isChild=false, chainLevel=1)
+function computeAndAward(baseMoney, isChild=false, chainLevel=1){
+  // baseMoney is integer
+  const base = Math.max(0, Math.floor(baseMoney));
+
+  // 1) Chain reaction: if enabled and chaos roll doesn't override, spawn chain extras
+  // (we'll spawn children AFTER computing multipliers so order remains predictable)
+  // 2) Chaos Roll override
+  let chaosMultiplier = 1;
+  let triggeredChainFromChaos = false;
+  if (EVENTS_STATE.chaosRoll && Math.random() < 1) {
+    // pick random outcome with weighting: [0.5, 1, 2, 5, chain]
+    const choices = ["0.5","1","2","5","chain"];
+    const pick = choices[Math.floor(Math.random()*choices.length)];
+    if (pick === "chain") {
+      triggeredChainFromChaos = true;
+    } else {
+      chaosMultiplier = parseFloat(pick);
+    }
+  }
+
+  // 3) Golden Firework (rare)
+  let goldenMultiplier = 1;
+  if (EVENTS_STATE.goldenFirework && Math.random() < 0.01) {
+    goldenMultiplier = 10;
+    // visual cue can be handled by using special color
+  }
+
+  // 4) Lucky Explosions
+  let luckyMultiplier = 1;
+  if (EVENTS_STATE.luckyExplosions && Math.random() < 0.10) {
+    luckyMultiplier = 4;
+  }
+
+  // 5) Cosmic Mode
+  let cosmicMultiplier = EVENTS_STATE.cosmicMode ? 2 : 1;
+
+  // 6) Double Money
+  let doubleMultiplier = EVENTS_STATE.doubleMoney ? 2 : 1;
+
+  // 7) Rainbow Mode
+  let rainbowMultiplier = EVENTS_STATE.rainbowMode ? 5 : 1;
+
+  // 8) Blackout
+  let blackoutMultiplier = EVENTS_STATE.blackout ? 3 : 1;
+
+  // 9) Glitch random multiplier (0..3)
+  let glitchMultiplier = 1;
+  if (EVENTS_STATE.glitch) {
+    glitchMultiplier = Math.random()*3; // 0..3
+  }
+
+  // Final multiplier composition (order: chaos -> lucky -> golden -> cosmic -> double -> rainbow -> blackout -> glitch)
+  const finalMultiplier = chaosMultiplier * luckyMultiplier * goldenMultiplier * cosmicMultiplier * doubleMultiplier * rainbowMultiplier * blackoutMultiplier * glitchMultiplier;
+
+  // final award
+  const awarded = Math.round(base * finalMultiplier);
+
+  // award to player
+  awardAndSave(awarded);
+
+  // if chain reaction active (or triggered by chaos), spawn child explosions:
+  if ((EVENTS_STATE.chainReaction && !isChild) || triggeredChainFromChaos) {
+    // spawn children based on base (not awarded)
+    doChainReaction(base, chainLevel, 2);
+  }
+
+  // Visual: golden or lucky flash
+  if (goldenMultiplier > 1) {
+    flashScreen("#ffd700", 200);
+  } else if (luckyMultiplier > 1) {
+    flashScreen("#00ff00", 150);
+  }
+}
+
+// simple screen flash (visual)
+function flashScreen(color, duration=150){
+  const old = ctx.fillStyle;
+  ctx.fillStyle = color;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  setTimeout(()=>{}, duration); // just for timing, main loop will repaint
+}
+
+// -------- EXPLOSIONS & LAUNCH --------
+function explode(x,y,colorObj, ownerFlag=false){
+  fireworkSound.currentTime=0; fireworkSound.play();
+
+  // visual particles
+  for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
+
+  // Determine color override if Rainbow mode
+  if (EVENTS_STATE.rainbowMode) {
+    colorObj = { color: `hsl(${Math.floor(Math.random()*360)},100%,60%)`, value: colorObj.value };
+  }
+
+  // base money (before multipliers)
+  const base = colorObj.value * (rebirthCount + 1);
+
+  // Compute & award (handles chain, chaos, lucky, golden, etc)
+  computeAndAward(base, false, 1);
+}
+
+// launch firework (player)
 function launchFirework(x,y){
   const colorIndex = Math.floor(Math.random() * unlockedColors);
   const colorObj = colors[colorIndex];
-  fireworks.push(new Firework(x,y,colorObj));
+  fireworks.push(new Firework(x,y,colorObj,true));
   lastClick = Date.now();
 }
 
 document.addEventListener("click",e=>{
-  if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY);
+  const now = Date.now();
+  if (now - lastClick >= clickDelay) {
+    lastClick = now;
+    launchFirework(e.clientX,e.clientY);
+  } else {
+    // click too fast - ignore
+  }
 });
 
+// -------- ANIMATE --------
 function animate(){
-  ctx.fillStyle="rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-  for(let i=fireworks.length-1;i>=0;i--){if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw();}
-  for(let i=particles.length-1;i>=0;i--){particles[i].update();particles[i].draw();if(particles[i].life<=0) particles.splice(i,1);}
+  // Blackout visual: darken sky more
+  if (EVENTS_STATE.blackout) {
+    ctx.fillStyle="rgba(0,0,0,0.98)";
+  } else {
+    ctx.fillStyle="rgba(0,0,0,0.2)";
+  }
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // visual event glow if double money or rainbow
+  if (EVENTS_STATE.doubleMoney) {
+    ctx.shadowBlur = 12; ctx.shadowColor = "#ff0";
+  } else if (EVENTS_STATE.rainbowMode) {
+    ctx.shadowBlur = 20; ctx.shadowColor = "#f0f";
+  } else {
+    ctx.shadowBlur = 0;
+  }
+
+  for(let i=fireworks.length-1;i>=0;i--){
+    if(fireworks[i].update()) fireworks.splice(i,1);
+    else fireworks[i].draw();
+  }
+  for(let i=particles.length-1;i>=0;i--){
+    particles[i].update(); particles[i].draw();
+    if(particles[i].life<=0) particles.splice(i,1);
+  }
   const elapsed=Date.now()-lastClick; const fill=Math.min(100,(elapsed/clickDelay)*100);
   document.getElementById("cooldownFill").style.width=fill+"%";
   document.getElementById("moneyMultiplier").textContent=(rebirthCount+1);
@@ -227,9 +517,19 @@ function animate(){
 }
 animate();
 
-// -------- ONLINE SAVE/LOAD --------
+// -------- ONLINE SAVE/LOAD (safe) --------
 async function saveProgressOnline(){
   if(!currentUser) return;
+
+  // Basic client-side sanity checks (makes casual cheating harder)
+  if (!Number.isFinite(money) || money < 0) money = Math.max(0, Math.floor(money));
+  if (money > 1000000000) money = 1000000000;
+  if (clickDelay < 100) clickDelay = 100;
+  if (unlockedColors > colors.length) unlockedColors = colors.length;
+  if (rebirthCount < 0) rebirthCount = 0;
+  if (autoAmount < 0) autoAmount = 0;
+  if (autoAmount > 3) autoAmount = 3;
+
   const progress = { money, unlockedColors, clickDelay, rebirthCount, rebirthPrice, colorPrice, delayPrice, autoAmount, autoSpeed };
   await db.ref("progress/" + currentUser).set(progress);
 }
@@ -256,7 +556,7 @@ async function loadProgressOnline(){
   }
 }
 
-// -------- BUTTONS & UPGRADES --------
+// -------- BUTTONS & UPGRADES (same as your old logic) --------
 function updateButtons(){
   document.getElementById("buyColor").textContent = unlockedColors >= colors.length ? "MAX" : `Buy Color ($${colorPrice})`;
   document.getElementById("reduceDelay").textContent = clickDelay <= 100 ? "MAX" : `Reduce Delay ($${delayPrice})`;
@@ -324,7 +624,7 @@ function startAutoLaunch(){
   if(autoAmount>0) autoInterval=setInterval(()=>{launchFirework(Math.random()*canvas.width,Math.random()*canvas.height/2);},autoSpeed*1000);
 }
 
-// -------- SAFE LEADERBOARD --------
+// -------- SAFE LEADERBOARD (unchanged) --------
 function saveScore(){
   if(!currentUser) return;
   const scoreRef = db.ref("scores/"+currentUser);
@@ -337,13 +637,100 @@ function saveScore(){
 
 goLeaderboardBtn.addEventListener("click",()=>{window.open("fireworkleaderboard.html","_blank");});
 
-// Owner commands
+// -------- OWNER COMMANDS -> set events in /events --------
+async function setEventPayload(payload){
+  await db.ref("events").set(payload);
+}
+async function toggleEventFlag(flag){
+  const snap = await db.ref("events").once("value");
+  const cur = snap.val() || {};
+  cur[flag] = !cur[flag];
+  cur.active = Object.values({ ...cur }).some(v => v === true || (typeof v === "object" && v.active)); // keep active if anything true
+  await db.ref("events").set(cur);
+}
+
+// admin buttons
 document.getElementById("giveMoneyBtn").addEventListener("click",()=>{money+=10000; document.getElementById("money").textContent=money; saveProgressOnline();});
 document.getElementById("unlockColorsBtn").addEventListener("click",()=>{unlockedColors=colors.length; updateButtons(); saveProgressOnline();});
 document.getElementById("maxAutoBtn").addEventListener("click",()=>{autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline();});
-document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Admin view: check Firebase users in database.");});
+document.getElementById("toggleDouble").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.doubleMoney = !cur.doubleMoney; cur.active = true; cur.name = "Double Money"; cur.description = cur.doubleMoney ? "All fireworks give 2x money!" : "";
+  if(cur.doubleMoney) cur.endsAt = Date.now()+60000; else cur.endsAt = null;
+  await db.ref("events").set(cur);
+});
+document.getElementById("toggleRainbow").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.rainbowMode = !cur.rainbowMode; cur.active = true; cur.name = "Rainbow Mode"; cur.description = cur.rainbowMode ? "All fireworks are rainbow and give 5x!" : "";
+  if(cur.rainbowMode) cur.endsAt = Date.now()+30000; else cur.endsAt = null;
+  await db.ref("events").set(cur);
+});
+document.getElementById("toggleChain").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.chainReaction = !cur.chainReaction; cur.active = true; cur.name = "Chain Reaction"; cur.description = cur.chainReaction ? "Explosions spawn smaller explosions worth half." : "";
+  if(cur.chainReaction) cur.endsAt = Date.now()+45000; else cur.endsAt = null;
+  await db.ref("events").set(cur);
+});
+document.getElementById("toggleCosmic").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.cosmicMode = !cur.cosmicMode; cur.active = true; cur.name = "Cosmic Mode"; cur.description = cur.cosmicMode ? "Cosmic visuals + 2x money." : "";
+  if(cur.cosmicMode) cur.endsAt = Date.now()+60000; else cur.endsAt = null;
+  await db.ref("events").set(cur);
+});
+document.getElementById("toggleLucky").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.luckyExplosions = !cur.luckyExplosions; cur.active = true; cur.name = "Lucky Explosions"; cur.description = cur.luckyExplosions ? "10% chance for 4x!" : "";
+  if(cur.luckyExplosions) cur.endsAt = Date.now()+60000; else cur.endsAt = null;
+  await db.ref("events").set(cur);
+});
+document.getElementById("toggleChaos").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.chaosRoll = !cur.chaosRoll; cur.active = true; cur.name = "Chaos Roll"; cur.description = cur.chaosRoll ? "Every launch gets a random modifier." : "";
+  if(cur.chaosRoll) cur.endsAt = Date.now()+45000; else cur.endsAt = null;
+  await db.ref("events").set(cur);
+});
+document.getElementById("triggerAdminStorm").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.adminStorm = true; cur.active = true; cur.name = "Admin Storm"; cur.description = "Fireworks rain from the sky!";
+  cur.endsAt = Date.now()+20000;
+  await db.ref("events").set(cur);
+  // schedule auto-off
+  setTimeout(async ()=> {
+    const s = await db.ref("events").once("value"); const c = s.val() || {};
+    c.adminStorm = false; if(!Object.values(c).some(v=>v===true)) c.active=false; c.endsAt=null; await db.ref("events").set(c);
+  }, 20000);
+});
+document.getElementById("toggleBlackout").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.blackout = !cur.blackout; cur.active = true; cur.name = "Blackout"; cur.description = cur.blackout ? "Screen darkens, 3x money!" : "";
+  if(cur.blackout) cur.endsAt = Date.now()+30000; else cur.endsAt = null;
+  await db.ref("events").set(cur);
+});
+document.getElementById("toggleGlitch").addEventListener("click", async ()=> {
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.glitch = !cur.glitch; cur.active = true; cur.name = "Glitch Event"; cur.description = cur.glitch ? "Weird physics and random rewards." : "";
+  if(cur.glitch) cur.endsAt = Date.now()+40000; else cur.endsAt = null;
+  await db.ref("events").set(cur);
+});
+document.getElementById("adminAnnounce").addEventListener("click", async ()=> {
+  const message = prompt("Announcement message:");
+  if(!message) return;
+  const snap = await db.ref("events").once("value"); const cur = snap.val() || {};
+  cur.name = "Announcement"; cur.description = message; cur.active = true; cur.endsAt = Date.now()+10000;
+  await db.ref("events").set(cur);
+});
+
+// -------- OWNER: view users (simple) --------
+document.getElementById("viewUsersBtn").addEventListener("click", async ()=>{
+  const snap = await db.ref("users").once("value");
+  const users = snap.val() || {};
+  console.log("Users snapshot:", users);
+  alert("Check console for user list.");
+});
+
+// -------- SAFETY: small anti-cheat helpers already included above --------
+
+// done
 </script>
 </body>
 </html>
-
-
