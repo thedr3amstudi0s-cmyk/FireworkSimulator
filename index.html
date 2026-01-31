@@ -5,7 +5,15 @@
 <title>Firework Simulator</title>
 <style>
 html, body { margin:0; padding:0; overflow:hidden; font-family: Arial, sans-serif; background:#000; }
-canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #000); }
+canvas {
+  display: block;
+  background: radial-gradient(circle at bottom, #0a0a0a, #000);
+  position: fixed; /* keep canvas fixed */
+  top: 0;
+  left: 0;
+  z-index: 1;      /* make canvas behind UI buttons */
+}
+
 
 /* Login UI */
 #loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
@@ -734,3 +742,4 @@ document.getElementById("viewUsersBtn").addEventListener("click", async ()=>{
 </script>
 </body>
 </html>
+
