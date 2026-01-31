@@ -5,29 +5,23 @@
 <title>Firework Leaderboard</title>
 <style>
 body { background:#0a0a0a; color:white; font-family:Arial, sans-serif; padding:20px; }
-h1 { color:#0ff; text-align:center; }
+h1 { color:#0ff; }
 table { width:100%; border-collapse: collapse; margin-top:20px; }
 th, td { padding:10px; border-bottom:1px solid #444; text-align:left; }
 th { color:#0ff; }
-button { margin-top:20px; padding:5px 10px; cursor:pointer; background:#0ff; color:black; border:none; border-radius:5px; font-weight:bold; }
-button:hover { background:cyan; }
+button { margin-top:20px; padding:5px 10px; cursor:pointer; background:red; color:white; border:none; border-radius:5px; }
 </style>
 </head>
 <body>
-
 <h1>Firework Leaderboard</h1>
-
 <table id="leaderboardTable">
 <tr><th>Rank</th><th>Username</th><th>Money</th></tr>
 </table>
-
 <button id="refreshBtn">Refresh Leaderboard</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
-// -------- FIREBASE CONFIG --------
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -42,32 +36,30 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// -------- LOAD LEADERBOARD --------
 async function loadLeaderboard() {
   const table = document.getElementById("leaderboardTable");
   // Remove old rows
   table.querySelectorAll("tr:not(:first-child)").forEach(r => r.remove());
 
   try {
-    // Fetch all scores
     const scoresSnap = await db.ref("scores").once("value");
     const scoresObj = scoresSnap.val() || {};
 
-    // Fetch all usernames
-    const usernamesSnap = await db.ref("usernames").once("value");
-    const usernamesObj = usernamesSnap.val() || {};
+    const leaderboard = [];
 
-    // Combine scores and usernames
-    const leaderboard = Object.entries(scoresObj).map(([uid, data]) => {
-      const money = data.money || 0;
-      const username = usernamesObj[uid] || "Unknown";
-      return { uid, username, money };
-    });
+    // Build leaderboard array with username
+    for (const uid in scoresObj) {
+      const money = scoresObj[uid].money || 0;
+      // Fetch username from /usernames
+      const nameSnap = await db.ref("usernames/" + uid).once("value");
+      const username = nameSnap.exists() ? nameSnap.val() : "Unknown";
+      leaderboard.push({ username, money });
+    }
 
     // Sort descending by money
     leaderboard.sort((a, b) => b.money - a.money);
 
-    // Populate table
+    // Add to table
     leaderboard.forEach((entry, i) => {
       const row = table.insertRow();
       row.insertCell(0).textContent = i + 1;
@@ -77,16 +69,13 @@ async function loadLeaderboard() {
 
   } catch(err) {
     console.error("Error loading leaderboard:", err);
-    alert("Failed to load leaderboard. Check console for details.");
   }
 }
 
-// -------- REFRESH BUTTON --------
 document.getElementById("refreshBtn").addEventListener("click", loadLeaderboard);
 
 // Load leaderboard automatically
 loadLeaderboard();
 </script>
-
 </body>
 </html>
