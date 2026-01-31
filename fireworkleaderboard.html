@@ -70,19 +70,19 @@ async function loadLeaderboard() {
   table.querySelectorAll("tr:not(:first-child)").forEach(r => r.remove());
 
   try {
-    // Get all progress
+    // Get progress (money)
     const progressSnap = await db.ref("progress").once("value");
     const progress = progressSnap.val() || {};
 
-    // Get all usernames
-    const namesSnap = await db.ref("usernames").once("value");
-    const names = namesSnap.val() || {};
+    // Get users (names)
+    const usersSnap = await db.ref("users").once("value");
+    const users = usersSnap.val() || {};
 
     const leaderboard = [];
 
     for (const uid in progress) {
       leaderboard.push({
-        username: names[uid] || "Unknown",
+        username: users[uid]?.username || "Unknown",
         money: progress[uid].money || 0
       });
     }
