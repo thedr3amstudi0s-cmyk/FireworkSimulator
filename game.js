@@ -1,5 +1,4 @@
 // game.js
-// Drop this file into your project and include <script src="game.js"></script> after Firebase scripts.
 
 (() => {
   // ---- Firebase config (same as your index) ----
