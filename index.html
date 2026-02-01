@@ -4,16 +4,88 @@
   <meta charset="UTF-8">
   <title>Firework Simulator</title>
   <style>
-    html, body { margin:0; padding:0; overflow:hidden; font-family:sans-serif; background:#111; color:white; }
-    canvas { display:block; position:absolute; top:0; left:0; z-index:0; }
-    #ui { position:absolute; top:10px; left:10px; z-index:10; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; }
-    button { margin:2px; }
-    #loginBox { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#222; padding:20px; border-radius:10px; display:flex; flex-direction:column; gap:5px; }
-    #eventBanner { position:absolute; top:50px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:6px; display:none; text-align:center; }
-    #cooldownBar { width:120px; height:10px; background:#333; border-radius:5px; overflow:hidden; margin-top:5px; }
-    #cooldownFill { height:100%; width:0%; background:#0f0; }
-    input { padding:4px; border-radius:4px; border:none; }
-    .ownerBtn { background:#880; color:#000; padding:4px 6px; margin:2px; border:none; border-radius:4px; cursor:pointer; }
+    html, body {
+      margin:0;
+      padding:0;
+      overflow:hidden;
+      font-family:sans-serif;
+      background:#111;
+      color:white;
+      user-select:none; /* prevent text selection */
+    }
+    canvas {
+      display:block;
+      position:absolute;
+      top:0;
+      left:0;
+      z-index:0;
+    }
+    #ui {
+      position:absolute;
+      top:10px;
+      left:10px;
+      z-index:10;
+      background:rgba(0,0,0,0.5);
+      padding:10px;
+      border-radius:8px;
+      pointer-events:auto;
+    }
+    button {
+      margin:2px;
+      cursor:pointer;
+    }
+    #loginBox {
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      background:#222;
+      padding:20px;
+      border-radius:10px;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      pointer-events:auto;
+    }
+    #eventBanner {
+      position:fixed;
+      top:10px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,0.8);
+      padding:8px 12px;
+      border-radius:6px;
+      display:none;
+      text-align:center;
+      z-index:20;
+    }
+    #cooldownBar {
+      width:120px;
+      height:10px;
+      background:#333;
+      border-radius:5px;
+      overflow:hidden;
+      margin-top:5px;
+    }
+    #cooldownFill {
+      height:100%;
+      width:0%;
+      background:#0f0;
+    }
+    input {
+      padding:4px;
+      border-radius:4px;
+      border:none;
+    }
+    .ownerBtn {
+      background:#880;
+      color:#000;
+      padding:4px 6px;
+      margin:2px;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+    }
   </style>
 </head>
 <body>
@@ -38,7 +110,7 @@
   <div>Unlocked Colors: <span id="unlockedColors">1</span></div>
   <div>Click Delay: <span id="delayDisplay">1200</span>ms</div>
   <div>Auto Speed: <span id="autoSpeedDisplay">2.5</span>s</div>
-  
+
   <button id="buyColor">Buy Color ($50)</button>
   <button id="reduceDelay">Reduce Delay ($100)</button>
   <button id="buyAuto">Buy Auto-Launch ($200)</button>
@@ -80,9 +152,34 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<!-- Patched game.js -->
 <script src="game.js"></script>
+
+<script>
+  // Make clicks on UI also launch fireworks
+  const ui = document.getElementById('ui');
+  const loginBox = document.getElementById('loginBox');
+  const canvas = document.getElementById('canvas');
+
+  function launchFromClick(e) {
+    const x = e.clientX;
+    const y = e.clientY;
+    if (window.launchFirework) window.launchFirework(x, y);
+  }
+
+  document.addEventListener('click', launchFromClick, {passive:true});
+  ui.addEventListener('click', launchFromClick);
+  loginBox.addEventListener('click', launchFromClick);
+
+  // Only show owner commands to Dreamcrusher41
+  firebase.auth().onAuthStateChanged(user => {
+    const ownerCommands = document.getElementById('ownerCommands');
+    if (user && user.email === "Dreamcrusher41@example.com") {
+      ownerCommands.style.display = "block";
+    } else {
+      ownerCommands.style.display = "none";
+    }
+  });
+</script>
 
 </body>
 </html>
-
