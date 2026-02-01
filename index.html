@@ -4,93 +4,146 @@
 <meta charset="UTF-8">
 <title>Firework Simulator</title>
 <style>
-html, body { margin:0; padding:0; overflow:hidden; font-family: Arial, sans-serif; background:#000; height:100%; }
-canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #000); }
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background: #111;
+  font-family: Arial, sans-serif;
+  color: white;
+}
 
-/* Login UI overlay */
+/* Canvas */
+#canvas {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Login Box */
 #loginBox {
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
-  background:#222;
-  padding:30px;
-  border-radius:10px;
-  color:white;
-  text-align:center;
-  z-index:200;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.7);
+  flex-direction: column;
+  z-index: 10;
+  padding: 20px;
+  border-radius: 10px;
 }
-#loginBox h2 { color:#0ff; margin-bottom:15px; }
 #loginBox input, #loginBox button {
-  display:block;
-  margin:8px auto;
-  padding:10px;
-  width:240px;
-  border-radius:5px;
-  border:none;
+  display: block;
+  margin: 8px 0;
+  padding: 10px;
+  width: 220px;
+  border-radius: 5px;
+  border: none;
 }
-#loginBox button { background:cyan; color:black; font-weight:bold; cursor:pointer; }
-#loginBox button:hover { background:#0ff; }
-#loginBox #forgotBtn { background:#444; color:white; }
-#loginMsg { color:yellow; margin-top:10px; }
+#loginBox button {
+  background: cyan;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+#loginBox button:hover { background: #0ff; }
 
 /* Game UI */
 #ui {
-  position:fixed;
-  top:10px;
-  left:10px;
-  color:white;
-  z-index:100;
-  display:none;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  display: none;
 }
-#ui button{margin:2px; padding:5px 8px; font-size:14px; cursor:pointer;}
-#ownerCommands{position:fixed; top:10px; right:10px; display:none;}
-#cooldownBar{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.25); border-radius:9px;}
-#cooldownFill{height:100%; width:0%; background:limegreen; transition:width 0.05s;}
+#ownerCommands {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  display: none;
+}
+#cooldownBar {
+  width: 200px;
+  height: 10px;
+  background: #444;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+#cooldownFill {
+  height: 100%;
+  width: 0;
+  background: limegreen;
+  border-radius: 5px;
+}
+button { cursor: pointer; }
 </style>
 </head>
 <body>
 
 <canvas id="canvas"></canvas>
 
+<!-- Login -->
 <div id="loginBox">
-  <h2>Firework Simulator</h2>
+  <h2 style="color:#0ff">Firework Simulator</h2>
   <input type="text" id="username" placeholder="Username">
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
   <button id="loginBtn">Login</button>
   <button id="signupBtn">Sign Up</button>
-  <button id="forgotBtn">Forgot Password?</button>
-  <p id="loginMsg"></p>
+  <button id="forgotBtn" style="background:#444;color:white;">Forgot Password?</button>
+  <p id="loginMsg" style="color:yellow;"></p>
 </div>
 
+<!-- Game UI -->
 <div id="ui">
-  <h2>Money: $<span id="money">0</span></h2>
+  <div>Money: $<span id="money">0</span></div>
+  <div>Multiplier: x<span id="moneyMultiplier">1</span></div>
+  <div>Colors unlocked: <span id="unlockedColors">1</span></div>
+  <div>Click Delay: <span id="delayDisplay">1200</span>ms</div>
+  <div>Auto Speed: <span id="autoSpeedDisplay">2.50</span>s</div>
   <button id="buyColor">Buy Color ($50)</button>
   <button id="reduceDelay">Reduce Delay ($100)</button>
-  <button id="rebirth">Rebirth ($500)</button>
   <button id="buyAuto">Buy Auto-Launch ($200)</button>
-  <button id="goLeaderboardBtn">View Leaderboard</button>
-  <p>Unlocked Colors: <span id="unlockedColors">1</span></p>
-  <p>Click Delay: <span id="delayDisplay">1200</span> ms</p>
-  <p>Firework Money Multiplier: x<span id="moneyMultiplier">1</span></p>
-  <p>Auto Speed: <span id="autoSpeedDisplay">2.50</span> sec</p>
-  <div id="ownerCommands">
-    <h3>Owner</h3>
-    <button id="giveMoneyBtn">Give $1000</button>
-    <button id="unlockColorsBtn">Unlock All Colors</button>
-    <button id="maxAutoBtn">Max Auto-Launch</button>
-    <button id="viewUsersBtn">View Users</button>
-  </div>
+  <button id="rebirth">Rebirth ($500)</button>
+  <button id="resetBtn">Reset Progress</button>
+  <button id="logoutBtn">Logout</button>
+  <button id="goLeaderboardBtn">Leaderboard</button>
+  <div id="cooldownBar"><div id="cooldownFill"></div></div>
 </div>
 
-<div id="cooldownBar"><div id="cooldownFill"></div></div>
+<!-- Owner Commands -->
+<div id="ownerCommands">
+  <button data-event="doubleMoney">Double Money</button>
+  <button data-event="rainbowMode">Rainbow Mode</button>
+  <button data-event="chaosRoll">Chaos Roll</button>
+  <button data-event="blackout">Blackout</button>
+  <button data-event="glitch">Glitch</button>
+  <button data-event="chainReaction">Chain Reaction</button>
+  <button data-event="cosmicMode">Cosmic Mode</button>
+  <button data-event="luckyExplosions">Lucky Explosions</button>
+  <button data-event="goldenFirework">Golden Firework</button>
+  <button data-event="adminStorm">Admin Storm</button>
+</div>
+
+<!-- Event Banner -->
+<div id="eventBanner">
+  <div id="eventName"></div>
+  <div id="eventDesc"></div>
+  <div id="eventTimer"></div>
+</div>
+
 <audio id="fireworkSound" src="assets/firework.mp3"></audio>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="game.js"></script>
-
 </body>
 </html>
