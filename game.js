@@ -500,7 +500,11 @@
   function triggerEventByName(name) {
     if (!name) return;
     // make sure event resets previous timers if same event re-triggered
-    const seconds = 10 * 1000; // default duration
+  const input = prompt("Event duration (seconds):", "15");
+  const durationSec = Math.max(1, Number(input));
+  if (!Number.isFinite(durationSec)) return;
+  const seconds = durationSec * 1000;
+
     EVENTS_STATE.active = true;
     EVENTS_STATE.name = name;
     EVENTS_STATE.description = "";
