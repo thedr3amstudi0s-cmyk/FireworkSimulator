@@ -4,15 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Firework Simulator</title>
-<style>
-  html,body{margin:0;padding:0;overflow:hidden;font-family:sans-serif;background:#111;color:#fff;}
-  #canvas{display:block;position:absolute;top:0;left:0;}
-  #loginBox,#ui{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
-  #loginBox{display:flex;flex-direction:column;gap:10px;}
-  input,button{padding:10px;font-size:16px;border:none;border-radius:5px;}
-  #ownerCommands{display:none;margin-top:10px;}
-  #eventBanner{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#222;padding:10px 20px;border-radius:8px;display:none;}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -28,20 +20,24 @@
 </div>
 
 <!-- Main UI -->
-<div id="ui" style="display:none;">
-  <div>Money: $<span id="money">0</span></div>
-  <div>Colors unlocked: <span id="unlockedColors">1</span></div>
-  <div>Multiplier: <span id="moneyMultiplier">1</span></div>
-  <div>Click delay: <span id="delayDisplay">1200</span>ms</div>
-  <div>Auto speed: <span id="autoSpeedDisplay">2.50</span>s</div>
+<div id="ui">
+  <div id="stats">
+    <div>Money: $<span id="money">0</span></div>
+    <div>Colors unlocked: <span id="unlockedColors">1</span></div>
+    <div>Multiplier: <span id="moneyMultiplier">1</span></div>
+    <div>Click delay: <span id="delayDisplay">1200</span>ms</div>
+    <div>Auto speed: <span id="autoSpeedDisplay">2.50</span>s</div>
+  </div>
 
-  <button id="buyColor">Buy Color ($50)</button>
-  <button id="reduceDelay">Reduce Delay ($100)</button>
-  <button id="buyAuto">Buy Auto-Launch ($200)</button>
-  <button id="rebirth">Rebirth ($500)</button>
-  <button id="resetBtn" style="display:none;">Reset Progress</button>
-  <button id="logoutBtn">Logout</button>
-  <button id="goLeaderboardBtn">Leaderboard</button>
+  <div id="buttons">
+    <button id="buyColor">Buy Color ($50)</button>
+    <button id="reduceDelay">Reduce Delay ($100)</button>
+    <button id="buyAuto">Buy Auto-Launch ($200)</button>
+    <button id="rebirth">Rebirth ($500)</button>
+    <button id="resetBtn">Reset Progress</button>
+    <button id="logoutBtn">Logout</button>
+    <button id="goLeaderboardBtn">Leaderboard</button>
+  </div>
 
   <!-- Admin commands -->
   <div id="ownerCommands">
@@ -64,7 +60,7 @@
 </div>
 
 <!-- Audio -->
-<audio id="fireworkSound" src="firework.mp3"></audio>
+<audio id="fireworkSound" src="assets/firework.mp3"></audio>
 
 <!-- Firebase & Game JS -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
