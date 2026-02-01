@@ -185,4 +185,80 @@
     });
   }
 
+  // ---- FIREWORKS ----
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+let fireworks = [];
+
+class Firework {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.particles = [];
+    for(let i=0;i<30;i++){
+      this.particles.push({
+        x: x,
+        y: y,
+        vx: (Math.random()-0.5)*6,
+        vy: (Math.random()-0.5)*6,
+        alpha: 1,
+        color: `hsl(${Math.random()*360},100%,60%)`
+      });
+    }
+  }
+  update() {
+    this.particles.forEach(p=>{
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05; // gravity
+      p.alpha -= 0.02;
+    });
+    this.particles = this.particles.filter(p=>p.alpha>0);
+  }
+  draw(ctx) {
+    this.particles.forEach(p=>{
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,3,0,Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+}
+
+function launchFirework(x, y){
+  fireworks.push(new Firework(x,y));
+  if(fireworkSound) fireworkSound.currentTime=0, fireworkSound.play();
+}
+
+function animate() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  fireworks.forEach(fw=>{ fw.update(); fw.draw(ctx); });
+  fireworks = fireworks.filter(fw=>fw.particles.length>0);
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ---- CLICK ANY BUTTON OR AREA AROUND IT TO LAUNCH ----
+function attachFireworkClicks(btnIds){
+  btnIds.forEach(id=>{
+    const el = $(id);
+    if(el){
+      el.addEventListener("click", e=>{
+        const rect = el.getBoundingClientRect();
+        launchFirework(rect.left+rect.width/2, rect.top+rect.height/2);
+      });
+    }
+  });
+}
+
+// Launch fireworks on all buttons
+attachFireworkClicks([
+  "buyColor","reduceDelay","buyAuto","rebirth","resetBtn",
+  "giveMoneyBtn","unlockColorsBtn","maxAutoBtn","goLeaderboardBtn",
+  "logoutBtn"
+]);
+
+
 })();
