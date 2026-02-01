@@ -1,6 +1,6 @@
-// ---- Fully patched game.js ----
 (() => {
-  // Firebase config
+  // ---- FIREWORK SIMULATOR: PATCHED GAME.JS ----
+
   const firebaseConfig = {
     apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
     authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -22,23 +22,20 @@
   const ui = $("ui");
   const ownerCommands = $("ownerCommands");
   const fireworkSound = $("fireworkSound");
-  const eventBanner = $("eventBanner");
-  const eventNameEl = $("eventName");
-  const eventDescEl = $("eventDesc");
-  const eventTimerEl = $("eventTimer");
 
-  if (canvas) {
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-    window.addEventListener("resize", resize);
-    resize();
-  }
-
-  // ---- State ----
   let currentUser = "";
-  let money = 0, unlockedColors = 1, clickDelay = 1200, lastClick = Date.now();
-  let rebirthCount = 0, colorPrice = 50, delayPrice = 100, rebirthPrice = 500;
-  let autoAmount = 0, autoSpeed = 2.5, autoInterval = null;
-  let fireworks = [], particles = [];
+  let money = 0;
+  let unlockedColors = 1;
+  let clickDelay = 1200;
+  let lastClick = Date.now();
+  let rebirthCount = 0;
+  let colorPrice = 50;
+  let delayPrice = 100;
+  let rebirthPrice = 500;
+  let autoPrice = 200;
+  let autoAmount = 0;
+  let autoSpeed = 2.5;
+
   const baseColors = [
     { color: "hsl(0,100%,60%)", value: 1 },
     { color: "hsl(30,100%,60%)", value: 2 },
@@ -49,93 +46,115 @@
   ];
   let colors = [...baseColors];
 
-  const EVENTS_STATE = {
-    active: false, doubleMoney:false, rainbowMode:false, chainReaction:false,
-    cosmicMode:false, luckyExplosions:false, chaosRoll:false, goldenFirework:false,
-    adminStorm:false, blackout:false, glitch:false, name: "", description: "", endsAt: null
-  };
-  const eventIntervals = {};
+  function safeText(id, txt) { const el = $(id); if (el) el.textContent = txt; }
+  function show(el) { if (!el) return; el.style.display = "block"; }
+  function hide(el) { if (!el) return; el.style.display = "none"; }
 
-  function safeText(id, txt){ const el = $(id); if(el) el.textContent = txt; }
-  function show(el){ if(el) el.style.display = "block"; }
-  function hide(el){ if(el) el.style.display = "none"; }
+  function saveProgressOnline() {
+    if (!currentUser) return;
+    db.ref("progress/" + currentUser).set({
+      money, unlockedColors, clickDelay, rebirthCount,
+      colorPrice, delayPrice, rebirthPrice,
+      autoAmount, autoSpeed
+    });
+    saveScore();
+  }
 
-  // ---- Firework Classes ----
-  class Firework {
-    constructor(x, y, colorObj, owner=false){ this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;this.owner=owner; }
-    update(){
-      this.y-=this.speed;
-      if(this.y<=this.targetY){ explode(this.x,this.y,this.colorObj,this.owner); return true; }
-      return false;
+  function loadProgressOnline() {
+    if (!currentUser) return;
+    db.ref("progress/" + currentUser).once("value").then(snapshot => {
+      const p = snapshot.val();
+      if (p) {
+        money = p.money || 0;
+        unlockedColors = p.unlockedColors || 1;
+        clickDelay = p.clickDelay || 1200;
+        rebirthCount = p.rebirthCount || 0;
+        colorPrice = p.colorPrice || 50;
+        delayPrice = p.delayPrice || 100;
+        rebirthPrice = p.rebirthPrice || 500;
+        autoAmount = p.autoAmount || 0;
+        autoSpeed = p.autoSpeed || 2.5;
+        updateButtons();
+      }
+    });
+  }
+
+  function saveScore() {
+    if (!currentUser) return;
+    const scoreRef = db.ref("scores/" + currentUser);
+    scoreRef.once("value").then(snap => {
+      const oldMoney = snap.val()?.money || 0;
+      const newMoney = Math.max(oldMoney, money);
+      scoreRef.set({ money: newMoney });
+    });
+  }
+
+  function updateButtons() {
+    safeText("money", money);
+    safeText("moneyMultiplier", rebirthCount + 1);
+    safeText("unlockedColors", unlockedColors);
+    safeText("delayDisplay", clickDelay);
+    safeText("autoSpeedDisplay", autoSpeed.toFixed(2));
+
+    const buyColor = $("buyColor"); if (buyColor) buyColor.textContent = unlockedColors >= colors.length ? "MAX" : `Buy Color ($${colorPrice})`;
+    const reduceDelay = $("reduceDelay"); if (reduceDelay) reduceDelay.textContent = clickDelay <= 100 ? "MAX" : `Reduce Delay ($${delayPrice})`;
+    const buyAuto = $("buyAuto"); if (buyAuto) buyAuto.textContent = autoAmount >= 3 ? "MAX" : `Buy Auto-Launch ($${autoPrice})`;
+    const reb = $("rebirth"); if (reb) reb.textContent = `Rebirth ($${rebirthPrice})`;
+  }
+
+  function attach(id, fn) { const el = $(id); if (el) el.addEventListener("click", fn); }
+
+  // ---- BUTTONS ----
+  attach("buyColor", () => { if (money >= colorPrice && unlockedColors < colors.length) { money -= colorPrice; unlockedColors++; colorPrice = Math.floor(colorPrice * 1.7); updateButtons(); saveProgressOnline(); }});
+  attach("reduceDelay", () => { if (money >= delayPrice && clickDelay > 100) { money -= delayPrice; clickDelay = Math.max(clickDelay-100,100); delayPrice = Math.floor(delayPrice*1.7); updateButtons(); saveProgressOnline(); }});
+  attach("buyAuto", () => { if (money >= autoPrice && autoAmount < 3) { money -= autoPrice; autoAmount++; autoSpeed /= 1.2; autoPrice = Math.floor(autoPrice*1.7); updateButtons(); saveProgressOnline(); }});
+  attach("rebirth", () => { if (money >= rebirthPrice) { money=0; rebirthCount++; unlockedColors=1; clickDelay=1200; autoAmount=0; autoSpeed=2.5; colorPrice=50; delayPrice=100; rebirthPrice=Math.floor(rebirthPrice*1.7); updateButtons(); saveProgressOnline(); } else alert(`Need $${rebirthPrice} to rebirth!`); });
+  attach("resetBtn", () => { if(confirm("Reset progress?")) { money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0; colorPrice=50; delayPrice=100; rebirthPrice=500; autoAmount=0; autoSpeed=2.5; updateButtons(); saveProgressOnline(); }});
+  attach("giveMoneyBtn", () => { money+=1000; updateButtons(); saveProgressOnline(); });
+  attach("unlockColorsBtn", () => { unlockedColors = colors.length; updateButtons(); saveProgressOnline(); });
+  attach("maxAutoBtn", () => { autoAmount=3; autoSpeed=0.1; updateButtons(); saveProgressOnline(); });
+  attach("goLeaderboardBtn", () => { window.open("fireworkleaderboard.html","_blank"); });
+
+  // ---- LOGIN / SIGNUP ----
+  const loginBtn = $("loginBtn");
+  const signupBtn = $("signupBtn");
+  const forgotBtn = $("forgotBtn");
+
+  if (loginBtn) loginBtn.addEventListener("click", async () => {
+    const email = $("email").value.trim(); const pass = $("password").value.trim();
+    if(!email||!pass){ $("loginMsg").textContent="Enter email & password!"; return; }
+    try { const cred = await auth.signInWithEmailAndPassword(email, pass); currentUser = cred.user.uid; $("loginMsg").textContent=""; loginSuccess(); } 
+    catch(err){ $("loginMsg").textContent = err.message; }
+  });
+
+  if (signupBtn) signupBtn.addEventListener("click", async () => {
+    const uname = $("username").value.trim();
+    const email = $("email").value.trim();
+    const pass = $("password").value.trim();
+    if(!uname||!email||!pass){ $("loginMsg").textContent="Enter all fields!"; return; }
+    try { const cred = await auth.createUserWithEmailAndPassword(email, pass); currentUser = cred.user.uid; await db.ref("users/"+currentUser).set({username: uname}); $("loginMsg").textContent="Account created!"; loginSuccess(); }
+    catch(err){ $("loginMsg").textContent=err.message; }
+  });
+
+  if (forgotBtn) forgotBtn.addEventListener("click", () => {
+    const email = $("email").value.trim(); if(!email){ $("loginMsg").textContent="Enter email!"; return; }
+    auth.sendPasswordResetEmail(email).then(()=>{$("loginMsg").textContent="Password reset email sent!";}).catch(err=>{$("loginMsg").textContent=err.message;});
+  });
+
+  function loginSuccess() {
+    hide(loginBox);
+    show(ui);
+    loadProgressOnline();
+    updateButtons();
+
+    // ---- OWNER COMMANDS VISIBILITY ----
+    if(currentUser === "FaZgGtIHzVcnSS6c8JAoir9RG8J2") {
+      show(ownerCommands);
+    } else {
+      hide(ownerCommands);
     }
-    draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.colorObj.color; ctx.fill(); }
-  }
-  class Particle {
-    constructor(x,y,color){ this.x=x; this.y=y; this.color=color.color||color; this.speedX=(Math.random()-0.5)*6; this.speedY=(Math.random()-0.5)*6; this.life=100; }
-    update(){ this.speedY+=0.04; this.x+=this.speedX; this.y+=this.speedY; this.life--; }
-    draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
   }
 
-  function awardAndSave(amount){ if(!Number.isFinite(amount)) return; if(amount<0) amount=0; money+=Math.floor(amount); safeText("money",money); saveProgressOnline(); saveScore(); }
+  attach("logoutBtn", () => { auth.signOut().then(()=>{ currentUser=""; hide(ui); hide(ownerCommands); show(loginBox); }).catch(err=>alert(err.message)); });
 
-  function explode(x,y,colorObj,ownerFlag=false){ if(fireworkSound){ try{ fireworkSound.currentTime=0; fireworkSound.play(); }catch{} }
-    for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
-    let base=(colorObj.value||1)*(rebirthCount+1); computeAndAward(base);
-  }
-  function computeAndAward(baseMoney){ let base=Math.max(0,Math.floor(baseMoney)); awardAndSave(base); }
-  function launchFirework(x,y){ const colorIndex=Math.floor(Math.random()*Math.max(1,unlockedColors)); const colorObj=colors[colorIndex]||colors[0]; fireworks.push(new Firework(x,y,colorObj,true)); lastClick=Date.now(); }
-
-  function animate(){
-    ctx.fillStyle="rgba(0,0,0,0.2)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let i=fireworks.length-1;i>=0;i--){ if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw(); }
-    for(let i=particles.length-1;i>=0;i--){ particles[i].update(); particles[i].draw(); if(particles[i].life<=0) particles.splice(i,1); }
-    safeText("moneyMultiplier",rebirthCount+1); safeText("delayDisplay",clickDelay); safeText("autoSpeedDisplay",autoSpeed.toFixed(2));
-    const elapsed=Date.now()-lastClick; const fill=Math.min(100,(elapsed/clickDelay)*100); const cdFill=$("cooldownFill"); if(cdFill) cdFill.style.width=fill+"%";
-    requestAnimationFrame(animate);
-  }
-
-  // ---- Save/Load ----
-  async function saveProgressOnline(){ if(!currentUser) return; const progress={money, unlockedColors, clickDelay, rebirthCount, colorPrice, delayPrice, rebirthPrice, autoAmount, autoSpeed}; try{ await db.ref("progress/"+currentUser).set(progress); }catch(e){ console.error(e); } }
-  async function loadProgressOnline(){ if(!currentUser) return; try{ const snap=await db.ref("progress/"+currentUser).once("value"); const p=snap.val(); if(p){ money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200; rebirthCount=p.rebirthCount||0;
-    autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5; colors=[...baseColors]; safeText("money",money); startAutoLaunch(); }}catch(e){ console.error(e);} }
-  function saveScore(){ if(!currentUser) return; const scoreRef=db.ref("scores/"+currentUser); scoreRef.once("value").then(snap=>{ const oldMoney=snap.val()?.money||0; scoreRef.set({money:Math.max(oldMoney,money)}).catch(console.error); }).catch(console.error); }
-
-  function startAutoLaunch(){ if(autoInterval) clearInterval(autoInterval); if(autoAmount>0){ autoInterval=setInterval(()=>{ launchFirework(Math.random()*canvas.width,Math.random()*canvas.height/2); },Math.max(50,autoSpeed*1000)); }}
-
-  // ---- Event Banner ----
-  function showEventBanner(name){ if(eventBanner&&eventNameEl){ eventNameEl.textContent=name; show(eventBanner); }}
-  function hideEventBanner(){ if(eventBanner) hide(eventBanner); }
-
-  function triggerEventByName(name,duration=10000){
-    EVENTS_STATE.active=true; EVENTS_STATE.name=name; EVENTS_STATE.endsAt=Date.now()+duration;
-    showEventBanner(name);
-    setTimeout(()=>{ EVENTS_STATE.active=false; hideEventBanner(); },duration);
-    db.ref("events/current").set({name,duration,ts:Date.now()});
-  }
-
-  // Listen for events from owner
-  db.ref("events/current").on("value",snap=>{ const e=snap.val(); if(e) triggerEventByName(e.name,e.duration); });
-
-  // ---- Click handler ----
-  document.addEventListener("click",e=>{ const now=Date.now(); if(now-lastClick>=clickDelay){ lastClick=now; launchFirework(e.clientX,e.clientY); } });
-
-  // ---- Owner Commands ----
-  function bindOwnerButtons(){ if(!ownerCommands) return; const userEmail=(auth.currentUser?.email||""); if(userEmail!="Dreamcrusher41") return; ownerCommands.style.display="block";
-    const buttons=ownerCommands.querySelectorAll("button"); buttons.forEach(btn=>{ const evt=btn.dataset.event; btn.addEventListener("click",()=>{ const dur=parseInt(prompt("Event duration (ms):",10000))||10000; triggerEventByName(evt,dur); }); });
-  }
-
-  // ---- Auth ----
-  auth.onAuthStateChanged(async user=>{
-    if(user){ currentUser=user.uid; if(loginBox) loginBox.style.display="none"; if(ui) ui.style.display="block"; bindOwnerButtons(); await loadProgressOnline(); }
-    else{ currentUser=""; if(loginBox) loginBox.style.display="flex"; if(ui) ui.style.display="none"; if(ownerCommands) ownerCommands.style.display="none"; money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0; autoAmount=0; autoSpeed=2.5; safeText("money",0); safeText("moneyMultiplier",1); safeText("delayDisplay",1200); safeText("autoSpeedDisplay",2.5); hideEventBanner(); }
-  });
-
-  $("loginBtn")?.addEventListener("click",async()=>{ const email=$("email").value.trim(); const pass=$("password").value.trim(); if(!email||!pass){ if($("loginMsg")) $("loginMsg").textContent="Enter email & password!"; return; }
-    try{ const cred=await auth.signInWithEmailAndPassword(email,pass); currentUser=cred.user.uid; if($("loginMsg")) $("loginMsg").textContent=""; }catch(err){ if($("loginMsg")) $("loginMsg").textContent=err.message; }
-  });
-  $("signupBtn")?.addEventListener("click",async()=>{ const uname=$("username").value.trim(); const email=$("email").value.trim(); const pass=$("password").value.trim(); if(!uname||!email||!pass){ if($("loginMsg")) $("loginMsg").textContent="Enter all fields!"; return; }
-    try{ const cred=await auth.createUserWithEmailAndPassword(email,pass); currentUser=cred.user.uid; await db.ref("users/"+currentUser).set({username:uname}); if($("loginMsg")){ $("loginMsg").style.color="lime"; $("loginMsg").textContent="Account created!"; } }catch(err){ if($("loginMsg")){ $("loginMsg").style.color="red"; $("loginMsg").textContent=err.message; } } });
-
-  animate();
 })();
