@@ -272,5 +272,4 @@
     if(!email){$("loginMsg").textContent="Enter email!"; return;}
     auth.sendPasswordResetEmail(email).then(()=>{$("loginMsg").textContent="Password reset email sent!";}).catch(err=>{$("loginMsg").textContent=err.message;});
   });
-
 })();
