@@ -29,63 +29,68 @@
   let clickDelay = 1200;
   let lastLaunch = 0;
   let rockets = [];
-  let fireworks = [];
+  let particles = [];
+  const gravity = 0.04;
 
   // ---------- FIREWORKS ----------
   class Rocket {
     constructor(x, y) {
       this.x = x;
-      this.y = y;
-      this.vy = -7;
+      this.y = canvas.height;
+      this.targetY = y;
+      this.speed = Math.random() * 2 + 4;
       this.exploded = false;
     }
     update() {
-      this.y += this.vy;
-      this.vy += 0.05;
-      if (this.vy > -1 && !this.exploded) {
-        this.exploded = true;
-        explode(this.x, this.y);
+      this.y -= this.speed;
+      if (this.y <= this.targetY && !this.exploded) {
+        this.explode();
+        return true;
       }
+      return false;
     }
     draw() {
       ctx.fillStyle = "white";
       ctx.fillRect(this.x, this.y, 2, 6);
     }
-  }
-
-  function explode(x, y) {
-    for (let i = 0; i < 30; i++) {
-      fireworks.push({
-        x, y,
-        vx:(Math.random()-0.5)*6,
-        vy:(Math.random()-0.5)*6,
-        life:1,
-        color:`hsl(${Math.random()*360},100%,60%)`
-      });
+    explode() {
+      this.exploded = true;
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: this.x,
+          y: this.y,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.5) * 6,
+          life: 1,
+          color: `hsl(${Math.random()*360},100%,60%)`
+        });
+      }
+      money++;
+      $("money").textContent = money;
     }
   }
 
   function animate() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    rockets.forEach(r => { r.update(); r.draw(); });
-    rockets = rockets.filter(r => !r.exploded);
+    rockets.forEach(r => { if (r.update()) rockets = rockets.filter(x=>x!==r); else r.draw(); });
 
-    fireworks.forEach(p => {
+    particles.forEach(p => {
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.05;
+      p.vy += gravity;
       p.life -= 0.02;
       ctx.globalAlpha = p.life;
       ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.arc(p.x,p.y,3,0,Math.PI*2);
+      ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
       ctx.fill();
     });
     ctx.globalAlpha = 1;
-    fireworks = fireworks.filter(p => p.life > 0);
+    particles = particles.filter(p => p.life > 0);
 
-    // cooldown bar
+    // cooldown
     const t = Math.min(1,(Date.now()-lastLaunch)/clickDelay);
     cooldownFill.style.width = `${t*100}%`;
 
@@ -98,42 +103,26 @@
     if (!loggedIn) return;
     if (Date.now() - lastLaunch < clickDelay) return;
     lastLaunch = Date.now();
-    rockets.push(new Rocket(e.clientX, canvas.height));
-    money++;
-    $("money").textContent = money;
+    rockets.push(new Rocket(e.clientX, e.clientY));
   });
 
   // ---------- AUTH ----------
   $("loginBtn").onclick = async () => {
     try {
-      await auth.signInWithEmailAndPassword(
-        $("email").value,
-        $("password").value
-      );
+      await auth.signInWithEmailAndPassword($("email").value,$("password").value);
     } catch (e) {
       $("loginMsg").textContent = e.message;
     }
   };
-
   $("signupBtn").onclick = async () => {
     try {
-      await auth.createUserWithEmailAndPassword(
-        $("email").value,
-        $("password").value
-      );
+      await auth.createUserWithEmailAndPassword($("email").value,$("password").value);
     } catch (e) {
       $("loginMsg").textContent = e.message;
     }
   };
-
   $("logoutBtn").onclick = () => auth.signOut();
-
-  $("resetBtn").onclick = () => {
-    if (!confirm("Reset progress?")) return;
-    money = 0;
-    clickDelay = 1200;
-    $("money").textContent = 0;
-  };
+  $("resetBtn").onclick = () => { money=0; $("money").textContent=0; };
 
   auth.onAuthStateChanged(user => {
     loggedIn = !!user;
