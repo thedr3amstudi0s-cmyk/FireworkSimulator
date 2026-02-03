@@ -1,186 +1,130 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Firework Simulator</title>
   <style>
-    html, body {
-      margin:0;
-      padding:0;
-      overflow:hidden;
-      font-family:sans-serif;
-      background:#111;
-      color:white;
-      user-select:none;
+    /* Full-screen canvas */
+    html,body { height:100%; margin:0; }
+    canvas { display:block; background: #0b0f1a; width:100%; height:100%; }
+
+    /* Top-right control area */
+    #topRightControls {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      z-index: 10000;
+      font-family: Arial, sans-serif;
     }
-    canvas { display:block; position:absolute; top:0; left:0; z-index:0; }
-    #ui {
-      position:absolute; top:10px; left:10px; z-index:10; background:rgba(0,0,0,0.5);
-      padding:10px; border-radius:8px; pointer-events:auto;
+    .panel {
+      background: rgba(255,255,255,0.06);
+      border-radius:8px;
+      padding:8px;
+      color: #fff;
+      min-width: 200px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
     }
-    button { margin:2px; cursor:pointer; }
-    #loginBox {
-      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-      background:#222; padding:20px; border-radius:10px; display:flex; flex-direction:column; gap:5px;
-      pointer-events:auto;
-    }
-    #eventBanner {
-      position:fixed; top:10px; left:50%; transform:translateX(-50%);
-      background:rgba(0,0,0,0.8); padding:8px 12px; border-radius:6px;
-      display:none; text-align:center; z-index:20;
-    }
-    #cooldownBar { width:120px; height:10px; background:#333; border-radius:5px; overflow:hidden; margin-top:5px; }
-    #cooldownFill { height:100%; width:0%; background:#0f0; }
-    input { padding:4px; border-radius:4px; border:none; }
-    .ownerBtn {
-      background:#880; color:#000; padding:4px 6px; margin:2px; border:none; border-radius:4px; cursor:pointer;
-    }
+    .panel small { color: #ddd; display:block; margin-bottom:6px; }
+    button { background:#1e90ff; border:0; padding:6px 8px; border-radius:6px; color:#fff; cursor:pointer; }
+    button.secondary { background:#333; }
+    .row { display:flex; gap:8px; align-items:center; margin-bottom:6px; flex-wrap:wrap; }
+    .stat { font-weight:700; }
+    label { font-size:12px; color:#ddd; }
+
+    /* login box (simple) */
+    #loginBox { position: fixed; left: 12px; top: 12px; z-index:9999; }
+    input[type="text"], input[type="password"], input[type="email"] { padding:6px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.02); color:#fff; }
+    #loginMsg { color:#ffb; font-size:13px; margin-top:6px; }
+
+    /* owner commands hidden by default */
+    #ownerCommands { display:none; margin-top:6px; }
   </style>
 </head>
 <body>
+  <canvas id="canvas"></canvas>
 
-<canvas id="canvas"></canvas>
+  <!-- Top-right UI / Controls -->
+  <div id="topRightControls">
+    <div id="ui" class="panel" style="display:none;">
+      <small>Stats</small>
+      <div class="row">
+        <div>Money: <span id="money" class="stat">0</span></div>
+        <div> x<span id="moneyMultiplier">1</span></div>
+      </div>
+      <div class="row">
+        <div>Delay: <span id="delayDisplay">1200</span>ms</div>
+        <div>Auto speed: <span id="autoSpeedDisplay">2.50</span>s</div>
+      </div>
+      <div class="row">
+        <div>Colors: <span id="unlockedColors">1</span></div>
+      </div>
 
-<div id="loginBox">
-  <input type="text" id="username" placeholder="Username">
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button id="loginBtn">Login</button>
-  <button id="signupBtn">Sign Up</button>
-  <button id="forgotBtn">Forgot Password</button>
-  <div id="loginMsg" style="color:red"></div>
-</div>
+      <div class="row">
+        <button id="buyColor">Buy Color</button>
+        <button id="reduceDelay" class="secondary">Reduce Delay</button>
+      </div>
+      <div class="row">
+        <button id="buyAuto">Buy Auto</button>
+        <button id="rebirth">Rebirth</button>
+      </div>
 
-<div id="ui" style="display:none;">
-  <div>Money: $<span id="money">0</span></div>
-  <div>Multiplier: x<span id="moneyMultiplier">1</span></div>
-  <div>Unlocked Colors: <span id="unlockedColors">1</span></div>
-  <div>Click Delay: <span id="delayDisplay">1200</span>ms</div>
-  <div>Auto Speed: <span id="autoSpeedDisplay">2.5</span>s</div>
+      <div class="row">
+        <button id="giveMoneyBtn" class="secondary">+1000</button>
+        <button id="unlockColorsBtn" class="secondary">Unlock All Colors</button>
+        <button id="maxAutoBtn" class="secondary">Max Auto</button>
+      </div>
 
-  <button id="buyColor">Buy Color ($50)</button>
-  <button id="reduceDelay">Reduce Delay ($100)</button>
-  <button id="buyAuto">Buy Auto-Launch ($200)</button>
-  <button id="rebirth">Rebirth ($500)</button>
-  <button id="resetBtn">Reset Progress</button>
-  <button id="giveMoneyBtn">Give $1000</button>
-  <button id="unlockColorsBtn">Unlock All Colors</button>
-  <button id="maxAutoBtn">Max Auto</button>
-  <button id="goLeaderboardBtn">Leaderboard</button>
-  <button id="viewUsersBtn">View Users (Admin)</button>
-  <button id="logoutBtn">Logout</button>
+      <div style="margin-top:6px;">
+        <button id="goLeaderboardBtn">Leaderboard</button>
+      </div>
+    </div>
 
-  <div id="cooldownBar"><div id="cooldownFill"></div></div>
-</div>
+    <!-- Buttons that must be top-right (logout / reset) -->
+    <div class="panel">
+      <div class="row">
+        <button id="logoutBtn">Logout</button>
+        <button id="resetBtn" class="secondary">Reset Progress</button>
+      </div>
+      <div id="ownerCommands">
+        <small>Owner Commands</small>
+        <div class="row">
+          <button id="adminStormBtn">Admin Storm</button>
+          <button id="adminGiveMoneyBtn" class="secondary">Give Money</button>
+          <button id="adminToggleRainbowBtn" class="secondary">Toggle Rainbow</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div id="eventBanner">
-  <div id="eventName">Event</div>
-  <div id="eventDesc"></div>
-  <div id="eventTimer"></div>
-</div>
+  <!-- Simple login box (left-top) -->
+  <div id="loginBox" class="panel">
+    <small>Login / Sign up</small>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <input id="email" type="email" placeholder="email" />
+      <input id="password" type="password" placeholder="password" />
+      <input id="username" type="text" placeholder="username (signup)" />
+      <div style="display:flex;gap:8px;">
+        <button id="loginBtn">Login</button>
+        <button id="signupBtn" class="secondary">Sign Up</button>
+        <button id="forgotBtn" class="secondary">Forgot</button>
+      </div>
+      <div id="loginMsg"></div>
+    </div>
+  </div>
 
-<div id="ownerCommands" style="display:none; position:absolute; top:200px; left:10px; z-index:15; background:rgba(0,0,0,0.6); padding:10px; border-radius:8px;">
-  <button class="ownerBtn" id="toggleDouble" data-event="doubleMoney">Double Money</button>
-  <button class="ownerBtn" id="toggleRainbow" data-event="rainbowMode">Rainbow Mode</button>
-  <button class="ownerBtn" id="toggleChain" data-event="chainReaction">Chain Reaction</button>
-  <button class="ownerBtn" id="toggleCosmic" data-event="cosmicMode">Cosmic Mode</button>
-  <button class="ownerBtn" id="toggleLucky" data-event="luckyExplosions">Lucky Explosions</button>
-  <button class="ownerBtn" id="toggleChaos" data-event="chaosRoll">Chaos Roll</button>
-  <button class="ownerBtn" id="toggleBlackout" data-event="blackout">Blackout</button>
-  <button class="ownerBtn" id="toggleGlitch" data-event="glitch">Glitch</button>
-  <button class="ownerBtn" id="triggerAdminStorm" data-event="adminStorm">Admin Storm</button>
-</div>
+  <!-- audio -->
+  <audio id="fireworkSound" src="" preload="auto"></audio>
 
-<audio id="fireworkSound" src="firework.mp3"></audio>
+  <!-- Firebase (v8 style used by your original code) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="game.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  const forgotBtn = document.getElementById('forgotBtn');
-  const ownerCommands = document.getElementById('ownerCommands');
-
-  const ui = document.getElementById('ui');
-  const loginBox = document.getElementById('loginBox');
-
-  // Launch fireworks when clicking anywhere
-  function launchFromClick(e) {
-    if (window.launchFirework) window.launchFirework(e.clientX, e.clientY);
-  }
-  document.addEventListener('click', launchFromClick, {passive:true});
-  ui.addEventListener('click', launchFromClick);
-  loginBox.addEventListener('click', launchFromClick);
-
-  // Show owner commands only for Dreamcrusher41
-  firebase.auth().onAuthStateChanged(user => {
-    if (user && user.email === "aaron.gatorfan@gmail.com") {
-      ownerCommands.style.display = "block";
-    } else {
-      ownerCommands.style.display = "none";
-    }
-  });
-
-  // ---- login/signup/forgot ----
-  if (loginBtn) loginBtn.addEventListener('click', async () => {
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('password').value.trim();
-    if (!email || !pass) { document.getElementById('loginMsg').textContent = "Enter email & password!"; return; }
-    try {
-      const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
-      document.getElementById('loginMsg').textContent = "";
-      loginBox.style.display = 'none';
-      ui.style.display = 'block';
-    } catch(err) {
-      document.getElementById('loginMsg').textContent = err.message;
-    }
-  });
-
-  if (signupBtn) signupBtn.addEventListener('click', async () => {
-    const uname = document.getElementById('username').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('password').value.trim();
-    if (!uname || !email || !pass) { document.getElementById('loginMsg').textContent = "Enter all fields!"; return; }
-    try {
-      const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
-      await firebase.database().ref("users/"+cred.user.uid).set({username: uname});
-      document.getElementById('loginMsg').style.color="lime";
-      document.getElementById('loginMsg').textContent = "Account created!";
-      loginBox.style.display = 'none';
-      ui.style.display = 'block';
-    } catch(err) {
-      document.getElementById('loginMsg').style.color="red";
-      document.getElementById('loginMsg').textContent = err.message;
-    }
-  });
-
-  if (forgotBtn) forgotBtn.addEventListener('click', () => {
-    const email = document.getElementById('email').value.trim();
-    if (!email) { document.getElementById('loginMsg').textContent = "Enter email!"; return; }
-    firebase.auth().sendPasswordResetEmail(email)
-      .then(() => { document.getElementById('loginMsg').textContent = "Password reset email sent!"; })
-      .catch(err => { document.getElementById('loginMsg').textContent = err.message; });
-  });
-
-  // ---- owner events with duration prompt ----
-  if (ownerCommands) {
-    ownerCommands.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        let duration = parseInt(prompt("Event duration in seconds:", "10"));
-        if (!Number.isFinite(duration) || duration < 1) duration = 10;
-        if (window._FS && window._FS.triggerEventByName) {
-          window._FS.triggerEventByName(btn.dataset.event, duration*1000);
-        }
-      });
-    });
-  }
-});
-</script>
-
+  <!-- Your game script -->
+  <script src="game.js"></script>
 </body>
 </html>
-
