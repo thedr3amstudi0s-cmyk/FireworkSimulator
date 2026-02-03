@@ -1,132 +1,121 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Firework Simulator</title>
-  <style>
-    html, body { height: 100%; margin: 0; font-family: Arial, sans-serif; background: #070812; color:#fff; }
-    canvas { display:block; width:100%; height:100%; }
+<meta charset="UTF-8">
+<title>Firework Simulator</title>
 
-    /* Top-right area for logout/reset + owner commands */
-    #topRight {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 9999;
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-    }
-    .topPanel {
-      background: rgba(255,255,255,0.04);
-      padding: 8px;
-      border-radius: 8px;
-      min-width: 220px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-    }
-    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    button { background:#1e90ff; color:#fff; border:0; padding:6px 8px; border-radius:6px; cursor:pointer; }
-    button.secondary { background:#333; }
-    small { color:#ccc; display:block; margin-bottom:6px; font-size:12px; }
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: black;
+  font-family: Arial;
+}
 
-    /* login box left top */
-    #loginBox {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 9999;
-      background: rgba(255,255,255,0.03);
-      padding: 10px;
-      border-radius:8px;
-      min-width:220px;
-    }
-    input[type="text"], input[type="email"], input[type="password"] {
-      width: 100%;
-      margin-bottom:6px;
-      padding:6px;
-      border-radius:6px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #fff;
-    }
+canvas {
+  display: block;
+}
 
-    /* small inline stats if needed */
-    .stat { font-weight:700; color:#fff; }
-  </style>
+/* LOGIN */
+#loginBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  padding: 25px;
+  border-radius: 10px;
+  color: white;
+  z-index: 10;
+}
+
+#loginBox input, #loginBox button {
+  width: 220px;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 5px;
+  border: none;
+}
+
+/* UI */
+#ui {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  color: white;
+  display: none;
+}
+
+#ui button {
+  margin: 3px;
+}
+
+#cooldownBar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 16px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+}
+
+#cooldownFill {
+  height: 100%;
+  width: 0%;
+  background: lime;
+  border-radius: 8px;
+}
+
+/* TOP RIGHT */
+#logoutBtn, #resetBtn {
+  position: fixed;
+  right: 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+#logoutBtn { top: 10px; background: orange; }
+#resetBtn { top: 50px; background: red; color: white; }
+</style>
 </head>
+
 <body>
-  <canvas id="canvas"></canvas>
 
-  <!-- Top-right controls -->
-  <div id="topRight">
-    <div class="topPanel" id="ui" style="display:none;">
-      <small>Stats</small>
-      <div class="row">
-        <div>Money: <span id="money" class="stat">0</span></div>
-        <div> x<span id="moneyMultiplier">1</span></div>
-      </div>
-      <div class="row" style="margin-top:6px;">
-        <div>Delay: <span id="delayDisplay">1200</span>ms</div>
-        <div>Auto: <span id="autoSpeedDisplay">2.50</span>s</div>
-      </div>
-      <div class="row" style="margin-top:8px;">
-        <button id="buyColor">Buy Color</button>
-        <button id="reduceDelay" class="secondary">Reduce Delay</button>
-      </div>
-      <div class="row" style="margin-top:8px;">
-        <button id="buyAuto">Buy Auto</button>
-        <button id="rebirth">Rebirth</button>
-      </div>
-      <div class="row" style="margin-top:8px;">
-        <button id="giveMoneyBtn" class="secondary">+1000</button>
-        <button id="unlockColorsBtn" class="secondary">Unlock Colors</button>
-        <button id="maxAutoBtn" class="secondary">Max Auto</button>
-      </div>
-      <div style="margin-top:8px;">
-        <button id="goLeaderboardBtn">Leaderboard</button>
-      </div>
-    </div>
+<canvas id="canvas"></canvas>
 
-    <div class="topPanel">
-      <div class="row" style="margin-bottom:8px;">
-        <button id="logoutBtn">Logout</button>
-        <button id="resetBtn" class="secondary">Reset Progress</button>
-      </div>
+<div id="loginBox">
+  <h2>Firework Simulator</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button id="loginBtn">Login</button>
+  <button id="signupBtn">Sign Up</button>
+  <p id="loginMsg"></p>
+</div>
 
-      <div id="ownerCommands" style="display:none; margin-top:6px;">
-        <small>Owner Commands</small>
-        <div class="row">
-          <button id="adminStormBtn">Admin Storm</button>
-          <button id="adminGiveMoneyBtn" class="secondary">Give $</button>
-          <button id="adminToggleRainbowBtn" class="secondary">Toggle Rainbow</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<div id="ui">
+  <p>Money: $<span id="money">0</span></p>
+  <button id="buyColor">Buy Color</button>
+  <button id="reduceDelay">Reduce Delay</button>
+  <button id="buyAuto">Buy Auto</button>
+  <button id="rebirth">Rebirth</button>
+  <p>Colors: <span id="colorText">1</span></p>
+</div>
 
-  <!-- Login box (left-top) -->
-  <div id="loginBox">
-    <small>Login / Signup</small>
-    <input id="email" type="email" placeholder="email" />
-    <input id="password" type="password" placeholder="password" />
-    <input id="username" type="text" placeholder="username (for signup)" />
-    <div class="row" style="margin-top:6px;">
-      <button id="loginBtn">Login</button>
-      <button id="signupBtn" class="secondary">Sign Up</button>
-      <button id="forgotBtn" class="secondary">Forgot</button>
-    </div>
-    <div id="loginMsg" style="margin-top:6px;color:#ffb;"></div>
-  </div>
+<button id="logoutBtn" style="display:none;">Logout</button>
+<button id="resetBtn" style="display:none;">Reset Progress</button>
 
-  <audio id="fireworkSound" src="" preload="auto"></audio>
+<div id="cooldownBar"><div id="cooldownFill"></div></div>
 
-  <!-- Firebase v8 scripts -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <!-- game script -->
-  <script src="game.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
