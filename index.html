@@ -56,6 +56,7 @@ body, button, input, p, span { user-select: none; }
     <button id="maxAutoBtn">Max Auto-Launch</button>
     <button id="viewUsersBtn">View Users</button>
     <button id="adminFireworkBtn">Mega Firework (Admin Event)</button>
+    <button id="adminFireworkBtnNuke">Nuke (Admin Event)</button>
   </div>
 </div>
 
@@ -336,6 +337,16 @@ document.getElementById("adminFireworkBtn").addEventListener("click", () => {
   db.ref("adminEvents/latest").set(event); // push to all players
 });
 
+// Admin broadcasts a NUKE
+document.getElementById("adminFireworkBtnNuke").addEventListener("click", () => {
+  const event = {
+    type: "NUKE",
+    message: "Admin launched a NUKE",
+    timestamp: Date.now() // unique to prevent duplicates
+  };
+  db.ref("adminEvents/latest").set(event); // push to all players
+});
+
 let lastAdminTimestamp = 0; // make sure event only triggers once
 
 db.ref("adminEvents/latest").on("value", snapshot => {
@@ -352,9 +363,12 @@ db.ref("adminEvents/latest").on("value", snapshot => {
       }
       alert(event.message); // optional popup
       break;
-    case "doubleMoney":
-      money *= 2;
-      document.getElementById("money").textContent = money;
+    case "NUKE":
+      // Launch 20 random fireworks on everyone’s screen
+      for(let i=0;i<200;i++){
+        launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2);
+      }
+      alert(event.message); // optional popup
       break;
     // You can add more event types here
   }
@@ -382,4 +396,5 @@ document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Adm
 </script>
 </body>
 </html>
+
 
