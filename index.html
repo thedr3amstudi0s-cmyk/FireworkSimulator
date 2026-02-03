@@ -283,7 +283,7 @@ document.getElementById("rebirth").addEventListener("click", async () => {
   if (money >= rebirthPrice) {
     money=0; rebirthCount++; unlockedColors=1; clickDelay=1200;
     autoAmount=0; autoSpeed=2.5; autoPrice=200; clearInterval(autoInterval); autoInterval=null;
-    colorPrice=50; delayPrice=100; rebirthPrice=Math.floor(rebirthPrice*1.7);
+    colorPrice=50; delayPrice=100; rebirthPrice=Math.floor(rebirthPrice*2);
     colors=[...baseColors, ...getRebirthColors(rebirthCount)];
     updateButtons(); document.getElementById("money").textContent=money;
     await saveProgressOnline(); saveScore();
@@ -396,5 +396,6 @@ document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Adm
 </script>
 </body>
 </html>
+
 
 
