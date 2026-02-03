@@ -1,140 +1,144 @@
-// 🔥 FIREBASE CONFIG (use YOURS)
-firebase.initializeApp({
+(() => {
+  // ---------- FIREBASE ----------
+  firebase.initializeApp({
     apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
     authDomain: "fireworkleaderboard.firebaseapp.com",
     databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com",
     projectId: "fireworkleaderboard",
-    storageBucket: "fireworkleaderboard.appspot.com",
-    messagingSenderId: "243474267364",
-    appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
-    measurementId: "G-H07BZY385S"
-});
-
-// ---------- CANVAS ----------
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-resize();
-window.onresize = resize;
-
-function resize() {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-}
-
-// ---------- STATE ----------
-let loggedIn = false;
-let money = 0;
-let colors = 1;
-let delay = 1200;
-let lastLaunch = 0;
-
-const fireworks = [];
-const particles = [];
-
-// ---------- LOGIN ----------
-loginBtn.onclick = () => auth(false);
-signupBtn.onclick = () => auth(true);
-
-function auth(signup) {
-  const email = emailInput.value;
-  const pass = passwordInput.value;
-  const fn = signup
-    ? firebase.auth().createUserWithEmailAndPassword
-    : firebase.auth().signInWithEmailAndPassword;
-
-  fn(email, pass)
-    .then(() => loginMsg.textContent = "")
-    .catch(e => loginMsg.textContent = e.message);
-}
-
-firebase.auth().onAuthStateChanged(user => {
-  if (!user) return;
-
-  loggedIn = true;
-  loginBox.style.display = "none";
-  ui.style.display = "block";
-  logoutBtn.style.display = "block";
-  resetBtn.style.display = "block";
-
-  const ref = firebase.database().ref("players/" + user.uid);
-  ref.once("value").then(snap => {
-    if (snap.exists()) Object.assign(window, snap.val());
   });
-});
 
-// ---------- LOGOUT / RESET ----------
-logoutBtn.onclick = () => firebase.auth().signOut();
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-resetBtn.onclick = () => {
-  money = 0;
-  colors = 1;
-  delay = 1200;
-  save();
-};
+  // ---------- DOM ----------
+  const $ = id => document.getElementById(id);
+  const canvas = $("canvas");
+  const ctx = canvas.getContext("2d");
+  const cooldownFill = $("cooldownFill");
 
-// ---------- SAVE ----------
-function save() {
-  const u = firebase.auth().currentUser;
-  if (!u) return;
-  firebase.database().ref("players/" + u.uid).set({ money, colors, delay });
-}
-
-// ---------- FIREWORKS ----------
-canvas.addEventListener("click", e => {
-  if (!loggedIn) return;
-  if (Date.now() - lastLaunch < delay) return;
-  launch(e.clientX, e.clientY);
-});
-
-function launch(x, y) {
-  lastLaunch = Date.now();
-  fireworks.push({ x, y: canvas.height, tx: x, ty: y });
-  money += 10;
-  save();
-}
-
-function explode(x, y) {
-  for (let i = 0; i < 50; i++) {
-    particles.push({
-      x, y,
-      vx: Math.cos(i) * Math.random() * 4,
-      vy: Math.sin(i) * Math.random() * 4,
-      life: 60,
-      color: `hsl(${Math.random() * 360},100%,60%)`
-    });
+  function resize() {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
   }
-}
+  addEventListener("resize", resize);
+  resize();
 
-// ---------- LOOP ----------
-function loop() {
-  ctx.fillStyle = "rgba(0,0,0,0.2)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  // ---------- STATE ----------
+  let loggedIn = false;
+  let money = 0;
+  let clickDelay = 1200;
+  let lastLaunch = 0;
+  let rockets = [];
+  let fireworks = [];
 
-  fireworks.forEach((f, i) => {
-    f.y -= 8;
-    ctx.fillStyle = "white";
-    ctx.fillRect(f.x, f.y, 2, 10);
-    if (f.y <= f.ty) {
-      explode(f.x, f.y);
-      fireworks.splice(i, 1);
+  // ---------- FIREWORKS ----------
+  class Rocket {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.vy = -7;
+      this.exploded = false;
     }
+    update() {
+      this.y += this.vy;
+      this.vy += 0.05;
+      if (this.vy > -1 && !this.exploded) {
+        this.exploded = true;
+        explode(this.x, this.y);
+      }
+    }
+    draw() {
+      ctx.fillStyle = "white";
+      ctx.fillRect(this.x, this.y, 2, 6);
+    }
+  }
+
+  function explode(x, y) {
+    for (let i = 0; i < 30; i++) {
+      fireworks.push({
+        x, y,
+        vx:(Math.random()-0.5)*6,
+        vy:(Math.random()-0.5)*6,
+        life:1,
+        color:`hsl(${Math.random()*360},100%,60%)`
+      });
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    rockets.forEach(r => { r.update(); r.draw(); });
+    rockets = rockets.filter(r => !r.exploded);
+
+    fireworks.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.life -= 0.02;
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,3,0,Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    fireworks = fireworks.filter(p => p.life > 0);
+
+    // cooldown bar
+    const t = Math.min(1,(Date.now()-lastLaunch)/clickDelay);
+    cooldownFill.style.width = `${t*100}%`;
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // ---------- INPUT ----------
+  addEventListener("click", e => {
+    if (!loggedIn) return;
+    if (Date.now() - lastLaunch < clickDelay) return;
+    lastLaunch = Date.now();
+    rockets.push(new Rocket(e.clientX, canvas.height));
+    money++;
+    $("money").textContent = money;
   });
 
-  particles.forEach((p, i) => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life--;
-    ctx.fillStyle = p.color;
-    ctx.fillRect(p.x, p.y, 3, 3);
-    if (p.life <= 0) particles.splice(i, 1);
+  // ---------- AUTH ----------
+  $("loginBtn").onclick = async () => {
+    try {
+      await auth.signInWithEmailAndPassword(
+        $("email").value,
+        $("password").value
+      );
+    } catch (e) {
+      $("loginMsg").textContent = e.message;
+    }
+  };
+
+  $("signupBtn").onclick = async () => {
+    try {
+      await auth.createUserWithEmailAndPassword(
+        $("email").value,
+        $("password").value
+      );
+    } catch (e) {
+      $("loginMsg").textContent = e.message;
+    }
+  };
+
+  $("logoutBtn").onclick = () => auth.signOut();
+
+  $("resetBtn").onclick = () => {
+    if (!confirm("Reset progress?")) return;
+    money = 0;
+    clickDelay = 1200;
+    $("money").textContent = 0;
+  };
+
+  auth.onAuthStateChanged(user => {
+    loggedIn = !!user;
+    $("loginBox").style.display = loggedIn ? "none" : "flex";
+    $("ui").style.display = loggedIn ? "block" : "none";
+    $("topRight").style.display = loggedIn ? "block" : "none";
   });
-
-  moneySpan.textContent = money;
-  colorText.textContent = colors;
-
-  const cd = Math.min((Date.now() - lastLaunch) / delay, 1);
-  cooldownFill.style.width = (cd * 100) + "%";
-
-  requestAnimationFrame(loop);
-}
-loop();
+})();
