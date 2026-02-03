@@ -55,6 +55,7 @@ body, button, input, p, span { user-select: none; }
     <button id="unlockColorsBtn">Unlock All Colors</button>
     <button id="maxAutoBtn">Max Auto-Launch</button>
     <button id="viewUsersBtn">View Users</button>
+    <button id="adminFireworkBtn">Mega Firework (Admin Event)</button>
   </div>
 </div>
 
@@ -324,6 +325,42 @@ function startAutoLaunch(){
   if(autoAmount>0) autoInterval=setInterval(()=>{launchFirework(Math.random()*canvas.width,Math.random()*canvas.height/2);},autoSpeed*1000);
 }
 
+
+// Admin broadcasts a mega firework
+document.getElementById("adminFireworkBtn").addEventListener("click", () => {
+  const event = {
+    type: "megaFirework",
+    message: "Admin launched a mega firework!",
+    timestamp: Date.now() // unique to prevent duplicates
+  };
+  db.ref("adminEvents/latest").set(event); // push to all players
+});
+
+let lastAdminTimestamp = 0; // make sure event only triggers once
+
+db.ref("adminEvents/latest").on("value", snapshot => {
+  const event = snapshot.val();
+  if (!event || event.timestamp <= lastAdminTimestamp) return;
+
+  lastAdminTimestamp = event.timestamp;
+
+  switch(event.type){
+    case "megaFirework":
+      // Launch 20 random fireworks on everyone’s screen
+      for(let i=0;i<20;i++){
+        launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2);
+      }
+      alert(event.message); // optional popup
+      break;
+    case "doubleMoney":
+      money *= 2;
+      document.getElementById("money").textContent = money;
+      break;
+    // You can add more event types here
+  }
+});
+
+
 // -------- SAFE LEADERBOARD --------
 function saveScore(){
   if(!currentUser) return;
@@ -345,3 +382,4 @@ document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Adm
 </script>
 </body>
 </html>
+
