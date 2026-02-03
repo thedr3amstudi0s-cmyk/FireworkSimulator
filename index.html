@@ -3,23 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <title>Firework Simulator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-html,body{margin:0;padding:0;overflow:hidden;background:black;font-family:Arial,sans-serif;color:white;}
-canvas{display:block;}
+html, body { margin:0; padding:0; overflow:hidden; font-family: Arial, sans-serif; background:#000; }
+canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #000); }
 
-#loginBox{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:10;}
-#loginBox div{background:#222;padding:25px;border-radius:10px;}
-#loginBox input,#loginBox button{display:block;width:220px;margin:8px 0;padding:8px;}
+/* Login UI */
+#loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:#222; padding:30px; border-radius:10px; color:white; z-index:200;}
+#loginBox input, #loginBox button { display:block; margin:8px 0; padding:10px; width:240px; border-radius:5px; border:none; }
+#loginBox button { background:cyan; color:black; font-weight:bold; cursor:pointer; }
+#loginBox button:hover { background:#0ff; }
 
-#ui{position:fixed;top:10px;left:10px;z-index:5;display:none;}
-#ui button{margin:3px;}
-
-#topRight{position:fixed;top:10px;right:10px;z-index:5;display:none;}
-#topRight button{display:block;margin-bottom:6px;}
-
-#cooldown{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:300px;height:16px;background:#333;border-radius:8px;overflow:hidden;}
-#cooldownFill{height:100%;width:0%;background:lime;}
+/* Game UI */
+#ui{position:fixed; top:10px; left:10px; color:white; z-index:100;}
+#ui button{margin:2px; padding:5px 8px; font-size:14px; cursor:pointer;}
+#ownerCommands{margin-top:8px; display:none;}
+#cooldownBar{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.25); border-radius:9px;}
+#cooldownFill{height:100%; width:0%; background:limegreen; transition:width 0.05s;}
+#resetBtn{position:fixed; top:10px; right:10px; padding:5px 8px; background:red; color:white; border:none; border-radius:5px; display:none;}
+body, button, input, p, span { user-select: none; }
 </style>
 </head>
 <body>
@@ -27,35 +29,319 @@ canvas{display:block;}
 <canvas id="canvas"></canvas>
 
 <div id="loginBox">
-  <div>
-    <h2>Firework Simulator</h2>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
-    <button id="signupBtn">Sign Up</button>
-    <p id="loginMsg"></p>
+  <h2 style="text-align:center;color:#0ff;">Firework Simulator</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button id="loginBtn">Login</button>
+  <button id="signupBtn">Sign Up</button>
+  <button id="forgotBtn" style="background:#444;color:white;">Forgot Password?</button>
+  <p id="loginMsg" style="color:yellow;"></p>
+</div>
+
+<div id="ui" style="display:none;">
+  <h2>Money: $<span id="money">0</span></h2>
+  <button id="buyColor">Buy Color ($<span id="colorPrice">50</span>)</button>
+  <button id="reduceDelay">Reduce Delay ($<span id="delayPrice">100</span>)</button>
+  <button id="rebirth">Rebirth ($<span id="rebirthPrice">500</span>)</button>
+  <button id="buyAuto">Buy Auto-Launch ($<span id="autoPrice">200</span>)</button>
+  <button id="goLeaderboardBtn">Open Leaderboard (broken)</button>
+  <p>Unlocked Colors: <span id="unlockedColors">1</span></p>
+  <p>Click Delay: <span id="delayDisplay">1200</span> ms</p>
+  <p>Firework Money Multiplier: x<span id="moneyMultiplier">1</span></p>
+  <p>Auto Speed: <span id="autoSpeedDisplay">2.50</span> sec</p>
+  <div id="ownerCommands"><h3>Owner</h3>
+    <button id="giveMoneyBtn">Give $1000</button>
+    <button id="unlockColorsBtn">Unlock All Colors</button>
+    <button id="maxAutoBtn">Max Auto-Launch</button>
+    <button id="viewUsersBtn">View Users</button>
   </div>
 </div>
 
-<div id="ui">
-  <div>Money: $<span id="money">0</span></div>
-  <button id="buyColor">Buy Color</button>
-  <button id="reduceDelay">Reduce Delay</button>
-  <button id="rebirth">Rebirth</button>
-</div>
+<button id="resetBtn">Reset Progress</button>
+<button id="logoutBtn" style="position:fixed; top:50px; right:10px; padding:5px 8px; background:orange; color:white; border:none; border-radius:5px;">Logout</button>
+<div id="cooldownBar"><div id="cooldownFill"></div></div>
+<audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 
-<div id="topRight">
-  <button id="resetBtn">Reset</button>
-  <button id="logoutBtn">Logout</button>
-</div>
-
-<div id="cooldown"><div id="cooldownFill"></div></div>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<script src="game.js"></script>
+<script>
+// -------- FIREBASE CONFIG --------
+const firebaseConfig = {
+  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
+  authDomain: "fireworkleaderboard.firebaseapp.com",
+  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com",
+  projectId: "fireworkleaderboard",
+  storageBucket: "fireworkleaderboard.firebasestorage.app",
+  messagingSenderId: "243474267364",
+  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
+  measurementId: "G-H07BZY385S"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+// -------- GLOBAL VARIABLES --------
+const loginBox = document.getElementById("loginBox");
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const loginMsg = document.getElementById("loginMsg");
+const ui = document.getElementById("ui");
+const resetBtn = document.getElementById("resetBtn");
+const ownerCommands = document.getElementById("ownerCommands");
+const goLeaderboardBtn = document.getElementById("goLeaderboardBtn");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener("resize",()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
+
+let currentUser="";
+let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now(), rebirthCount=0;
+let colorPrice=50, delayPrice=100, rebirthPrice=500, autoPrice=200, autoAmount=0, autoSpeed=2.5;
+let fireworks=[], particles=[];
+const gravity=0.04;
+const fireworkSound=document.getElementById("fireworkSound");
+let autoInterval=null;
+
+// Base colors
+const baseColors=[
+  {color:"hsl(0,100%,60%)", value:1},
+  {color:"hsl(30,100%,60%)", value:2},
+  {color:"hsl(60,100%,60%)", value:3},
+  {color:"hsl(120,100%,60%)", value:4},
+  {color:"hsl(180,100%,60%)", value:5},
+  {color:"hsl(240,100%,60%)", value:6}
+];
+let colors=[...baseColors];
+
+// -------- AUTH & LOGIN --------
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    currentUser = user.uid;
+    loginBox.style.display = "none";
+    ui.style.display = "block";
+    resetBtn.style.display = "block";
+    await loadProgressOnline();
+    ownerCommands.style.display = user.email === "aaron.gatorfan@gmail.com" ? "block" : "none";
+  }
+});
+
+// Forgot Password
+document.getElementById("forgotBtn").addEventListener("click",()=>{
+  const email=document.getElementById("email").value.trim();
+  if(!email){ loginMsg.textContent="Enter email!"; return; }
+  auth.sendPasswordResetEmail(email)
+    .then(()=>loginMsg.textContent="Password reset email sent!")
+    .catch(err=>loginMsg.textContent=err.message);
+});
+
+// Login
+loginBtn.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  loginMsg.style.color = "yellow";
+  if (!email || !pass) { loginMsg.textContent = "Enter email & password!"; return; }
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    currentUser = cred.user.uid;
+    loginMsg.textContent = "";
+    loginBox.style.display = "none";
+    ui.style.display = "block";
+    resetBtn.style.display = "block";
+    ownerCommands.style.display = cred.user.user === "Dreamcrusher41" ? "block" : "none";
+    await loadProgressOnline();
+  } catch(err){ loginMsg.textContent = err.message; }
+});
+
+// Signup
+signupBtn.addEventListener("click", async () => {
+  const uname = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  loginMsg.style.color = "yellow";
+  if (!uname || !email || !pass) { loginMsg.textContent = "Enter all fields!"; return; }
+  if (pass.length < 6) { loginMsg.textContent = "Password must be at least 6 characters!"; return; }
+  if (!/^[a-zA-Z0-9_]{3,16}$/.test(uname)) { loginMsg.textContent = "Username must be 3-16 characters (letters, numbers, _)"; return; }
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    currentUser = cred.user.uid;
+    await db.ref("usernames/" + currentUser).set(uname);
+    loginMsg.style.color = "lime";
+    loginMsg.textContent = "Account created!";
+    loginBox.style.display = "none"; ui.style.display = "block"; resetBtn.style.display = "block";
+    await saveProgressOnline();
+    ownerCommands.style.display = cred.user.email === "aaron.gatorfan@gmail.com" ? "block" : "none";
+  } catch(err){ loginMsg.style.color = "red"; loginMsg.textContent = err.message; }
+});
+
+// -------- FIREWORK LOGIC --------
+class Firework{constructor(x,y,colorObj){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;}
+update(){this.y-=this.speed;if(this.y<=this.targetY){explode(this.x,this.y,this.colorObj);return true;}return false;}
+draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.colorObj.color;ctx.fill();}}
+class Particle{constructor(x,y,colorObj){this.x=x;this.y=y;this.color=colorObj.color;this.speedX=(Math.random()-0.5)*6;this.speedY=(Math.random()-0.5)*6;this.life=100;}
+update(){this.speedY+=gravity;this.x+=this.speedX;this.y+=this.speedY;this.life--;}
+draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}}
+
+function getRebirthColors(rebirthCount){
+  const scheme=[{base:60},{base:80},{base:100},{base:120}][rebirthCount%4];
+  const numColors=Math.min(10+rebirthCount,50);
+  let newColors=[];
+  for(let i=0;i<numColors;i++){
+    const hue=Math.random()*360;
+    newColors.push({color:`hsl(${hue},${scheme.base}%,60%)`, value:i+1});
+  }
+  return newColors;
+}
+
+function explode(x,y,colorObj){
+  fireworkSound.currentTime=0;fireworkSound.play();
+  for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
+  money += colorObj.value * (rebirthCount + 1);
+  document.getElementById("money").textContent = money;
+  saveProgressOnline();
+  saveScore();
+}
+
+function launchFirework(x,y){
+  const colorIndex = Math.floor(Math.random() * unlockedColors);
+  const colorObj = colors[colorIndex];
+  fireworks.push(new Firework(x,y,colorObj));
+  lastClick = Date.now();
+}
+
+document.addEventListener("click",e=>{
+  if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY);
+});
+
+function animate(){
+  ctx.fillStyle="rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=fireworks.length-1;i>=0;i--){if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw();}
+  for(let i=particles.length-1;i>=0;i--){particles[i].update();particles[i].draw();if(particles[i].life<=0) particles.splice(i,1);}
+  const elapsed=Date.now()-lastClick; const fill=Math.min(100,(elapsed/clickDelay)*100);
+  document.getElementById("cooldownFill").style.width=fill+"%";
+  document.getElementById("moneyMultiplier").textContent=(rebirthCount+1);
+  requestAnimationFrame(animate);
+}
+animate();
+
+// -------- ONLINE SAVE/LOAD --------
+async function saveProgressOnline(){
+  if(!currentUser) return;
+  const progress = { money, unlockedColors, clickDelay, rebirthCount, rebirthPrice, colorPrice, delayPrice, autoAmount, autoSpeed };
+  await db.ref("progress/" + currentUser).set(progress);
+}
+
+async function loadProgressOnline(){
+  if(!currentUser) return;
+  const snap = await db.ref("progress/" + currentUser).once("value");
+  const p = snap.val();
+  if(p){
+    money = p.money || 0;
+    unlockedColors = p.unlockedColors || 1;
+    clickDelay = p.clickDelay || 1200;
+    rebirthCount = p.rebirthCount || 0;
+    rebirthPrice = p.rebirthPrice || 500;
+    colorPrice = p.colorPrice || 50;
+    delayPrice = p.delayPrice || 100;
+    autoAmount = p.autoAmount || 0;
+    autoSpeed = p.autoSpeed || 2.5;
+    colors = [...baseColors, ...getRebirthColors(rebirthCount)];
+    if(unlockedColors>colors.length) unlockedColors=colors.length;
+    document.getElementById("money").textContent = money;
+    updateButtons();
+    startAutoLaunch();
+  }
+}
+
+// -------- BUTTONS & UPGRADES --------
+function updateButtons(){
+  document.getElementById("buyColor").textContent = unlockedColors >= colors.length ? "MAX" : `Buy Color ($${colorPrice})`;
+  document.getElementById("reduceDelay").textContent = clickDelay <= 100 ? "MAX" : `Reduce Delay ($${delayPrice})`;
+  document.getElementById("buyAuto").textContent = autoAmount >= 3 ? "MAX" : `Buy Auto-Launch ($${autoPrice})`;
+  document.getElementById("rebirth").textContent = `Rebirth ($${rebirthPrice})`;
+  document.getElementById("delayDisplay").textContent = clickDelay;
+  document.getElementById("autoSpeedDisplay").textContent = autoSpeed.toFixed(2);
+  document.getElementById("unlockedColors").textContent = unlockedColors;
+}
+
+document.getElementById("buyColor").addEventListener("click",()=>{
+  if(money>=colorPrice && unlockedColors<colors.length){money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.7); updateButtons(); document.getElementById("money").textContent=money; saveProgressOnline();}
+});
+document.getElementById("reduceDelay").addEventListener("click",()=>{
+  if(money>=delayPrice && clickDelay>100){money-=delayPrice; clickDelay=Math.max(clickDelay-100,100); delayPrice=Math.floor(delayPrice*1.7); updateButtons(); document.getElementById("money").textContent=money; saveProgressOnline();}
+});
+document.getElementById("buyAuto").addEventListener("click",()=>{
+  if(autoAmount<3 && money>=autoPrice){money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7); document.getElementById("money").textContent=money; updateButtons(); saveProgressOnline(); startAutoLaunch();}
+});
+
+document.getElementById("rebirth").addEventListener("click", async () => {
+  if (money >= rebirthPrice) {
+    money=0; rebirthCount++; unlockedColors=1; clickDelay=1200;
+    autoAmount=0; autoSpeed=2.5; autoPrice=200; clearInterval(autoInterval); autoInterval=null;
+    colorPrice=50; delayPrice=100; rebirthPrice=Math.floor(rebirthPrice*1.7);
+    colors=[...baseColors, ...getRebirthColors(rebirthCount)];
+    updateButtons(); document.getElementById("money").textContent=money;
+    await saveProgressOnline(); saveScore();
+    startAutoLaunch();
+    alert("Rebirth complete!");
+  } else alert(`Need $${rebirthPrice} to rebirth!`);
+});
+
+resetBtn.addEventListener("click", async ()=>{
+  if(confirm("Reset progress?")){
+    money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0;
+    colorPrice=50; delayPrice=100; rebirthPrice=500; autoAmount=0; autoSpeed=2.5;
+    clearInterval(autoInterval); autoInterval=null; colors=[...baseColors];
+    updateButtons(); document.getElementById("money").textContent=money; await saveProgressOnline(); saveScore(); alert("Progress reset!");
+  }
+});
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  if (confirm("Are you sure you want to log out?")) {
+    auth.signOut().then(() => {
+      loginBox.style.display = "block";
+      ui.style.display = "none";
+      resetBtn.style.display = "none";
+      ownerCommands.style.display = "none";
+      currentUser = "";
+      money = 0; unlockedColors = 1; clickDelay = 1200; rebirthCount = 0; autoAmount = 0; autoSpeed = 2.5;
+      clearInterval(autoInterval); autoInterval = null;
+      document.getElementById("money").textContent = "0";
+      document.getElementById("unlockedColors").textContent = "1";
+      document.getElementById("moneyMultiplier").textContent = "1";
+      document.getElementById("delayDisplay").textContent = "1200";
+      document.getElementById("autoSpeedDisplay").textContent = "2.50";
+      alert("You have been logged out!");
+    }).catch(err => { alert("Error logging out: " + err.message); });
+  }
+});
+
+function startAutoLaunch(){
+  if(autoInterval) clearInterval(autoInterval);
+  if(autoAmount>0) autoInterval=setInterval(()=>{launchFirework(Math.random()*canvas.width,Math.random()*canvas.height/2);},autoSpeed*1000);
+}
+
+// -------- SAFE LEADERBOARD --------
+function saveScore(){
+  if(!currentUser) return;
+  const scoreRef = db.ref("scores/"+currentUser);
+  scoreRef.once("value").then(snapshot=>{
+    const oldMoney = snapshot.val()?.money || 0;
+    const newMoney = Math.max(oldMoney, money);
+    scoreRef.set({ money: newMoney });
+  }).catch(err=>console.error("Error saving score:", err));
+}
+
+goLeaderboardBtn.addEventListener("click",()=>{window.open("fireworkleaderboard.html","_blank");});
+
+// Owner commands
+document.getElementById("giveMoneyBtn").addEventListener("click",()=>{money+=1000; document.getElementById("money").textContent=money; saveProgressOnline();});
+document.getElementById("unlockColorsBtn").addEventListener("click",()=>{unlockedColors=colors.length; updateButtons(); saveProgressOnline();});
+document.getElementById("maxAutoBtn").addEventListener("click",()=>{autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline();});
+document.getElementById("viewUsersBtn").addEventListener("click",()=>{alert("Admin view: check Firebase users in database.");});
+</script>
 </body>
 </html>
