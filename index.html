@@ -1,130 +1,132 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Firework Simulator</title>
   <style>
-    /* Full-screen canvas */
-    html,body { height:100%; margin:0; }
-    canvas { display:block; background: #0b0f1a; width:100%; height:100%; }
+    html, body { height: 100%; margin: 0; font-family: Arial, sans-serif; background: #070812; color:#fff; }
+    canvas { display:block; width:100%; height:100%; }
 
-    /* Top-right control area */
-    #topRightControls {
+    /* Top-right area for logout/reset + owner commands */
+    #topRight {
       position: fixed;
       top: 12px;
       right: 12px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      z-index: 10000;
-      font-family: Arial, sans-serif;
+      z-index: 9999;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
     }
-    .panel {
-      background: rgba(255,255,255,0.06);
-      border-radius:8px;
-      padding:8px;
-      color: #fff;
-      min-width: 200px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    .topPanel {
+      background: rgba(255,255,255,0.04);
+      padding: 8px;
+      border-radius: 8px;
+      min-width: 220px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
     }
-    .panel small { color: #ddd; display:block; margin-bottom:6px; }
-    button { background:#1e90ff; border:0; padding:6px 8px; border-radius:6px; color:#fff; cursor:pointer; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    button { background:#1e90ff; color:#fff; border:0; padding:6px 8px; border-radius:6px; cursor:pointer; }
     button.secondary { background:#333; }
-    .row { display:flex; gap:8px; align-items:center; margin-bottom:6px; flex-wrap:wrap; }
-    .stat { font-weight:700; }
-    label { font-size:12px; color:#ddd; }
+    small { color:#ccc; display:block; margin-bottom:6px; font-size:12px; }
 
-    /* login box (simple) */
-    #loginBox { position: fixed; left: 12px; top: 12px; z-index:9999; }
-    input[type="text"], input[type="password"], input[type="email"] { padding:6px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.02); color:#fff; }
-    #loginMsg { color:#ffb; font-size:13px; margin-top:6px; }
+    /* login box left top */
+    #loginBox {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 9999;
+      background: rgba(255,255,255,0.03);
+      padding: 10px;
+      border-radius:8px;
+      min-width:220px;
+    }
+    input[type="text"], input[type="email"], input[type="password"] {
+      width: 100%;
+      margin-bottom:6px;
+      padding:6px;
+      border-radius:6px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #fff;
+    }
 
-    /* owner commands hidden by default */
-    #ownerCommands { display:none; margin-top:6px; }
+    /* small inline stats if needed */
+    .stat { font-weight:700; color:#fff; }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
 
-  <!-- Top-right UI / Controls -->
-  <div id="topRightControls">
-    <div id="ui" class="panel" style="display:none;">
+  <!-- Top-right controls -->
+  <div id="topRight">
+    <div class="topPanel" id="ui" style="display:none;">
       <small>Stats</small>
       <div class="row">
         <div>Money: <span id="money" class="stat">0</span></div>
         <div> x<span id="moneyMultiplier">1</span></div>
       </div>
-      <div class="row">
+      <div class="row" style="margin-top:6px;">
         <div>Delay: <span id="delayDisplay">1200</span>ms</div>
-        <div>Auto speed: <span id="autoSpeedDisplay">2.50</span>s</div>
+        <div>Auto: <span id="autoSpeedDisplay">2.50</span>s</div>
       </div>
-      <div class="row">
-        <div>Colors: <span id="unlockedColors">1</span></div>
-      </div>
-
-      <div class="row">
+      <div class="row" style="margin-top:8px;">
         <button id="buyColor">Buy Color</button>
         <button id="reduceDelay" class="secondary">Reduce Delay</button>
       </div>
-      <div class="row">
+      <div class="row" style="margin-top:8px;">
         <button id="buyAuto">Buy Auto</button>
         <button id="rebirth">Rebirth</button>
       </div>
-
-      <div class="row">
+      <div class="row" style="margin-top:8px;">
         <button id="giveMoneyBtn" class="secondary">+1000</button>
-        <button id="unlockColorsBtn" class="secondary">Unlock All Colors</button>
+        <button id="unlockColorsBtn" class="secondary">Unlock Colors</button>
         <button id="maxAutoBtn" class="secondary">Max Auto</button>
       </div>
-
-      <div style="margin-top:6px;">
+      <div style="margin-top:8px;">
         <button id="goLeaderboardBtn">Leaderboard</button>
       </div>
     </div>
 
-    <!-- Buttons that must be top-right (logout / reset) -->
-    <div class="panel">
-      <div class="row">
+    <div class="topPanel">
+      <div class="row" style="margin-bottom:8px;">
         <button id="logoutBtn">Logout</button>
         <button id="resetBtn" class="secondary">Reset Progress</button>
       </div>
-      <div id="ownerCommands">
+
+      <div id="ownerCommands" style="display:none; margin-top:6px;">
         <small>Owner Commands</small>
         <div class="row">
           <button id="adminStormBtn">Admin Storm</button>
-          <button id="adminGiveMoneyBtn" class="secondary">Give Money</button>
+          <button id="adminGiveMoneyBtn" class="secondary">Give $</button>
           <button id="adminToggleRainbowBtn" class="secondary">Toggle Rainbow</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Simple login box (left-top) -->
-  <div id="loginBox" class="panel">
-    <small>Login / Sign up</small>
-    <div style="display:flex;flex-direction:column;gap:6px;">
-      <input id="email" type="email" placeholder="email" />
-      <input id="password" type="password" placeholder="password" />
-      <input id="username" type="text" placeholder="username (signup)" />
-      <div style="display:flex;gap:8px;">
-        <button id="loginBtn">Login</button>
-        <button id="signupBtn" class="secondary">Sign Up</button>
-        <button id="forgotBtn" class="secondary">Forgot</button>
-      </div>
-      <div id="loginMsg"></div>
+  <!-- Login box (left-top) -->
+  <div id="loginBox">
+    <small>Login / Signup</small>
+    <input id="email" type="email" placeholder="email" />
+    <input id="password" type="password" placeholder="password" />
+    <input id="username" type="text" placeholder="username (for signup)" />
+    <div class="row" style="margin-top:6px;">
+      <button id="loginBtn">Login</button>
+      <button id="signupBtn" class="secondary">Sign Up</button>
+      <button id="forgotBtn" class="secondary">Forgot</button>
     </div>
+    <div id="loginMsg" style="margin-top:6px;color:#ffb;"></div>
   </div>
 
-  <!-- audio -->
   <audio id="fireworkSound" src="" preload="auto"></audio>
 
-  <!-- Firebase (v8 style used by your original code) -->
+  <!-- Firebase v8 scripts -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <!-- Your game script -->
+  <!-- game script -->
   <script src="game.js"></script>
 </body>
 </html>
