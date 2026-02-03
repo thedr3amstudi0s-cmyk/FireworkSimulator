@@ -4,76 +4,24 @@
 <meta charset="UTF-8">
 <title>Firework Simulator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-html,body {
-  margin:0;
-  padding:0;
-  background:black;
-  overflow:hidden;
-  font-family:Arial, sans-serif;
-  color:white;
-}
-canvas { display:block; }
+html,body{margin:0;padding:0;overflow:hidden;background:black;font-family:Arial,sans-serif;color:white;}
+canvas{display:block;}
 
-#loginBox {
-  position:fixed;
-  inset:0;
-  background:#000c;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:10;
-}
-#loginBox div {
-  background:#222;
-  padding:25px;
-  border-radius:10px;
-}
-#loginBox input, #loginBox button {
-  display:block;
-  width:220px;
-  margin:8px 0;
-  padding:8px;
-}
+#loginBox{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:10;}
+#loginBox div{background:#222;padding:25px;border-radius:10px;}
+#loginBox input,#loginBox button{display:block;width:220px;margin:8px 0;padding:8px;}
 
-#ui {
-  position:fixed;
-  top:10px;
-  left:10px;
-  z-index:5;
-  display:none;
-}
-#ui button { margin:3px; }
+#ui{position:fixed;top:10px;left:10px;z-index:5;display:none;}
+#ui button{margin:3px;}
 
-#topRight {
-  position:fixed;
-  top:10px;
-  right:10px;
-  z-index:5;
-  display:none;
-}
-#topRight button { display:block; margin-bottom:6px; }
+#topRight{position:fixed;top:10px;right:10px;z-index:5;display:none;}
+#topRight button{display:block;margin-bottom:6px;}
 
-#cooldown {
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  width:300px;
-  height:16px;
-  background:#333;
-  border-radius:8px;
-  overflow:hidden;
-}
-#cooldownFill {
-  height:100%;
-  width:0%;
-  background:lime;
-}
+#cooldown{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:300px;height:16px;background:#333;border-radius:8px;overflow:hidden;}
+#cooldownFill{height:100%;width:0%;background:lime;}
 </style>
 </head>
-
 <body>
 
 <canvas id="canvas"></canvas>
