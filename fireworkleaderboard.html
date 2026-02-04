@@ -4,54 +4,41 @@
 <meta charset="UTF-8">
 <title>Firework Leaderboard</title>
 <style>
-body {
-  background:#0a0a0a;
-  color:white;
-  font-family:Arial, sans-serif;
-  padding:20px;
-}
-h1 { color:#0ff; text-align:center; }
-table {
-  width:100%;
-  border-collapse: collapse;
-  margin-top:20px;
-}
-th, td {
-  padding:10px;
-  border-bottom:1px solid #444;
-  text-align:left;
-}
-th { color:#0ff; }
-button {
-  margin-top:20px;
-  padding:6px 12px;
-  cursor:pointer;
-  background:#0ff;
-  color:black;
-  border:none;
-  border-radius:5px;
-  font-weight:bold;
-}
+  body { margin:0; padding:0; font-family: Arial, sans-serif; background:#111; color:#fff; }
+  h1 { text-align:center; margin:20px 0; }
+  table { width:80%; margin:20px auto; border-collapse: collapse; }
+  th, td { padding:10px; text-align:center; border-bottom:1px solid #444; }
+  th { background:#222; }
+  tr:nth-child(even) { background:#1a1a1a; }
+  .rank-tag { padding:4px 8px; border-radius:6px; font-weight:700; color:#fff; }
+  .Owner { background:purple; }
+  .Admin { background:red; }
+  .Player { background:gray; }
+  #loading { text-align:center; margin-top:40px; color:#0ff; }
 </style>
 </head>
-
 <body>
-<h1>🔥 Firework Leaderboard 🔥</h1>
 
-<table id="leaderboardTable">
-<tr>
-  <th>Rank</th>
-  <th>Username</th>
-  <th>Money</th>
-</tr>
+<h1>Firework Leaderboard</h1>
+<div id="loading">Loading leaderboard...</div>
+<table id="leaderboard" style="display:none;">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Tag</th>
+      <th>Username</th>
+      <th>Money</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
 </table>
 
-<button onclick="loadLeaderboard()">Refresh</button>
-
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
+/* ================== CONFIG ================== */
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -61,48 +48,61 @@ const firebaseConfig = {
   messagingSenderId: "243474267364",
   appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-async function loadLeaderboard() {
-  const table = document.getElementById("leaderboardTable");
-  table.querySelectorAll("tr:not(:first-child)").forEach(r => r.remove());
+/* ===== fallback admin/owner tags ===== */
+const TAG_FALLBACK = {
+  "FaZgGtIHzVcnSS6c8JAoir9RG8J2": "Owner",
+  "BxQ1aTqPndOfHzuX3OzlCcD4pbC3": "Admin"
+};
 
+/* fetch leaderboard */
+async function loadLeaderboard(){
   try {
-    // Get progress (money)
-    const progressSnap = await db.ref("progress").once("value");
-    const progress = progressSnap.val() || {};
+    const scoresSnap = await db.ref('scores').once('value');
+    const scores = scoresSnap.val() || {};
+    const tbody = document.querySelector('#leaderboard tbody');
+    tbody.innerHTML = '';
 
-    // Get users (names)
-    const usersSnap = await db.ref("users").once("value");
-    const users = usersSnap.val() || {};
+    // fetch usernames and tags
+    const usersSnap = await db.ref('usernames').once('value');
+    const usernames = usersSnap.val() || {};
+    
+    const adminsSnap = await db.ref('admins').once('value');
+    const admins = adminsSnap.val() || {};
 
-    const leaderboard = [];
-
-    for (const uid in progress) {
-      leaderboard.push({
-        username: users[uid]?.username || "Unknown",
-        money: progress[uid].money || 0
-      });
+    // build array for sorting
+    const scoreArray = [];
+    for(const uid in scores){
+      const s = scores[uid];
+      const uname = usernames[uid] || 'Unknown';
+      let tag = 'Player';
+      if(admins[uid]) tag = 'Admin';
+      else if(TAG_FALLBACK[uid]) tag = TAG_FALLBACK[uid];
+      scoreArray.push({uid, uname, money: s.money || 0, tag});
     }
 
-    // Sort highest money first
-    leaderboard.sort((a, b) => b.money - a.money);
+    // sort by money descending
+    scoreArray.sort((a,b)=>b.money - a.money);
 
-    leaderboard
-      .slice(0, 20) // take only the first 20 entries
-      .forEach((player, i) => {
-      const row = table.insertRow();
-      row.insertCell(0).textContent = i + 1;
-      row.insertCell(1).textContent = player.username;
-      row.insertCell(2).textContent = player.money.toLocaleString();
+    // populate table
+    scoreArray.forEach((user,index)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${index+1}</td>
+        <td><span class="rank-tag ${user.tag}">${user.tag}</span></td>
+        <td>${user.uname}</td>
+        <td>$${user.money}</td>
+      `;
+      tbody.appendChild(tr);
     });
 
-
-  } catch (err) {
-    console.error("Leaderboard error:", err);
-    alert("Leaderboard failed — check console");
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('leaderboard').style.display = 'table';
+  } catch(e){
+    document.getElementById('loading').textContent = 'Error loading leaderboard';
+    console.error(e);
   }
 }
 
@@ -110,4 +110,3 @@ loadLeaderboard();
 </script>
 </body>
 </html>
-
