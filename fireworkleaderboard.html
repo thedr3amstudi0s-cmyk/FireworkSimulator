@@ -2,25 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Firework Leaderboard</title>
+<title>Firework Simulator Leaderboard</title>
 <style>
-  body { margin:0; padding:0; font-family: Arial, sans-serif; background:#111; color:#fff; }
-  h1 { text-align:center; margin:20px 0; }
-  table { width:80%; margin:20px auto; border-collapse: collapse; }
-  th, td { padding:10px; text-align:center; border-bottom:1px solid #444; }
-  th { background:#222; }
-  tr:nth-child(even) { background:#1a1a1a; }
-  .rank-tag { padding:4px 8px; border-radius:6px; font-weight:700; color:#fff; }
-  .Owner { background:purple; }
-  .Admin { background:red; }
-  .Player { background:gray; }
-  #loading { text-align:center; margin-top:40px; color:#0ff; }
+  body { font-family: Arial, sans-serif; background: #111; color:#fff; margin:0; padding:20px; }
+  table { border-collapse: collapse; width:100%; max-width:800px; margin:auto; background:#222; }
+  th, td { border:1px solid #555; padding:8px 12px; text-align:center; }
+  th { background:#333; }
+  .rank-tag { padding:2px 6px; border-radius:4px; font-weight:700; color:#fff; }
+  .Owner { background:#ff0066; }
+  .Admin { background:#00ccff; }
+  .Player { background:#888; }
 </style>
 </head>
 <body>
-
-<h1>Firework Leaderboard</h1>
-<div id="loading">Loading leaderboard...</div>
+<h1 style="text-align:center;">Firework Simulator Leaderboard</h1>
+<div id="loading" style="text-align:center; margin:20px;">Loading leaderboard...</div>
 <table id="leaderboard" style="display:none;">
   <thead>
     <tr>
@@ -30,15 +26,14 @@
       <th>Money</th>
     </tr>
   </thead>
-  <tbody></tbody>
+  <tbody>
+    <!-- rows injected here -->
+  </tbody>
 </table>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
-/* ================== CONFIG ================== */
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -51,42 +46,40 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ===== fallback admin/owner tags ===== */
+// fallback tags
 const TAG_FALLBACK = {
   "FaZgGtIHzVcnSS6c8JAoir9RG8J2": "Owner",
   "BxQ1aTqPndOfHzuX3OzlCcD4pbC3": "Admin"
 };
 
-/* fetch leaderboard */
 async function loadLeaderboard(){
+  const loading = document.getElementById('loading');
+  const tbody = document.querySelector('#leaderboard tbody');
   try {
-    const scoresSnap = await db.ref('scores').once('value');
+    const scoresSnap = await db.ref('progress').once('value'); // <-- use "progress" path
     const scores = scoresSnap.val() || {};
-    const tbody = document.querySelector('#leaderboard tbody');
-    tbody.innerHTML = '';
+    if(Object.keys(scores).length === 0) throw new Error('No scores found');
 
-    // fetch usernames and tags
     const usersSnap = await db.ref('usernames').once('value');
     const usernames = usersSnap.val() || {};
-    
+
     const adminsSnap = await db.ref('admins').once('value');
     const admins = adminsSnap.val() || {};
 
-    // build array for sorting
+    tbody.innerHTML = '';
     const scoreArray = [];
+
     for(const uid in scores){
       const s = scores[uid];
       const uname = usernames[uid] || 'Unknown';
       let tag = 'Player';
-      if(admins[uid]) tag = 'Admin';
+      if(admins && admins[uid]) tag = 'Admin';
       else if(TAG_FALLBACK[uid]) tag = TAG_FALLBACK[uid];
       scoreArray.push({uid, uname, money: s.money || 0, tag});
     }
 
-    // sort by money descending
     scoreArray.sort((a,b)=>b.money - a.money);
 
-    // populate table
     scoreArray.forEach((user,index)=>{
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -98,11 +91,11 @@ async function loadLeaderboard(){
       tbody.appendChild(tr);
     });
 
-    document.getElementById('loading').style.display = 'none';
+    loading.style.display = 'none';
     document.getElementById('leaderboard').style.display = 'table';
   } catch(e){
-    document.getElementById('loading').textContent = 'Error loading leaderboard';
     console.error(e);
+    loading.textContent = 'Error loading leaderboard. Check DB paths & rules.';
   }
 }
 
