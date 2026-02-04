@@ -7,14 +7,12 @@
 html, body { margin:0; padding:0; overflow:hidden; font-family: Arial, sans-serif; background:#000; }
 canvas { display:block; background: radial-gradient(circle at bottom, #0a0a0a, #000); }
 
-/* Login UI */
 #loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
     background:#222; padding:30px; border-radius:10px; color:white; z-index:200;}
 #loginBox input, #loginBox button { display:block; margin:8px 0; padding:10px; width:240px; border-radius:5px; border:none; }
 #loginBox button { background:cyan; color:black; font-weight:bold; cursor:pointer; }
 #loginBox button:hover { background:#0ff; }
 
-/* Game UI */
 #ui{position:fixed; top:10px; left:10px; color:white; z-index:100;}
 #ui button{margin:2px; padding:5px 8px; font-size:14px; cursor:pointer;}
 #ownerCommands{margin-top:8px; display:none;}
@@ -100,6 +98,7 @@ canvas.height = window.innerHeight;
 window.addEventListener("resize", ()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
 
 let currentUser="";
+let currentUsername="";
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now(), rebirthCount=0;
 let colorPrice=50, delayPrice=100, rebirthPrice=500, autoPrice=200, autoAmount=0, autoSpeed=2.5;
 let fireworks=[], particles=[];
@@ -135,22 +134,6 @@ function showNotification(msg, duration=2000) {
   setTimeout(()=>notif.remove(), duration);
 }
 
-// -------- AUTH --------
-auth.onAuthStateChanged(async user => {
-  if (user) {
-    currentUser = user.uid;
-    loginBox.style.display = "none";
-    ui.style.display = "block";
-    resetBtn.style.display = "block";
-
-    // Check if admin
-    const adminSnap = await db.ref("admins/" + currentUser).once("value");
-    ownerCommands.style.display = adminSnap.val() ? "block" : "none";
-
-    await loadProgressOnline();
-  }
-});
-
 // -------- FIREWORK CLASSES --------
 class Firework { constructor(x,y,colorObj){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;this.exploded=false;} update(){this.y-=this.speed;if(this.y<=this.targetY&&!this.exploded){explode(this.x,this.y,this.colorObj);this.exploded=true;return true;}return false;} draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.colorObj.color;ctx.fill();}}
 class Particle { constructor(x,y,colorObj){this.x=x;this.y=y;this.color=colorObj.color;this.speedX=(Math.random()-0.5)*6;this.speedY=(Math.random()-0.5)*6;this.life=100;} update(){this.speedY+=0.04;this.x+=this.speedX;this.y+=this.speedY;this.life--;} draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}}
@@ -168,7 +151,38 @@ animate();
 
 // -------- SAVE/LOAD --------
 async function saveProgressOnline(){if(!currentUser) return; const progress={money,unlockedColors,clickDelay,rebirthCount,rebirthPrice,colorPrice,delayPrice,autoAmount,autoSpeed}; await db.ref("progress/"+currentUser).set(progress);}
-async function loadProgressOnline(){if(!currentUser) return; const snap=await db.ref("progress/"+currentUser).once("value"); const p=snap.val(); if(p){money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200; rebirthCount=p.rebirthCount||0; colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5; colors=[...baseColors,...getRebirthColors(rebirthCount)]; if(unlockedColors>colors.length) unlockedColors=colors.length; document.getElementById("money").textContent=money; rebirthPrice = Math.floor(500 * Math.pow(1.5, rebirthCount)); updateButtons(); startAutoLaunch();}}
+async function loadProgressOnline(){
+  if(!currentUser) return;
+  const snap = await db.ref("progress/"+currentUser).once("value");
+  const p = snap.val();
+  if(p){
+    // Load saved values
+    money = p.money || 0;
+    unlockedColors = p.unlockedColors || 1;
+    clickDelay = p.clickDelay || 1200;
+    rebirthCount = p.rebirthCount || 0;
+    colorPrice = p.colorPrice || 50;
+    delayPrice = p.delayPrice || 100;
+    autoAmount = p.autoAmount || 0;
+    autoSpeed = p.autoSpeed || 2.5;
+
+    // Recalculate derived values
+    rebirthPrice = Math.floor(500 * Math.pow(1.5, rebirthCount));
+    colors = [...baseColors, ...getRebirthColors(rebirthCount)];
+    if(unlockedColors > colors.length) unlockedColors = colors.length;
+
+    // Update UI
+    document.getElementById("money").textContent = money;
+    updateButtons();
+
+    // Start auto-launch without saving yet
+    startAutoLaunch();
+
+    // Load username for leaderboard
+    const usernameSnap = await db.ref("usernames/" + currentUser).once("value");
+    currentUsername = usernameSnap.val() || "Player";
+  }
+}
 
 // -------- BUTTONS --------
 function updateButtons(){document.getElementById("buyColor").textContent=unlockedColors>=colors.length?"MAX":`Buy Color ($${colorPrice})`; document.getElementById("reduceDelay").textContent=clickDelay<=100?"MAX":`Reduce Delay ($${delayPrice})`; document.getElementById("buyAuto").textContent=autoAmount>=3?"MAX":`Buy Auto-Launch ($${autoPrice})`; document.getElementById("rebirth").textContent=`Rebirth ($${rebirthPrice})`; document.getElementById("delayDisplay").textContent=clickDelay; document.getElementById("autoSpeedDisplay").textContent=autoSpeed.toFixed(2); document.getElementById("unlockedColors").textContent=unlockedColors;}
@@ -211,12 +225,50 @@ db.ref("adminEvents").on("value", snapshot=>{
 // -------- LEADERBOARD --------
 document.getElementById("goLeaderboardBtn").addEventListener("click", async ()=>{
   try{
-    const progressSnap=await db.ref("progress").once("value"); const data=progressSnap.val()||{}; let leaderboardText="Leaderboard:\n";
-    for(const uid in data){ leaderboardText += `${data[uid].username || uid}: $${data[uid].money || 0}\n`; }
-    showNotification(leaderboardText, 5000);
-  } catch(err){console.error("Leaderboard error:",err); showNotification("Error loading leaderboard");}
+    const usersSnap = await db.ref("progress").once("value");
+    const data = usersSnap.val() || {};
+    let leaderboardText = "Leaderboard:\n";
+    for(const uid in data){
+      const unameSnap = await db.ref("usernames/" + uid).once("value");
+      const uname = unameSnap.val() || uid;
+      leaderboardText += `${uname}: $${data[uid].money || 0}\n`;
+    }
+    showNotification(leaderboardText,5000);
+  }catch(e){showNotification("Leaderboard error: "+e.message);}
 });
 
+// -------- RESET & LOGOUT --------
+resetBtn.addEventListener("click", async ()=>{if(!confirm("Reset progress?")) return; money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0;colorPrice=50; delayPrice=100; rebirthPrice=500; autoAmount=0; autoSpeed=2.5; clearInterval(autoInterval); autoInterval=null; colors=[...baseColors]; updateButtons(); document.getElementById("money").textContent=money; await saveProgressOnline(); showNotification("Progress reset!");});
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
+  if(!confirm("Are you sure you want to log out?")) return;
+  auth.signOut().then(()=>{loginBox.style.display="block"; ui.style.display="none"; resetBtn.style.display="none"; ownerCommands.style.display="none"; currentUser=""; money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0; autoAmount=0; autoSpeed=2.5; clearInterval(autoInterval); autoInterval=null; document.getElementById("money").textContent="0"; document.getElementById("unlockedColors").textContent="1"; document.getElementById("moneyMultiplier").textContent="1"; document.getElementById("delayDisplay").textContent="1200"; document.getElementById("autoSpeedDisplay").textContent="2.50"; showNotification("Logged out!");});
+});
+
+// -------- AUTH & LOGIN --------
+auth.onAuthStateChanged(async user=>{
+  if(user){currentUser=user.uid; loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block"; 
+    const adminSnap=await db.ref("admins/"+currentUser).once("value");
+    ownerCommands.style.display=adminSnap.val()?"block":"none";
+    await loadProgressOnline();
+  }
+});
+document.getElementById("forgotBtn").addEventListener("click", async ()=>{
+  const email=document.getElementById("email").value.trim(); if(!email){loginMsg.textContent="Enter email!"; return;}
+  auth.sendPasswordResetEmail(email).then(()=>loginMsg.textContent="Password reset email sent!").catch(err=>loginMsg.textContent=err.message);
+});
+loginBtn.addEventListener("click", async ()=>{
+  const email=document.getElementById("email").value.trim(); const pass=document.getElementById("password").value.trim(); loginMsg.style.color="yellow";
+  if(!email||!pass){loginMsg.textContent="Enter email & password!"; return;}
+  try{const cred=await auth.signInWithEmailAndPassword(email,pass); currentUser=cred.user.uid; loginMsg.textContent=""; loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block";
+  const adminSnap=await db.ref("admins/"+currentUser).once("value"); ownerCommands.style.display=adminSnap.val()?"block":"none"; await loadProgressOnline();}catch(err){loginMsg.textContent=err.message;}
+});
+signupBtn.addEventListener("click", async ()=>{
+  const uname=document.getElementById("username").value.trim(); const email=document.getElementById("email").value.trim(); const pass=document.getElementById("password").value.trim(); loginMsg.style.color="yellow";
+  if(!uname||!email||!pass){loginMsg.textContent="Enter all fields!"; return;}
+  if(pass.length<6){loginMsg.textContent="Password must be at least 6 characters!"; return;}
+  try{const cred=await auth.createUserWithEmailAndPassword(email,pass); currentUser=cred.user.uid; await db.ref("usernames/"+currentUser).set(uname); loginMsg.style.color="lime"; loginMsg.textContent="Account created!"; loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block"; await saveProgressOnline();
+  const adminSnap=await db.ref("admins/"+currentUser).once("value"); ownerCommands.style.display=adminSnap.val()?"block":"none";}catch(err){loginMsg.style.color="red"; loginMsg.textContent=err.message;}
+});
 </script>
 </body>
 </html>
