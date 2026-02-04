@@ -68,7 +68,7 @@ background:#222;padding:30px;border-radius:10px;color:white;z-index:200;}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// Firebase config
+// ------------------ Firebase Setup ------------------
 const firebaseConfig = {
 apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
 authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -83,7 +83,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// Global variables
+// ------------------ Variables ------------------
 const loginBox = document.getElementById("loginBox");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
@@ -94,15 +94,11 @@ const ownerCommands = document.getElementById("ownerCommands");
 const goLeaderboardBtn = document.getElementById("goLeaderboardBtn");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-window.addEventListener("resize",()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+window.addEventListener("resize",()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
 
 const notifications = document.getElementById("notifications");
-function showNotification(text){
-  notifications.textContent = text;
-  setTimeout(()=>{notifications.textContent = ""},3000);
-}
+function showNotification(text){notifications.textContent=text;setTimeout(()=>{notifications.textContent=""},3000);}
 
 let currentUser="";
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now(), rebirthCount=0;
@@ -115,13 +111,13 @@ const fireworkSound=document.getElementById("fireworkSound");
 const baseColors=[{color:"hsl(0,100%,60%)",value:1},{color:"hsl(30,100%,60%)",value:2},{color:"hsl(60,100%,60%)",value:3},{color:"hsl(120,100%,60%)",value:4},{color:"hsl(180,100%,60%)",value:5},{color:"hsl(240,100%,60%)",value:6}];
 let colors=[...baseColors];
 
-// Admin list (UIDs)
+// Admin UIDs
 const adminList={
 "FaZgGtIHzVcnSS6c8JAoir9RG8J2":true,
 "BxQ1aTqPndOfHzuX3OzlCcD4pbC3":true
 };
 
-// ------------------ CLASSES ------------------
+// ------------------ Firework Classes ------------------
 class Firework{
   constructor(x,y,colorObj){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;}
   update(){if(this.y<=this.targetY){explode(this.x,this.y,this.colorObj);return true;}this.y-=this.speed;return false;}
@@ -133,7 +129,7 @@ class Particle{
   draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}
 }
 
-// ------------------ FIREWORK LOGIC ------------------
+// ------------------ Firework Functions ------------------
 function getRebirthColors(rebirthCount){
   const scheme=[{base:60},{base:80},{base:100},{base:120}][rebirthCount%4];
   const numColors=Math.min(10+rebirthCount,50);
@@ -141,7 +137,6 @@ function getRebirthColors(rebirthCount){
   for(let i=0;i<numColors;i++){const hue=Math.random()*360;newColors.push({color:`hsl(${hue},${scheme.base}%,60%)`,value:i+1});}
   return newColors;
 }
-
 function explode(x,y,colorObj){
   fireworkSound.currentTime=0;fireworkSound.play();
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
@@ -149,18 +144,13 @@ function explode(x,y,colorObj){
   document.getElementById("money").textContent=money;
   saveProgressOnline(); saveScore();
 }
-
 function launchFirework(x,y){
   const colorIndex=Math.floor(Math.random()*unlockedColors);
   const colorObj=colors[colorIndex];
   fireworks.push(new Firework(x,y,colorObj));
   lastClick=Date.now();
 }
-
-document.addEventListener("click",e=>{
-  if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY);
-});
-
+document.addEventListener("click",e=>{if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY);});
 function animate(){
   ctx.fillStyle="rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
   for(let i=fireworks.length-1;i>=0;i--){if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw();}
@@ -173,28 +163,18 @@ function animate(){
 animate();
 
 // ------------------ SAVE / LOAD ------------------
-async function saveProgressOnline(){
-  if(!currentUser) return;
-  await db.ref("progress/"+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,rebirthPrice,colorPrice,delayPrice,autoAmount,autoSpeed});
-}
-
+async function saveProgressOnline(){if(!currentUser) return; await db.ref("progress/"+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,rebirthPrice,colorPrice,delayPrice,autoAmount,autoSpeed});}
 async function loadProgressOnline(){
   if(!currentUser) return;
-  const snap = await db.ref("progress/"+currentUser).once("value");
-  const p = snap.val();
-  if(p){
-    money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
-    rebirthCount=p.rebirthCount||0; rebirthPrice=p.rebirthPrice||500; colorPrice=p.colorPrice||50;
-    delayPrice=p.delayPrice||100; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
-    colors=[...baseColors,...getRebirthColors(rebirthCount)];
-    if(unlockedColors>colors.length) unlockedColors=colors.length;
-    document.getElementById("money").textContent=money;
-    updateButtons(); startAutoLaunch();
-    checkAdminUI();
-  }
+  const snap=await db.ref("progress/"+currentUser).once("value"); const p=snap.val();
+  if(p){money=p.money||0;unlockedColors=p.unlockedColors||1;clickDelay=p.clickDelay||1200;
+  rebirthCount=p.rebirthCount||0;rebirthPrice=p.rebirthPrice||500;colorPrice=p.colorPrice||50;
+  delayPrice=p.delayPrice||100;autoAmount=p.autoAmount||0;autoSpeed=p.autoSpeed||2.5;
+  colors=[...baseColors,...getRebirthColors(rebirthCount)]; if(unlockedColors>colors.length) unlockedColors=colors.length;
+  document.getElementById("money").textContent=money; updateButtons(); startAutoLaunch(); checkAdminUI();}
 }
 
-// ------------------ BUTTON LOGIC ------------------
+// ------------------ Buttons & Upgrades ------------------
 function updateButtons(){
   document.getElementById("buyColor").textContent=unlockedColors>=colors.length?"MAX":`Buy Color ($${colorPrice})`;
   document.getElementById("reduceDelay").textContent=clickDelay<=100?"MAX":`Reduce Delay ($${delayPrice})`;
@@ -205,7 +185,27 @@ function updateButtons(){
   document.getElementById("unlockedColors").textContent=unlockedColors;
 }
 
-// (add event listeners for buttons...)  
+function startAutoLaunch(){if(autoInterval) clearInterval(autoInterval); if(autoAmount>0) autoInterval=setInterval(()=>{launchFirework(Math.random()*canvas.width,Math.random()*canvas.height/2);},autoSpeed*1000);}
+function checkAdminUI(){ownerCommands.style.display=adminList[currentUser]?"block":"none";}
+
+// ------------------ AUTH ------------------
+auth.onAuthStateChanged(async user=>{
+  if(user){currentUser=user.uid; loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block";
+  await loadProgressOnline();}
+});
+
+loginBtn.addEventListener("click", async()=>{
+  const email=document.getElementById("email").value.trim(); const pass=document.getElementById("password").value.trim();
+  if(!email||!pass){loginMsg.textContent="Enter email & password!";return;}
+  try{const cred=await auth.signInWithEmailAndPassword(email,pass); currentUser=cred.user.uid; loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block"; await loadProgressOnline();}
+  catch(err){loginMsg.textContent=err.message;}
+});
+signupBtn.addEventListener("click", async()=>{
+  const uname=document.getElementById("username").value.trim(); const email=document.getElementById("email").value.trim(); const pass=document.getElementById("password").value.trim();
+  if(!uname||!email||!pass){loginMsg.textContent="Enter all fields!"; return;}
+  try{const cred=await auth.createUserWithEmailAndPassword(email,pass); currentUser=cred.user.uid; await db.ref("usernames/"+currentUser).set(uname); loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block"; await saveProgressOnline();}
+  catch(err){loginMsg.textContent=err.message;}
+});
 
 </script>
 </body>
