@@ -2,19 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Firework Leaderboard</title>
+<title>Firework Simulator Leaderboard</title>
 <style>
-  body { margin:0; font-family:Arial, sans-serif; background:#111; color:#eee; }
-  h1 { text-align:center; margin-top:20px; color:#0ff; text-shadow:0 0 6px #000; }
-  table { margin:20px auto; border-collapse:collapse; width:80%; max-width:800px; }
-  th, td { padding:12px 16px; border-bottom:1px solid #333; text-align:left; }
-  th { background:#222; }
-  tr:nth-child(even) { background:#1a1a1a; }
-  .tag { font-weight:700; padding:2px 6px; border-radius:4px; color:white; }
-  .owner { background:gold; color:#000; }
-  .vip { background:cyan; color:#000; }
-  .regular { background:#555; }
-  #loading { text-align:center; margin-top:50px; color:#0f0; }
+  body { font-family: Arial, sans-serif; background: #111; color: #fff; margin:0; padding:20px; }
+  h1 { text-align:center; margin-bottom:20px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; }
+  th { background: #222; }
+  tr:nth-child(even) { background: #1a1a1a; }
+  .tag.owner { color: orange; font-weight: bold; }
+  .tag.regular { color: #0ff; }
+  .tag.vip { color: gold; font-weight: bold; }
+  #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
 </style>
 </head>
 <body>
@@ -34,10 +33,10 @@
 </table>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// ===== Firebase Config =====
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -50,57 +49,57 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ===== Tag colors =====
-const TAGS = {
-  owner: { name: 'Owner', class: 'owner' },
-  vip: { name: 'VIP', class: 'vip' },
-  regular: { name: 'Regular', class: 'regular' }
-};
-
-// ===== Fallback for known owner/admin UIDs (optional) =====
+/* ===== owner UID fallback ===== */
 const OWNER_UIDS = {
-  "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true,
-  "BxQ1aTqPndOfHzuX3OzlCcD4pbC3": true
+  "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true
 };
 
-// ===== Leaderboard load =====
+/* ===== tag colors & names ===== */
+const TAGS = {
+  owner: { name: "Owner", class: "owner" },
+  vip: { name: "VIP", class: "vip" },
+  regular: { name: "Regular", class: "regular" }
+};
+
 async function loadLeaderboard(){
   const lbBody = document.getElementById('leaderboardBody');
   lbBody.innerHTML = '';
   try {
-    // fetch progress
     const progressSnap = await db.ref('progress').once('value');
     const scoresSnap = await db.ref('scores').once('value');
     const usernamesSnap = await db.ref('usernames').once('value');
+    const usersSnap = await db.ref('users').once('value'); // <-- merged
     const adminsSnap = await db.ref('admins').once('value');
 
     const progress = progressSnap.val() || {};
     const scores = scoresSnap.val() || {};
     const usernames = usernamesSnap.val() || {};
+    const users = usersSnap.val() || {};  // <-- merged
     const admins = adminsSnap.val() || {};
 
-    // combine all UIDs into one array
-    const uids = new Set([...Object.keys(progress), ...Object.keys(scores), ...Object.keys(usernames)]);
+    const uids = new Set([
+      ...Object.keys(progress),
+      ...Object.keys(scores),
+      ...Object.keys(usernames),
+      ...Object.keys(users)
+    ]);
 
     const data = [];
     uids.forEach(uid=>{
       const money = progress[uid]?.money ?? 0;
-      const uname = usernames[uid] ?? 'Unknown';
+      const uname = usernames[uid] ?? users[uid]?.username ?? 'Unknown';
       let tag = 'regular';
       if(admins[uid]) tag = 'owner';
-      else if(OWNER_UIDS[uid]) tag = 'owner'; // fallback owner
+      else if(OWNER_UIDS[uid]) tag = 'owner';
       data.push({ uid, money, uname, tag });
     });
 
-    // sort descending by money
     data.sort((a,b)=>b.money - a.money);
 
-    // populate table
     data.forEach((d,i)=>{
       const tr = document.createElement('tr');
       const rankTd = document.createElement('td'); rankTd.textContent = i+1;
-      const tagTd = document.createElement('td');
-      tagTd.textContent = TAGS[d.tag].name;
+      const tagTd = document.createElement('td'); tagTd.textContent = TAGS[d.tag].name;
       tagTd.className = 'tag ' + TAGS[d.tag].class;
       const unameTd = document.createElement('td'); unameTd.textContent = d.uname;
       const moneyTd = document.createElement('td'); moneyTd.textContent = d.money;
@@ -120,7 +119,7 @@ async function loadLeaderboard(){
   }
 }
 
-// init
+/* load after auth (optional: guest view works) */
 loadLeaderboard();
 </script>
 
