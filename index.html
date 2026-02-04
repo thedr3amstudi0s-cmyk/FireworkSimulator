@@ -1,60 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Firework Simulator</title>
+<meta charset="utf-8" />
+<title>Firework Simulator - Fixed</title>
 <style>
-html,body{margin:0;padding:0;overflow:hidden;font-family:Arial,sans-serif;background:#000;}
-canvas{display:block;background:radial-gradient(circle at bottom,#0a0a0a,#000);}
-#loginBox{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-background:#222;padding:30px;border-radius:10px;color:white;z-index:200;}
-#loginBox input,#loginBox button{display:block;margin:8px 0;padding:10px;width:240px;border-radius:5px;border:none;}
-#loginBox button{background:cyan;color:black;font-weight:bold;cursor:pointer;}
-#loginBox button:hover{background:#0ff;}
-#ui{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:white;z-index:100;text-align:center;}
-#ui button{margin:2px;padding:5px 8px;font-size:14px;cursor:pointer;}
-#ownerCommands{margin-top:8px;display:none;}
-#cooldownBar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:280px;height:18px;background:rgba(255,255,255,0.25);border-radius:9px;}
-#cooldownFill{height:100%;width:0%;background:limegreen;transition:width 0.05s;}
-#resetBtn{position:fixed;top:10px;right:10px;padding:5px 8px;background:red;color:white;border:none;border-radius:5px;display:none;}
-#logoutBtn{position:fixed;top:50px;right:10px;padding:5px 8px;background:orange;color:white;border:none;border-radius:5px;}
-#notifications{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;color:#0ff;font-weight:bold;}
+  html,body { margin:0; padding:0; height:100%; background:#000; font-family:Arial, sans-serif; }
+  canvas { display:block; width:100%; height:100%; background: radial-gradient(circle at bottom,#0a0a0a,#000); }
+  /* Login UI (centered) */
+  #loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+     background:#222; padding:28px; border-radius:10px; color:white; z-index:200; width:280px; }
+  #loginBox input, #loginBox button { display:block; margin:8px 0; padding:10px; width:100%; border-radius:6px; border:none; box-sizing:border-box; }
+  #loginBox button { background:cyan; color:#000; cursor:pointer; font-weight:700; }
+  #loginBox button:hover{ filter:brightness(1.05); }
+
+  /* Game UI (top-left) */
+  #ui { position:fixed; top:10px; left:10px; color:white; z-index:150; }
+  #ui h2{ margin:0 0 8px 0; color:#fff; font-size:18px; }
+  #ui button { margin:4px 4px 4px 0; padding:6px 8px; border-radius:6px; border:none; cursor:pointer; }
+  #ownerCommands{ margin-top:8px; display:none; background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; }
+  #cooldownBar{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.12); border-radius:9px; z-index:160; }
+  #cooldownFill{ height:100%; width:0%; background:limegreen; border-radius:8px; transition:width 0.05s; }
+  #resetBtn { position:fixed; top:10px; right:10px; padding:6px 8px; background:#c0392b; color:white; border:none; border-radius:6px; display:none; z-index:150; }
+  #logoutBtn { position:fixed; top:50px; right:10px; padding:6px 8px; background:orange; color:white; border:none; border-radius:6px; z-index:150; }
+  #notifications { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:300; color:#0ff; font-weight:700; text-shadow:0 0 6px rgba(0,0,0,0.8); pointer-events:none; }
+  /* small texts */
+  #ui p { margin:6px 0; font-size:13px; color:#ddd; }
 </style>
 </head>
 <body>
 
 <canvas id="canvas"></canvas>
 
+<!-- Login box (centered) -->
 <div id="loginBox">
-<h2 style="text-align:center;color:#0ff;">Firework Simulator</h2>
-<input type="text" id="username" placeholder="Username">
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-<button id="loginBtn">Login</button>
-<button id="signupBtn">Sign Up</button>
-<button id="forgotBtn" style="background:#444;color:white;">Forgot Password?</button>
-<p id="loginMsg" style="color:yellow;"></p>
+  <input id="username" placeholder="Username (3-16 chars, optional on login)"/>
+  <input id="email" type="email" placeholder="Email"/>
+  <input id="password" type="password" placeholder="Password"/>
+  <button id="loginBtn">Login</button>
+  <button id="signupBtn">Sign Up</button>
+  <button id="forgotBtn" style="background:#444;color:white;">Forgot Password?</button>
+  <p id="loginMsg" style="color:yellow; margin:6px 0 0 0; font-size:13px;"></p>
 </div>
 
+<!-- Game UI (top-left) -->
 <div id="ui" style="display:none;">
-<h2>Money: $<span id="money">0</span></h2>
-<button id="buyColor">Buy Color ($<span id="colorPrice">50</span>)</button>
-<button id="reduceDelay">Reduce Delay ($<span id="delayPrice">100</span>)</button>
-<button id="rebirth">Rebirth ($<span id="rebirthPrice">500</span>)</button>
-<button id="buyAuto">Buy Auto-Launch ($<span id="autoPrice">200</span>)</button>
-<button id="goLeaderboardBtn">Open Leaderboard</button>
-<p>Unlocked Colors: <span id="unlockedColors">1</span></p>
-<p>Click Delay: <span id="delayDisplay">1200</span> ms</p>
-<p>Firework Money Multiplier: x<span id="moneyMultiplier">1</span></p>
-<p>Auto Speed: <span id="autoSpeedDisplay">2.50</span> sec</p>
-<div id="ownerCommands"><h3>Owner</h3>
-<button id="giveMoneyBtn">Give $1000</button>
-<button id="unlockColorsBtn">Unlock All Colors</button>
-<button id="maxAutoBtn">Max Auto-Launch</button>
-<button id="viewUsersBtn">View Users</button>
-<button id="adminFireworkBtn">Mega Firework (Admin Event)</button>
-<button id="adminFireworkBtnNuke">Nuke (Admin Event)</button>
-</div>
+  <h2>Money: $<span id="money">0</span></h2>
+
+  <div>
+    <button id="buyColor">Buy Color ($<span id="colorPrice">50</span>)</button>
+    <button id="reduceDelay">Reduce Delay ($<span id="delayPrice">100</span>)</button>
+    <button id="rebirth">Rebirth ($<span id="rebirthPrice">500</span>)</button>
+    <button id="buyAuto">Buy Auto-Launch ($<span id="autoPrice">200</span>)</button>
+    <button id="goLeaderboardBtn">Open Leaderboard</button>
+  </div>
+
+  <p>Unlocked Colors: <span id="unlockedColors">1</span></p>
+  <p>Click Delay: <span id="delayDisplay">1200</span> ms</p>
+  <p>Firework Money Multiplier: x<span id="moneyMultiplier">1</span></p>
+  <p>Auto Speed: <span id="autoSpeedDisplay">2.50</span> sec</p>
+
+  <div id="ownerCommands">
+    <strong>Owner</strong><br/>
+    <button id="giveMoneyBtn">Give $1000</button>
+    <button id="unlockColorsBtn">Unlock All Colors</button>
+    <button id="maxAutoBtn">Max Auto-Launch</button>
+    <button id="viewUsersBtn">View Users</button>
+    <button id="adminFireworkBtn">Mega Firework</button>
+    <button id="adminFireworkBtnNuke">NUKE</button>
+  </div>
 </div>
 
 <button id="resetBtn">Reset Progress</button>
@@ -63,148 +76,494 @@ background:#222;padding:30px;border-radius:10px;color:white;z-index:200;}
 <div id="notifications"></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// ------------------ Firebase Setup ------------------
+/* ================== CONFIG ================== */
 const firebaseConfig = {
-apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
-authDomain: "fireworkleaderboard.firebaseapp.com",
-databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com",
-projectId: "fireworkleaderboard",
-storageBucket: "fireworkleaderboard.firebasestorage.app",
-messagingSenderId: "243474267364",
-appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
-measurementId: "G-H07BZY385S"
+  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
+  authDomain: "fireworkleaderboard.firebaseapp.com",
+  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com",
+  projectId: "fireworkleaderboard",
+  storageBucket: "fireworkleaderboard.firebasestorage.app",
+  messagingSenderId: "243474267364",
+  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ------------------ Variables ------------------
-const loginBox = document.getElementById("loginBox");
-const loginBtn = document.getElementById("loginBtn");
-const signupBtn = document.getElementById("signupBtn");
-const loginMsg = document.getElementById("loginMsg");
-const ui = document.getElementById("ui");
-const resetBtn = document.getElementById("resetBtn");
-const ownerCommands = document.getElementById("ownerCommands");
-const goLeaderboardBtn = document.getElementById("goLeaderboardBtn");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-window.addEventListener("resize",()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
+/* ================== GLOBALS ================== */
+const loginBox = document.getElementById('loginBox');
+const loginBtn = document.getElementById('loginBtn');
+const signupBtn = document.getElementById('signupBtn');
+const forgotBtn = document.getElementById('forgotBtn');
+const loginMsg = document.getElementById('loginMsg');
+const ui = document.getElementById('ui');
+const ownerCommands = document.getElementById('ownerCommands');
+const resetBtn = document.getElementById('resetBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const notifications = document.getElementById('notifications');
 
-const notifications = document.getElementById("notifications");
-function showNotification(text){notifications.textContent=text;setTimeout(()=>{notifications.textContent=""},3000);}
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-let currentUser="";
-let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now(), rebirthCount=0;
-let colorPrice=50, delayPrice=100, rebirthPrice=500, autoPrice=200, autoAmount=0, autoSpeed=2.5;
-let fireworks=[], particles=[], autoInterval=null;
-const gravity=0.04;
-const fireworkSound=document.getElementById("fireworkSound");
+const fireworkSound = document.getElementById('fireworkSound');
 
-// Base colors
-const baseColors=[{color:"hsl(0,100%,60%)",value:1},{color:"hsl(30,100%,60%)",value:2},{color:"hsl(60,100%,60%)",value:3},{color:"hsl(120,100%,60%)",value:4},{color:"hsl(180,100%,60%)",value:5},{color:"hsl(240,100%,60%)",value:6}];
-let colors=[...baseColors];
+/* game state */
+let currentUser = "";
+let currentUsername = "";
+let money = 0;
+let unlockedColors = 1;
+let clickDelay = 1200;
+let lastClick = Date.now();
+let rebirthCount = 0;
+let colorPrice = 50, delayPrice = 100, rebirthPrice = 500, autoPrice = 200;
+let autoAmount = 0, autoSpeed = 2.5;
+let fireworks = [], particles = [];
+const gravity = 0.04;
+let autoInterval = null;
 
-// Admin UIDs
-const adminList={
-"FaZgGtIHzVcnSS6c8JAoir9RG8J2":true,
-"BxQ1aTqPndOfHzuX3OzlCcD4pbC3":true
+/* colors */
+const baseColors = [
+  { color:"hsl(0,100%,60%)", value:1},
+  { color:"hsl(30,100%,60%)", value:2},
+  { color:"hsl(60,100%,60%)", value:3},
+  { color:"hsl(120,100%,60%)", value:4},
+  { color:"hsl(180,100%,60%)", value:5},
+  { color:"hsl(240,100%,60%)", value:6}
+];
+let colors = [...baseColors];
+
+/* ===== sample admin fallback (only used if DB read blocked) =====
+   You said you want admins like:
+   FaZgGtIHzVcnSS6c8JAoir9RG8J2 and BxQ1aTqP...
+   We still prefer checking /admins in DB, but this fallback makes dev/testing easier.
+*/
+const ADMIN_FALLBACK = {
+  "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true,
+  "BxQ1aTqPndOfHzuX3OzlCcD4pbC3": true
 };
 
-// ------------------ Firework Classes ------------------
-class Firework{
-  constructor(x,y,colorObj){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;}
-  update(){if(this.y<=this.targetY){explode(this.x,this.y,this.colorObj);return true;}this.y-=this.speed;return false;}
-  draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.colorObj.color;ctx.fill();}
-}
-class Particle{
-  constructor(x,y,colorObj){this.x=x;this.y=y;this.color=colorObj.color;this.speedX=(Math.random()-0.5)*6;this.speedY=(Math.random()-0.5)*6;this.life=100;}
-  update(){this.speedY+=gravity;this.x+=this.speedX;this.y+=this.speedY;this.life--;}
-  draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}
+/* last admin event timestamp — initialize from DB to avoid firing on load */
+let lastAdminTimestamp = 0;
+
+/* ================ helpers ================ */
+function showNotification(text, time = 2500){
+  notifications.textContent = text;
+  notifications.style.opacity = '1';
+  setTimeout(()=>{ notifications.style.opacity = '0'; }, time);
 }
 
-// ------------------ Firework Functions ------------------
-function getRebirthColors(rebirthCount){
-  const scheme=[{base:60},{base:80},{base:100},{base:120}][rebirthCount%4];
-  const numColors=Math.min(10+rebirthCount,50);
-  let newColors=[];
-  for(let i=0;i<numColors;i++){const hue=Math.random()*360;newColors.push({color:`hsl(${hue},${scheme.base}%,60%)`,value:i+1});}
-  return newColors;
+/* ================ Firework classes ================ */
+class Firework {
+  constructor(x, y, colorObj){
+    this.x = x;
+    this.y = canvas.height;
+    this.targetY = y;
+    this.speed = Math.random() * 2 + 4;
+    this.colorObj = colorObj;
+    this.exploded = false;
+  }
+  update(){
+    this.y -= this.speed;
+    if(this.y <= this.targetY && !this.exploded){
+      this.exploded = true;
+      explode(this.x, this.y, this.colorObj);
+      return true; // remove from array
+    }
+    return false;
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = this.colorObj.color;
+    ctx.fill();
+  }
 }
-function explode(x,y,colorObj){
-  fireworkSound.currentTime=0;fireworkSound.play();
-  for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
-  money+=colorObj.value*(rebirthCount+1);
-  document.getElementById("money").textContent=money;
-  saveProgressOnline(); saveScore();
+
+class Particle {
+  constructor(x, y, colorObj){
+    this.x = x;
+    this.y = y;
+    this.color = colorObj.color;
+    this.vx = (Math.random() - 0.5) * 6;
+    this.vy = (Math.random() - 0.5) * 6;
+    this.life = 100;
+  }
+  update(){
+    this.vy += gravity;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life--;
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  }
 }
-function launchFirework(x,y){
-  const colorIndex=Math.floor(Math.random()*unlockedColors);
-  const colorObj=colors[colorIndex];
-  fireworks.push(new Firework(x,y,colorObj));
-  lastClick=Date.now();
+
+/* ================ core functions ================ */
+function explode(x, y, colorObj){
+  try{ fireworkSound.currentTime = 0; fireworkSound.play(); } catch(e){}
+  for(let i=0;i<80;i++) particles.push(new Particle(x, y, colorObj));
+  money += colorObj.value * (rebirthCount + 1);
+  document.getElementById('money').textContent = money;
+  // save on action (safe)
+  saveProgressOnline().catch(()=>{/* ignore save errors */});
 }
-document.addEventListener("click",e=>{if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY);});
+
+function launchFirework(x, y){
+  // ensure colors array available
+  if(colors.length === 0) colors = [...baseColors];
+  const max = Math.min(unlockedColors, colors.length);
+  const colorIndex = Math.floor(Math.random() * Math.max(1, max));
+  const colorObj = colors[colorIndex];
+  fireworks.push(new Firework(x, y, colorObj));
+  lastClick = Date.now();
+}
+
+document.addEventListener('click', (e) => {
+  if(Date.now() - lastClick >= clickDelay) launchFirework(e.clientX, e.clientY);
+});
+
+/* animation loop */
 function animate(){
-  ctx.fillStyle="rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-  for(let i=fireworks.length-1;i>=0;i--){if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw();}
-  for(let i=particles.length-1;i>=0;i--){particles[i].update();particles[i].draw();if(particles[i].life<=0) particles.splice(i,1);}
-  const elapsed=Date.now()-lastClick; const fill=Math.min(100,(elapsed/clickDelay)*100);
-  document.getElementById("cooldownFill").style.width=fill+"%";
-  document.getElementById("moneyMultiplier").textContent=(rebirthCount+1);
+  ctx.fillStyle = "rgba(0,0,0,0.2)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  for(let i = fireworks.length - 1; i >= 0; i--){
+    if(fireworks[i].update()) fireworks.splice(i,1);
+    else fireworks[i].draw();
+  }
+  for(let i = particles.length - 1; i >= 0; i--){
+    particles[i].update();
+    particles[i].draw();
+    if(particles[i].life <= 0) particles.splice(i,1);
+  }
+
+  // cooldown bar
+  const elapsed = Date.now() - lastClick;
+  const pct = Math.min(100, (elapsed / clickDelay) * 100);
+  document.getElementById('cooldownFill').style.width = pct + '%';
+  // multiplier
+  document.getElementById('moneyMultiplier').textContent = (rebirthCount + 1);
+
   requestAnimationFrame(animate);
 }
 animate();
 
-// ------------------ SAVE / LOAD ------------------
-async function saveProgressOnline(){if(!currentUser) return; await db.ref("progress/"+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,rebirthPrice,colorPrice,delayPrice,autoAmount,autoSpeed});}
+/* ================ upgrades & ui ================ */
+function getRebirthColors(rebirthCount){
+  const scheme = [{base:60},{base:80},{base:100},{base:120}][rebirthCount%4];
+  const num = Math.min(10 + rebirthCount, 50);
+  const out = [];
+  for(let i=0;i<num;i++){
+    const hue = Math.floor(Math.random()*360);
+    out.push({ color: `hsl(${hue},${scheme.base}%,60%)`, value: i+1 });
+  }
+  return out;
+}
+
+function updateButtons(){
+  document.getElementById('buyColor').textContent = unlockedColors >= colors.length ? 'MAX' : `Buy Color ($${colorPrice})`;
+  document.getElementById('reduceDelay').textContent = clickDelay <= 100 ? 'MAX' : `Reduce Delay ($${delayPrice})`;
+  document.getElementById('buyAuto').textContent = autoAmount >= 3 ? 'MAX' : `Buy Auto-Launch ($${autoPrice})`;
+  document.getElementById('rebirth').textContent = `Rebirth ($${rebirthPrice})`;
+  document.getElementById('delayDisplay').textContent = clickDelay;
+  document.getElementById('autoSpeedDisplay').textContent = autoSpeed.toFixed(2);
+  document.getElementById('unlockedColors').textContent = unlockedColors;
+}
+
+/* button handlers */
+document.getElementById('buyColor').addEventListener('click', ()=>{
+  if(money >= colorPrice && unlockedColors < colors.length){
+    money -= colorPrice;
+    unlockedColors++;
+    colorPrice = Math.floor(colorPrice * 1.7);
+    document.getElementById('money').textContent = money;
+    updateButtons();
+    saveProgressOnline().catch(()=>{});
+    showNotification('Color unlocked!');
+  }
+});
+document.getElementById('reduceDelay').addEventListener('click', ()=>{
+  if(money >= delayPrice && clickDelay > 100){
+    money -= delayPrice;
+    clickDelay = Math.max(100, clickDelay - 100);
+    delayPrice = Math.floor(delayPrice * 1.7);
+    document.getElementById('money').textContent = money;
+    updateButtons();
+    saveProgressOnline().catch(()=>{});
+    showNotification('Delay reduced!');
+  }
+});
+document.getElementById('buyAuto').addEventListener('click', ()=>{
+  if(money >= autoPrice && autoAmount < 3){
+    money -= autoPrice;
+    autoAmount++;
+    autoSpeed /= 1.2;
+    autoPrice = Math.floor(autoPrice * 1.7);
+    document.getElementById('money').textContent = money;
+    updateButtons();
+    saveProgressOnline().catch(()=>{});
+    startAutoLaunch();
+    showNotification('Auto-launch purchased!');
+  }
+});
+document.getElementById('rebirth').addEventListener('click', async ()=>{
+  if(money < rebirthPrice){ showNotification(`Need $${rebirthPrice} to rebirth!`); return; }
+  if(!confirm(`Are you sure you want to rebirth for $${rebirthPrice}?`)) return;
+  money = 0;
+  rebirthCount++;
+  unlockedColors = 1;
+  clickDelay = 1200;
+  autoAmount = 0;
+  autoSpeed = 2.5;
+  autoPrice = 200;
+  colorPrice = 50;
+  delayPrice = 100;
+  rebirthPrice = Math.floor(500 * Math.pow(1.5, rebirthCount));
+  colors = [...baseColors, ...getRebirthColors(rebirthCount)];
+  updateButtons();
+  document.getElementById('money').textContent = money;
+  await saveProgressOnline().catch(()=>{});
+  saveScore();
+  startAutoLaunch();
+  showNotification('Rebirth complete!');
+});
+
+/* admin UI buttons */
+document.getElementById('giveMoneyBtn').addEventListener('click', ()=>{ money += 1000; document.getElementById('money').textContent = money; saveProgressOnline().catch(()=>{}); });
+document.getElementById('unlockColorsBtn').addEventListener('click', ()=>{ unlockedColors = colors.length; updateButtons(); saveProgressOnline().catch(()=>{}); });
+document.getElementById('maxAutoBtn').addEventListener('click', ()=>{ autoAmount = 3; autoSpeed = 0.1; updateButtons(); startAutoLaunch(); saveProgressOnline().catch(()=>{}); });
+document.getElementById('viewUsersBtn').addEventListener('click', ()=>{ showNotification('Check Firebase console for users.'); });
+
+document.getElementById('adminFireworkBtn').addEventListener('click', async ()=>{
+  // verify currentUser is admin (DB) or fallback
+  try {
+    const snap = await db.ref('admins/' + currentUser).once('value');
+    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]) { showNotification('Not admin'); return; }
+    const event = { type: 'megaFirework', message: 'Admin launched a mega firework!', timestamp: Date.now() };
+    await db.ref('adminEvents/latest').set(event);
+  } catch(e){
+    // if DB rules block admin reads/writes, fall back to local fallback admin list
+    if(ADMIN_FALLBACK[currentUser]) {
+      const event = { type: 'megaFirework', message: 'Admin launched a mega firework!', timestamp: Date.now() };
+      try{ await db.ref('adminEvents/latest').set(event); }catch(err){ showNotification('Permission denied writing admin event'); return; }
+    } else {
+      showNotification('Not admin (or DB blocked)');
+      return;
+    }
+  }
+});
+document.getElementById('adminFireworkBtnNuke').addEventListener('click', async ()=>{
+  try {
+    const snap = await db.ref('admins/' + currentUser).once('value');
+    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]) { showNotification('Not admin'); return; }
+    const event = { type: 'NUKE', message: 'Admin launched a NUKE!', timestamp: Date.now() };
+    await db.ref('adminEvents/latest').set(event);
+  } catch(e){
+    if(ADMIN_FALLBACK[currentUser]) {
+      const event = { type: 'NUKE', message: 'Admin launched a NUKE!', timestamp: Date.now() };
+      try{ await db.ref('adminEvents/latest').set(event); }catch(err){ showNotification('Permission denied writing admin event'); return; }
+    } else {
+      showNotification('Not admin (or DB blocked)');
+      return;
+    }
+  }
+});
+
+/* ================ admin events listener (init safely) ================ */
+async function initAdminEventsListener(){
+  // set lastAdminTimestamp from DB once (so existing event won't trigger)
+  try {
+    const snap = await db.ref('adminEvents/latest').once('value');
+    const val = snap.val();
+    if(val && val.timestamp) lastAdminTimestamp = val.timestamp;
+  } catch(e) {
+    // permission denied or none — keep 0 (then listener will still need to check <= lastAdminTimestamp)
+    lastAdminTimestamp = Date.now(); // safest: ignore older events
+  }
+
+  db.ref('adminEvents/latest').on('value', snapshot=>{
+    const event = snapshot.val();
+    if(!event || !event.timestamp) return;
+    if(event.timestamp <= lastAdminTimestamp) return;
+    lastAdminTimestamp = event.timestamp;
+    if(event.type === 'megaFirework'){
+      for(let i=0;i<20;i++) launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2);
+      showNotification(event.message || 'Mega Firework!');
+    } else if(event.type === 'NUKE'){
+      for(let i=0;i<200;i++) launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2);
+      showNotification(event.message || 'NUKE!');
+    }
+  });
+}
+
+/* ================ leaderboard / score ================ */
+function saveScore(){
+  if(!currentUser) return;
+  db.ref('scores/' + currentUser).set({ money, rebirthCount, timestamp: Date.now() }).catch(()=>{});
+}
+
+/* ================ save/load progress ================ */
+async function saveProgressOnline(){
+  if(!currentUser) return;
+  const progress = {
+    money, unlockedColors, clickDelay, rebirthCount, rebirthPrice, colorPrice, delayPrice, autoAmount, autoSpeed
+  };
+  await db.ref('progress/' + currentUser).set(progress);
+}
+
 async function loadProgressOnline(){
   if(!currentUser) return;
-  const snap=await db.ref("progress/"+currentUser).once("value"); const p=snap.val();
-  if(p){money=p.money||0;unlockedColors=p.unlockedColors||1;clickDelay=p.clickDelay||1200;
-  rebirthCount=p.rebirthCount||0;rebirthPrice=p.rebirthPrice||500;colorPrice=p.colorPrice||50;
-  delayPrice=p.delayPrice||100;autoAmount=p.autoAmount||0;autoSpeed=p.autoSpeed||2.5;
-  colors=[...baseColors,...getRebirthColors(rebirthCount)]; if(unlockedColors>colors.length) unlockedColors=colors.length;
-  document.getElementById("money").textContent=money; updateButtons(); startAutoLaunch(); checkAdminUI();}
+  try {
+    const snap = await db.ref('progress/' + currentUser).once('value');
+    const p = snap.val();
+    if(p){
+      // load saved fields
+      money = ('money' in p) ? p.money : 0;
+      unlockedColors = ('unlockedColors' in p) ? p.unlockedColors : 1;
+      clickDelay = ('clickDelay' in p) ? p.clickDelay : 1200;
+      rebirthCount = ('rebirthCount' in p) ? p.rebirthCount : 0;
+      colorPrice = ('colorPrice' in p) ? p.colorPrice : 50;
+      delayPrice = ('delayPrice' in p) ? p.delayPrice : 100;
+      autoAmount = ('autoAmount' in p) ? p.autoAmount : 0;
+      autoSpeed = ('autoSpeed' in p) ? p.autoSpeed : 2.5;
+      // derive rebirthPrice (use saved if exists else compute)
+      rebirthPrice = ('rebirthPrice' in p) ? p.rebirthPrice : Math.floor(500 * Math.pow(1.5, rebirthCount));
+      // rebuild colors
+      colors = [...baseColors, ...getRebirthColors(rebirthCount)];
+      if(unlockedColors > colors.length) unlockedColors = colors.length;
+      // update UI
+      document.getElementById('money').textContent = money;
+      updateButtons();
+      startAutoLaunch();
+      showNotification('Progress loaded');
+    } else {
+      // no progress for this account — keep defaults (do NOT write them to DB automatically)
+      showNotification('No saved progress for this account');
+    }
+  } catch(e){
+    // read failed (rules), preserve local defaults but continue
+    console.error('loadProgressOnline error', e);
+    showNotification('Could not read progress (DB rules?)');
+  }
 }
 
-// ------------------ Buttons & Upgrades ------------------
-function updateButtons(){
-  document.getElementById("buyColor").textContent=unlockedColors>=colors.length?"MAX":`Buy Color ($${colorPrice})`;
-  document.getElementById("reduceDelay").textContent=clickDelay<=100?"MAX":`Reduce Delay ($${delayPrice})`;
-  document.getElementById("buyAuto").textContent=autoAmount>=3?"MAX":`Buy Auto-Launch ($${autoPrice})`;
-  document.getElementById("rebirth").textContent=`Rebirth ($${rebirthPrice})`;
-  document.getElementById("delayDisplay").textContent=clickDelay;
-  document.getElementById("autoSpeedDisplay").textContent=autoSpeed.toFixed(2);
-  document.getElementById("unlockedColors").textContent=unlockedColors;
+/* ================ auth flow ================ */
+auth.onAuthStateChanged(async (user) => {
+  if(user){
+    currentUser = user.uid;
+    try {
+      const unameSnap = await db.ref('usernames/' + currentUser).once('value');
+      currentUsername = unameSnap.val() || '';
+    } catch(e) {
+      currentUsername = '';
+    }
+    loginBox.style.display = 'none';
+    ui.style.display = 'block';
+    resetBtn.style.display = 'block';
+    logoutBtn.style.display = 'block';
+    // load progress and admin info AFTER auth
+    await loadProgressOnline();
+    // check admin visibility: try DB first, fallback to local list
+    try {
+      const adminSnap = await db.ref('admins/' + currentUser).once('value');
+      const isAdmin = !!adminSnap.val();
+      ownerCommands.style.display = isAdmin ? 'block' : 'none';
+    } catch(e){
+      // permission denied reading /admins — fallback to local list
+      ownerCommands.style.display = ADMIN_FALLBACK[currentUser] ? 'block' : 'none';
+    }
+    // init admin events listener (safe)
+    initAdminEventsListener();
+  } else {
+    // no user: show login box
+    currentUser = '';
+    currentUsername = '';
+    ui.style.display = 'none';
+    loginBox.style.display = 'block';
+    resetBtn.style.display = 'none';
+    logoutBtn.style.display = 'none';
+    ownerCommands.style.display = 'none';
+  }
+});
+
+/* login / signup handlers */
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('password').value;
+  if(!email || !pass) { loginMsg.textContent = 'Enter email & password!'; return; }
+  loginMsg.textContent = 'Signing in...';
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    currentUser = cred.user.uid;
+    loginMsg.textContent = '';
+    // auth.onAuthStateChanged will handle loading
+  } catch(err) {
+    loginMsg.textContent = err.message;
+  }
+});
+
+document.getElementById('signupBtn').addEventListener('click', async ()=>{
+  const uname = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('password').value;
+  if(!uname || !email || !pass) { loginMsg.textContent = 'Enter all fields!'; return; }
+  if(pass.length < 6) { loginMsg.textContent = 'Password must be at least 6 chars'; return; }
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    currentUser = cred.user.uid;
+    // store username
+    await db.ref('usernames/' + currentUser).set(uname);
+    loginMsg.textContent = 'Account created';
+    // auth.onAuthStateChanged will do further loading
+  } catch(err) {
+    loginMsg.textContent = err.message;
+  }
+});
+
+document.getElementById('forgotBtn').addEventListener('click', ()=>{
+  const email = document.getElementById('email').value.trim();
+  if(!email){ loginMsg.textContent = 'Enter email to reset'; return; }
+  auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent = 'Password reset sent'; }).catch(err=>{ loginMsg.textContent = err.message; });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  if(!confirm('Log out?')) return;
+  auth.signOut().then(()=>{ showNotification('Logged out'); }).catch(err=>{ showNotification('Logout error: ' + err.message); });
+});
+
+/* reset progress button */
+resetBtn.addEventListener('click', async ()=>{
+  if(!confirm('Reset progress?')) return;
+  money = 0; unlockedColors = 1; clickDelay = 1200; rebirthCount = 0;
+  colorPrice = 50; delayPrice = 100; rebirthPrice = 500; autoAmount = 0; autoSpeed = 2.5;
+  colors = [...baseColors];
+  updateButtons();
+  document.getElementById('money').textContent = money;
+  try { await saveProgressOnline(); saveScore(); showNotification('Progress reset'); } catch(e){ showNotification('Could not save reset'); }
+});
+
+/* start auto-launch */
+function startAutoLaunch(){
+  if(autoInterval) clearInterval(autoInterval);
+  if(autoAmount > 0) autoInterval = setInterval(()=>{ launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2); }, autoSpeed * 1000);
 }
 
-function startAutoLaunch(){if(autoInterval) clearInterval(autoInterval); if(autoAmount>0) autoInterval=setInterval(()=>{launchFirework(Math.random()*canvas.width,Math.random()*canvas.height/2);},autoSpeed*1000);}
-function checkAdminUI(){ownerCommands.style.display=adminList[currentUser]?"block":"none";}
-
-// ------------------ AUTH ------------------
-auth.onAuthStateChanged(async user=>{
-  if(user){currentUser=user.uid; loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block";
-  await loadProgressOnline();}
-});
-
-loginBtn.addEventListener("click", async()=>{
-  const email=document.getElementById("email").value.trim(); const pass=document.getElementById("password").value.trim();
-  if(!email||!pass){loginMsg.textContent="Enter email & password!";return;}
-  try{const cred=await auth.signInWithEmailAndPassword(email,pass); currentUser=cred.user.uid; loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block"; await loadProgressOnline();}
-  catch(err){loginMsg.textContent=err.message;}
-});
-signupBtn.addEventListener("click", async()=>{
-  const uname=document.getElementById("username").value.trim(); const email=document.getElementById("email").value.trim(); const pass=document.getElementById("password").value.trim();
-  if(!uname||!email||!pass){loginMsg.textContent="Enter all fields!"; return;}
-  try{const cred=await auth.createUserWithEmailAndPassword(email,pass); currentUser=cred.user.uid; await db.ref("usernames/"+currentUser).set(uname); loginBox.style.display="none"; ui.style.display="block"; resetBtn.style.display="block"; await saveProgressOnline();}
-  catch(err){loginMsg.textContent=err.message;}
+/* leaderboard open (keeps original behavior of opening a page) */
+document.getElementById('goLeaderboardBtn').addEventListener('click', ()=>{
+  window.open('fireworkleaderboard.html', '_blank');
 });
 
 </script>
