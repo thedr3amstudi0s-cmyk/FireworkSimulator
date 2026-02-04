@@ -13,6 +13,7 @@
   .tag.owner { color: orange; font-weight: bold; }
   .tag.regular { color: #0ff; }
   .tag.vip { color: gold; font-weight: bold; }
+  .tag.streamer { color: #981ab6; font-weight: bold; }
   #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
 </style>
 </head>
@@ -58,6 +59,7 @@ const OWNER_UIDS = {
 const TAGS = {
   owner: { name: "Owner", class: "owner" },
   vip: { name: "VIP", class: "vip" },
+  streamer: { name: "STREAMER", class: "streamer" },
   regular: { name: "Regular", class: "regular" }
 };
 
@@ -91,6 +93,8 @@ async function loadLeaderboard(){
       let tag = 'regular';
       if(admins[uid]) tag = 'owner';
       else if(OWNER_UIDS[uid]) tag = 'owner';
+      else if(someConditionForStreamer(uid)) tag = 'streamer';
+
       data.push({ uid, money, uname, tag });
     });
 
@@ -125,3 +129,4 @@ loadLeaderboard();
 
 </body>
 </html>
+
