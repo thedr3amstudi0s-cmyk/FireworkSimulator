@@ -88,7 +88,7 @@ const db = firebase.database();
 // -------- ADMIN SYSTEM --------
 const ADMIN_UIDS = {
   "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true
-  // add more UIDs here if desired (UI only)
+  // Add more UIDs here for more admins
 };
 
 function isAdmin(user) {
@@ -103,32 +103,83 @@ let autoAmount = 0, autoSpeed = 2.5, autoPrice = 200;
 let fireworks = [], particles = [];
 let autoInterval = null;
 
-let lastAdminTimestamp =
-  Number(localStorage.getItem("lastAdminTimestamp")) || 0;
+let lastAdminTimestamp = Number(localStorage.getItem("lastAdminTimestamp")) || 0;
+
+// -------- COLORS --------
+const baseColors = [
+  { color: "hsl(0,100%,60%)", value: 1 },
+  { color: "hsl(30,100%,60%)", value: 2 },
+  { color: "hsl(60,100%,60%)", value: 3 },
+  { color: "hsl(120,100%,60%)", value: 4 },
+  { color: "hsl(180,100%,60%)", value: 5 },
+  { color: "hsl(240,100%,60%)", value: 6 }
+];
+
+let colors = [...baseColors];
+
+function getRebirthColors(rebirthCount) {
+  const scheme = [{ base: 60 }, { base: 80 }, { base: 100 }, { base: 120 }][rebirthCount % 4];
+  const numColors = Math.min(10 + rebirthCount, 50);
+  let newColors = [];
+  for (let i = 0; i < numColors; i++) {
+    const hue = Math.random() * 360;
+    newColors.push({ color: `hsl(${hue},${scheme.base}%,60%)`, value: i + 1 });
+  }
+  return newColors;
+}
 
 // -------- CANVAS --------
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
-addEventListener("resize", () => {
+window.addEventListener("resize", () => {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
 });
 
-// -------- AUTH --------
-auth.onAuthStateChanged(async user => {
-  if (!user) return;
+// -------- IN-GAME NOTIFICATIONS --------
+const notifContainer = document.createElement("div");
+notifContainer.id = "notifications";
+notifContainer.style.cssText = `
+  position: fixed; top: 20px; right: 20px; width: 250px; z-index: 9999;
+`;
+document.body.appendChild(notifContainer);
 
-  currentUser = user.uid;
-  loginBox.style.display = "none";
-  ui.style.display = "block";
-  resetBtn.style.display = "block";
+function showNotification(message, duration = 3000) {
+  const notif = document.createElement("div");
+  notif.textContent = message;
+  notif.style.cssText = `
+    background: rgba(0,0,0,0.8);
+    color: #0ff;
+    padding: 8px 12px;
+    margin-top: 6px;
+    border-radius: 6px;
+    font-family: Arial;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  `;
+  notifContainer.appendChild(notif);
+  requestAnimationFrame(() => notif.style.opacity = 1);
+  setTimeout(() => {
+    notif.style.opacity = 0;
+    setTimeout(() => notifContainer.removeChild(notif), 300);
+  }, duration);
+}
 
-  await loadProgressOnline();
+// -------- PLAYER RANKS --------
+function getPlayerRank(rebirthCount, money) {
+  if (rebirthCount >= 10) return "Streamer";
+  if (rebirthCount >= 5) return "YouTuber";
+  if (money >= 10000) return "Popular";
+  return "Novice";
+}
 
-  ownerCommands.style.display = isAdmin(user) ? "block" : "none";
-});
+function updateRankDisplay() {
+  const rank = getPlayerRank(rebirthCount, money);
+  document.getElementById("rankDisplay").textContent = rank;
+}
 
 // -------- FIREWORK LOGIC --------
 class Firework {
@@ -179,20 +230,38 @@ class Particle {
 }
 
 function explode(x, y, colorObj) {
-  for (let i = 0; i < 80; i++) {
-    particles.push(new Particle(x, y, colorObj));
-  }
+  for (let i = 0; i < 80; i++) particles.push(new Particle(x, y, colorObj));
   money += colorObj.value * (rebirthCount + 1);
   document.getElementById("money").textContent = money;
+  updateRankDisplay();
+  showNotification(`+${colorObj.value * (rebirthCount + 1)} money`);
   saveProgressOnline();
 }
 
 function launchFirework(x, y) {
   const colorIndex = Math.floor(Math.random() * unlockedColors);
-  fireworks.push(new Firework(x, y, colors[colorIndex]));
+  const colorObj = colors[colorIndex];
+  fireworks.push(new Firework(x, y, colorObj));
   lastClick = Date.now();
 }
 
+// Click to launch
+document.addEventListener("click", e => {
+  if (Date.now() - lastClick >= clickDelay) {
+    launchFirework(e.clientX, e.clientY);
+  }
+});
+
+// Auto-launch
+function startAutoLaunch() {
+  if (autoInterval) clearInterval(autoInterval);
+  if (autoAmount > 0)
+    autoInterval = setInterval(() => {
+      launchFirework(Math.random() * canvas.width, Math.random() * canvas.height / 2);
+    }, autoSpeed * 1000);
+}
+
+// Animation loop
 function animate() {
   ctx.fillStyle = "rgba(0,0,0,0.2)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -210,14 +279,13 @@ function animate() {
 }
 animate();
 
-// -------- ADMIN EVENT BROADCAST --------
+// -------- ADMIN EVENTS --------
 function sendAdminEvent(type, message) {
   const user = auth.currentUser;
   if (!isAdmin(user)) {
-    alert("Not authorized");
+    showNotification("Not authorized");
     return;
   }
-
   db.ref("adminEvents/latest").set({
     type,
     message,
@@ -226,33 +294,51 @@ function sendAdminEvent(type, message) {
   });
 }
 
-adminFireworkBtn.onclick = () => {
-  sendAdminEvent("megaFirework", "An admin launched a mega firework!");
-};
+adminFireworkBtn.onclick = () => sendAdminEvent("megaFirework", "An admin launched a mega firework!");
+adminFireworkBtnNuke.onclick = () => sendAdminEvent("NUKE", "⚠️ ADMIN NUKE ⚠️");
 
-adminFireworkBtnNuke.onclick = () => {
-  sendAdminEvent("NUKE", "⚠️ ADMIN NUKE ⚠️");
-};
-
-// -------- ADMIN EVENT LISTENER --------
 db.ref("adminEvents/latest").on("value", snapshot => {
   const event = snapshot.val();
-  if (!event) return;
-  if (event.timestamp <= lastAdminTimestamp) return;
+  if (!event || event.timestamp <= lastAdminTimestamp) return;
 
   lastAdminTimestamp = event.timestamp;
   localStorage.setItem("lastAdminTimestamp", lastAdminTimestamp);
 
   const count = event.type === "NUKE" ? 200 : 20;
-  for (let i = 0; i < count; i++) {
-    launchFirework(
-      Math.random() * canvas.width,
-      Math.random() * canvas.height / 2
-    );
-  }
+  for (let i = 0; i < count; i++) launchFirework(Math.random() * canvas.width, Math.random() * canvas.height / 2);
 
-  alert(event.message);
+  showNotification(event.message);
 });
+
+// -------- ONLINE SAVE/LOAD --------
+async function saveProgressOnline() {
+  if (!currentUser) return;
+  const progress = { money, unlockedColors, clickDelay, rebirthCount, rebirthPrice, colorPrice, delayPrice, autoAmount, autoSpeed };
+  await db.ref("progress/" + currentUser).set(progress);
+}
+
+async function loadProgressOnline() {
+  if (!currentUser) return;
+  const snap = await db.ref("progress/" + currentUser).once("value");
+  const p = snap.val();
+  if (p) {
+    money = p.money || 0;
+    unlockedColors = p.unlockedColors || 1;
+    clickDelay = p.clickDelay || 1200;
+    rebirthCount = p.rebirthCount || 0;
+    rebirthPrice = p.rebirthPrice || 500;
+    colorPrice = p.colorPrice || 50;
+    delayPrice = p.delayPrice || 100;
+    autoAmount = p.autoAmount || 0;
+    autoSpeed = p.autoSpeed || 2.5;
+    colors = [...baseColors, ...getRebirthColors(rebirthCount)];
+    if (unlockedColors > colors.length) unlockedColors = colors.length;
+    document.getElementById("money").textContent = money;
+    updateRankDisplay();
+    startAutoLaunch();
+  }
+}
 </script>
 </body>
 </html>
+
