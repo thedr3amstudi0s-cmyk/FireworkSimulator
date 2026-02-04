@@ -25,6 +25,13 @@
   #notifications { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:300; color:#0ff; font-weight:700; text-shadow:0 0 6px rgba(0,0,0,0.8); pointer-events:none; }
   /* small texts */
   #ui p { margin:6px 0; font-size:13px; color:#ddd; }
+
+  /* Inventory UI */
+  #tagInventory { margin-top:10px; background:rgba(255,255,255,0.02); padding:8px; border-radius:8px; max-width:320px; }
+  #tagInventory h4 { margin:0 0 6px 0; color:#fff; font-size:14px; }
+  #tagInventory .tagRow { margin:6px 0; font-size:13px; color:#ddd; }
+  #tagInventory .tagName { color:#0ff; font-weight:700; margin-right:6px; }
+  #tagInventory .tagDesc { color:#aaa; font-style:italic; display:block; margin-top:2px; }
 </style>
 </head>
 <body>
@@ -68,6 +75,14 @@
     <button id="adminFireworkBtn">Mega Firework</button>
     <button id="adminFireworkBtnNuke">NUKE</button>
   </div>
+
+  <!-- ---------- TAG INVENTORY (ADDED) ---------- -->
+  <div id="tagInventory" style="display:none;">
+    <h4>Tag Inventory</h4>
+    <div id="tagInventoryList"></div>
+  </div>
+  <!-- ---------- END TAG INVENTORY ---------- -->
+
 </div>
 
 <button id="resetBtn">Reset Progress</button>
@@ -151,7 +166,14 @@ const ADMIN_FALLBACK = {
   "BxQ1aTqPndOfHzuX3OzlCcD4pbC3": true
 };
 
-/* last admin event timestamp — initialize from DB to avoid firing on load */
+/* TAGS INFO (easy to add new tags here) */
+const TAGS_INFO = {
+  owner: { name: "Owner", description: "Assigned to admins (managed in /admins)" },
+  vip: { name: "VIP", description: "Give to supporters — can be purchased/given" },
+  streamer: { name: "Streamer", description: "Given to verified streamers" },
+  regular: { name: "Regular", description: "Default player tag" }
+};
+
 let lastAdminTimestamp = 0;
 
 /* ================ helpers ================ */
@@ -485,6 +507,70 @@ auth.onAuthStateChanged(async (user) => {
       // permission denied reading /admins — fallback to local list
       ownerCommands.style.display = ADMIN_FALLBACK[currentUser] ? 'block' : 'none';
     }
+
+    // ---------- load tags UI (inventory) ----------
+    async function loadTagsUI(){
+      const invDiv = document.getElementById('tagInventory');
+      const invList = document.getElementById('tagInventoryList');
+      invList.innerHTML = '';
+      try {
+        // read user's tags node (expected to be object like { vip: true, streamer: true })
+        const snap = await db.ref('tags/' + currentUser).once('value');
+        const owned = snap.val() || {};
+        // read activeTag if present
+        let activeTag = null;
+        try {
+          const activeSnap = await db.ref('activeTag/' + currentUser).once('value');
+          activeTag = activeSnap.val();
+        } catch(e){ /* ignore */ }
+
+        // show inventory
+        for(const key in TAGS_INFO){
+          const info = TAGS_INFO[key];
+          const row = document.createElement('div');
+          row.className = 'tagRow';
+          const has = !!owned[key];
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'tagName';
+          nameSpan.textContent = info.name;
+          row.appendChild(nameSpan);
+          const status = document.createElement('span');
+          status.textContent = has ? 'Owned' : 'Locked';
+          status.style.marginRight = '8px';
+          status.style.color = has ? 'lightgreen' : 'lightcoral';
+          row.appendChild(status);
+          const desc = document.createElement('div');
+          desc.className = 'tagDesc';
+          desc.textContent = info.description;
+          row.appendChild(desc);
+
+          if(activeTag && activeTag === key){
+            const activeBadge = document.createElement('div');
+            activeBadge.textContent = 'Equipped';
+            activeBadge.style.fontSize='12px';
+            activeBadge.style.color='yellow';
+            row.appendChild(activeBadge);
+          }
+
+          invList.appendChild(row);
+        }
+        invDiv.style.display = 'block';
+      } catch(e){
+        console.error('loadTagsUI error', e);
+        // hide inventory if read fails
+        // invDiv.style.display = 'none'; (still show description available)
+        const invErr = document.createElement('div');
+        invErr.textContent = 'Could not load tags (DB rules?)';
+        invErr.style.color = 'red';
+        invList.appendChild(invErr);
+        invDiv.style.display = 'block';
+      }
+    }
+
+    // call it
+    loadTagsUI().catch(()=>{});
+    // ---------- end tags UI ----------
+
     // init admin events listener (safe)
     initAdminEventsListener();
   } else {
@@ -496,6 +582,8 @@ auth.onAuthStateChanged(async (user) => {
     resetBtn.style.display = 'none';
     logoutBtn.style.display = 'none';
     ownerCommands.style.display = 'none';
+    // hide tag inventory
+    try { document.getElementById('tagInventory').style.display = 'none'; } catch(e){}
   }
 });
 
@@ -566,7 +654,8 @@ document.getElementById('goLeaderboardBtn').addEventListener('click', ()=>{
   window.open('fireworkleaderboard.html', '_blank');
 });
 
+/* end of your original file content (no lines removed) */
+
 </script>
 </body>
 </html>
-
