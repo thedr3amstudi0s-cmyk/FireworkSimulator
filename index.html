@@ -157,9 +157,6 @@ const baseColors = [
 let colors = [...baseColors];
 
 /* ===== sample admin fallback (only used if DB read blocked) =====
-   You said you want admins like:
-   FaZgGtIHzVcnSS6c8JAoir9RG8J2 and BxQ1aTqP...
-   We still prefer checking /admins in DB, but this fallback makes dev/testing easier.
 */
 const ADMIN_FALLBACK = {
   "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true,
@@ -775,6 +772,7 @@ async function loadTagsUI() {
 </script>
 </body>
 </html>
+
 
 
 
