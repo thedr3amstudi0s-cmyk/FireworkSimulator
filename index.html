@@ -282,6 +282,7 @@ async function initAdminEventsListener(){
       lastAdminTimestamp=val.timestamp;
       showNotification(`ADMIN EVENT: ${val.type}`);
       if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:100}));
+      if(val.type==='megaFirework') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'red', value:50}));
     }
   });
 }
@@ -348,3 +349,4 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
