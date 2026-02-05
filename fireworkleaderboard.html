@@ -11,12 +11,11 @@
   th { background: #222; }
   tr:nth-child(even) { background: #1a1a1a; }
 
-  /* Tag colors */
   .tag.owner { color: orange; font-weight: bold; }
   .tag.vip { color: gold; font-weight: bold; }
   .tag.streamer { color: #981ab6; font-weight: bold; }
   .tag.regular { color: #0ff; }
-  
+
   #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
 </style>
 </head>
@@ -37,7 +36,6 @@
   <tbody id="leaderboardBody"></tbody>
 </table>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -55,12 +53,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ===== owner UID fallback ===== */
 const OWNER_UIDS = {
   "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true
 };
 
-/* ===== tag styles ===== */
 const TAGS = {
   owner: { name: "Owner", class: "owner" },
   vip: { name: "VIP", class: "vip" },
@@ -69,69 +65,58 @@ const TAGS = {
 };
 
 async function loadLeaderboard(){
-  const lbBody = document.getElementById('leaderboardBody');
-  lbBody.innerHTML = '';
+  const body = document.getElementById('leaderboardBody');
+  body.innerHTML = '';
+
   try {
-    const [progressSnap, scoresSnap, usernamesSnap, usersSnap, adminsSnap, tagsSnap] = await Promise.all([
+    const [
+      progressSnap,
+      usernamesSnap,
+      adminsSnap,
+      activeTagSnap
+    ] = await Promise.all([
       db.ref('progress').once('value'),
-      db.ref('scores').once('value'),
       db.ref('usernames').once('value'),
-      db.ref('users').once('value'),
       db.ref('admins').once('value'),
-      db.ref('tags').once('value')
+      db.ref('activeTag').once('value')
     ]);
 
     const progress = progressSnap.val() || {};
-    const scores = scoresSnap.val() || {};
     const usernames = usernamesSnap.val() || {};
-    const users = usersSnap.val() || {};
     const admins = adminsSnap.val() || {};
-    const userTags = tagsSnap.val() || {};
-
-    // combine all uids
-    const uids = new Set([
-      ...Object.keys(progress),
-      ...Object.keys(scores),
-      ...Object.keys(usernames),
-      ...Object.keys(users)
-    ]);
+    const activeTags = activeTagSnap.val() || {};
 
     const data = [];
-    uids.forEach(uid=>{
+
+    Object.keys(progress).forEach(uid=>{
       const money = progress[uid]?.money ?? 0;
-      const uname = usernames[uid] ?? users[uid]?.username ?? 'Unknown';
-      // priority: admin > owner fallback > tag from /tags > default regular
+      const uname = usernames[uid] ?? 'Unknown';
+
       let tag = 'regular';
-      if(admins[uid]) tag = 'owner';
-      else if(OWNER_UIDS[uid]) tag = 'owner';
-      else if(userTags[uid]) tag = userTags[uid];
+      if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
+      else if(activeTags[uid]) tag = activeTags[uid];
 
       data.push({ uid, money, uname, tag });
     });
 
-    // sort by money descending
     data.sort((a,b)=>b.money - a.money);
 
-    data.forEach((d,i)=>{
+    data.forEach((u,i)=>{
       const tr = document.createElement('tr');
-      const rankTd = document.createElement('td'); rankTd.textContent = i+1;
-      const tagTd = document.createElement('td'); tagTd.textContent = TAGS[d.tag]?.name || 'Regular';
-      tagTd.className = 'tag ' + (TAGS[d.tag]?.class || 'regular');
-      const unameTd = document.createElement('td'); unameTd.textContent = d.uname;
-      const moneyTd = document.createElement('td'); moneyTd.textContent = d.money;
-      tr.appendChild(rankTd);
-      tr.appendChild(tagTd);
-      tr.appendChild(unameTd);
-      tr.appendChild(moneyTd);
-      lbBody.appendChild(tr);
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
+        <td>${u.uname}</td>
+        <td>${u.money}</td>
+      `;
+      body.appendChild(tr);
     });
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('leaderboard').style.display = 'table';
-
   } catch(e){
     console.error(e);
-    document.getElementById('loading').textContent = 'Error loading leaderboard. Check DB paths & rules.';
+    document.getElementById('loading').textContent = 'Error loading leaderboard.';
   }
 }
 
