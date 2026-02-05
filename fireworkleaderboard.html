@@ -64,79 +64,98 @@ const TAGS = {
   regular: { name: "Regular", class: "regular" }
 };
 
-async function loadLeaderboard() {
-  const body = document.getElementById('leaderboardBody');
+const body = document.getElementById('leaderboardBody');
+const loading = document.getElementById('loading');
+
+// --- Data storage ---
+let progress = {}, usernames = {}, users = {}, admins = {}, activeTags = {};
+
+// --- Build leaderboard ---
+function buildLeaderboard() {
   body.innerHTML = '';
+  const uids = new Set([
+    ...Object.keys(progress || {}),
+    ...Object.keys(usernames || {}),
+    ...Object.keys(users || {})
+  ]);
 
-  try {
-    const [
-      progressSnap,
-      usernamesSnap,
-      usersSnap,
-      adminsSnap,
-      activeTagSnap
-    ] = await Promise.all([
-      db.ref('progress').once('value'),
-      db.ref('usernames').once('value'),
-      db.ref('users').once('value'),
-      db.ref('admins').once('value'),
-      db.ref('activeTag').once('value')
-    ]);
+  const data = [];
+  uids.forEach(uid => {
+    const money = progress[uid]?.money ?? 0;
+    let uname = usernames[uid] || (users[uid]?.username) || 'Unknown';
 
-    const progress = progressSnap.val() || {};
-    const usernames = usernamesSnap.val() || {};
-    const users = usersSnap.val() || {};
-    const admins = adminsSnap.val() || {};
-    const activeTags = activeTagSnap.val() || {};
+    // Tag priority: admin > owner fallback > active tag > regular
+    let tag = 'regular';
+    if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
+    else if(activeTags[uid]) tag = activeTags[uid];
 
-    // Combine all UIDs from progress, usernames, and users
-    const uids = new Set([
-      ...Object.keys(progress),
-      ...Object.keys(usernames),
-      ...Object.keys(users)
-    ]);
+    data.push({ uid, money, uname, tag });
+  });
 
-    const data = [];
+  // Sort by money descending
+  data.sort((a,b) => b.money - a.money);
 
-    uids.forEach(uid => {
-      const money = progress[uid]?.money ?? 0;
+  data.forEach((u, i) => {
+    const tr = document.createElement('tr');
+    tr.dataset.uid = u.uid; // for live updates
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
+      <td>${u.uname}</td>
+      <td>${u.money}</td>
+    `;
+    body.appendChild(tr);
+  });
 
-      // Username fallback: usernames > users > Unknown
-      let uname = 'Unknown';
-      if(usernames[uid]) uname = usernames[uid];
-      else if(users[uid] && users[uid].username) uname = users[uid].username;
-
-      // Tag priority: admin > owner fallback > active tag > regular
-      let tag = 'regular';
-      if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
-      else if(activeTags[uid]) tag = activeTags[uid];
-
-      data.push({ uid, money, uname, tag });
-    });
-
-    // Sort by money descending
-    data.sort((a,b) => b.money - a.money);
-
-    data.forEach((u,i) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${i+1}</td>
-        <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
-        <td>${u.uname}</td>
-        <td>${u.money}</td>
-      `;
-      body.appendChild(tr);
-    });
-
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('leaderboard').style.display = 'table';
-  } catch(e) {
-    console.error(e);
-    document.getElementById('loading').textContent = 'Error loading leaderboard. Check DB paths & rules.';
-  }
+  loading.style.display = 'none';
+  document.getElementById('leaderboard').style.display = 'table';
 }
 
-loadLeaderboard();
+// --- Load static data once ---
+Promise.all([
+  db.ref('progress').once('value'),
+  db.ref('usernames').once('value'),
+  db.ref('users').once('value'),
+  db.ref('admins').once('value'),
+  db.ref('activeTag').once('value')
+]).then(([pSnap, uSnap, usSnap, aSnap, tSnap])=>{
+  progress = pSnap.val() || {};
+  usernames = uSnap.val() || {};
+  users = usSnap.val() || {};
+  admins = aSnap.val() || {};
+  activeTags = tSnap.val() || {};
+  buildLeaderboard();
+});
+
+// --- Listen for progress changes ---
+db.ref('progress').on('value', snap => {
+  progress = snap.val() || {};
+  buildLeaderboard();
+});
+
+// --- Listen for usernames changes ---
+db.ref('usernames').on('value', snap => {
+  usernames = snap.val() || {};
+  buildLeaderboard();
+});
+
+// --- Listen for users changes ---
+db.ref('users').on('value', snap => {
+  users = snap.val() || {};
+  buildLeaderboard();
+});
+
+// --- Listen for admin changes ---
+db.ref('admins').on('value', snap => {
+  admins = snap.val() || {};
+  buildLeaderboard();
+});
+
+// --- Listen for activeTag changes (equip/unequip) ---
+db.ref('activeTag').on('value', snap => {
+  activeTags = snap.val() || {};
+  buildLeaderboard();
+});
 </script>
 </body>
 </html>
