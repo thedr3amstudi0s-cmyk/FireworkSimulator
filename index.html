@@ -509,57 +509,87 @@ auth.onAuthStateChanged(async (user) => {
       ownerCommands.style.display = ADMIN_FALLBACK[currentUser] ? 'block' : 'none';
     }
 
-    // ---------- load tags UI (inventory) ----------
+        // ---------- load tags UI (inventory) ----------
     async function loadTagsUI(){
       const invDiv = document.getElementById('tagInventory');
       const invList = document.getElementById('tagInventoryList');
       invList.innerHTML = '';
+    
       try {
-        // read user's tags node (expected to be object like { vip: true, streamer: true })
+        console.log("Loading tags UI for", currentUser);
+    
+        // get owned tags
         const snap = await db.ref('tags/' + currentUser).once('value');
         const owned = snap.val() || {};
-        // read activeTag if present
+    
+        // get active tag
         let activeTag = null;
         try {
           const activeSnap = await db.ref('activeTag/' + currentUser).once('value');
           activeTag = activeSnap.val();
         } catch(e){ /* ignore */ }
-
-        // show inventory
+    
+        // build UI
         for(const key in TAGS_INFO){
           const info = TAGS_INFO[key];
           const row = document.createElement('div');
           row.className = 'tagRow';
-          const has = !!owned[key];
+    
+          // tag name
           const nameSpan = document.createElement('span');
           nameSpan.className = 'tagName';
           nameSpan.textContent = info.name;
           row.appendChild(nameSpan);
+    
+          // status + equip/unequip button
           const status = document.createElement('span');
-          status.textContent = has ? 'Owned' : 'Locked';
-          status.style.marginRight = '8px';
-          status.style.color = has ? 'lightgreen' : 'lightcoral';
+          const btn = document.createElement('button');
+          btn.style.marginLeft = '8px';
+          btn.style.padding = '2px 6px';
+          btn.style.borderRadius = '4px';
+          btn.style.cursor = 'pointer';
+    
+          if(owned[key]){
+            status.textContent = 'Owned';
+            status.style.color = 'lightgreen';
+    
+            if(activeTag === key){
+              btn.textContent = 'Unequip';
+              btn.onclick = async () => {
+                await db.ref(`activeTag/${currentUser}`).remove();
+                showNotification(`Unequipped ${info.name}`);
+                loadTagsUI(); // refresh UI
+              };
+            } else {
+              btn.textContent = 'Equip';
+              btn.onclick = async () => {
+                await db.ref(`activeTag/${currentUser}`).set(key);
+                showNotification(`Equipped ${info.name}`);
+                loadTagsUI(); // refresh UI
+              };
+            }
+          } else {
+            status.textContent = 'Locked';
+            status.style.color = 'lightcoral';
+            btn.textContent = 'Locked';
+            btn.disabled = true;
+          }
+    
           row.appendChild(status);
+          row.appendChild(btn);
+    
+          // description
           const desc = document.createElement('div');
           desc.className = 'tagDesc';
           desc.textContent = info.description;
           row.appendChild(desc);
-
-          if(activeTag && activeTag === key){
-            const activeBadge = document.createElement('div');
-            activeBadge.textContent = 'Equipped';
-            activeBadge.style.fontSize='12px';
-            activeBadge.style.color='yellow';
-            row.appendChild(activeBadge);
-          }
-
+    
           invList.appendChild(row);
         }
+    
         invDiv.style.display = 'block';
       } catch(e){
         console.error('loadTagsUI error', e);
-        // hide inventory if read fails
-        // invDiv.style.display = 'none'; (still show description available)
         const invErr = document.createElement('div');
         invErr.textContent = 'Could not load tags (DB rules?)';
         invErr.style.color = 'red';
@@ -567,10 +597,11 @@ auth.onAuthStateChanged(async (user) => {
         invDiv.style.display = 'block';
       }
     }
-
-    // call it
-    loadTagsUI().catch(()=>{});
+    
+    // call it after login
+    loadTagsUI().catch(console.error);
     // ---------- end tags UI ----------
+
 
     // init admin events listener (safe)
     initAdminEventsListener();
@@ -744,6 +775,7 @@ async function loadTagsUI() {
 </script>
 </body>
 </html>
+
 
 
 
