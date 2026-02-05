@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,7 +75,6 @@
     <button id="viewUsersBtn">View Users</button>
     <button id="adminFireworkBtn">Mega Firework</button>
     <button id="adminFireworkBtnNuke">NUKE</button>
-    <button id="galaxyEventBtn">Galaxy Event</button>
   </div>
 
   <!-- ---------- TAG INVENTORY (ADDED) ---------- -->
@@ -145,11 +145,6 @@ let autoAmount = 0, autoSpeed = 2.5;
 let fireworks = [], particles = [];
 const gravity = 0.04;
 let autoInterval = null;
-/* ===== Galaxy Event State ===== */
-let galaxyModeActive = false;
-let galaxyEndTime = 0;
-let galaxyParticles = [];
-
 
 /* colors */
 const baseColors = [
@@ -237,55 +232,15 @@ class Particle {
   }
 }
 
-class GalaxyParticle {
-  constructor(x, y){
-    this.x = x;
-    this.y = y;
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 2 + 0.5;
-    this.vx = Math.cos(angle) * speed;
-    this.vy = Math.sin(angle) * speed;
-    this.life = 60;
-    this.size = Math.random() * 1.5 + 0.5;
-  }
-  update(){
-    this.x += this.vx;
-    this.y += this.vy;
-    this.life--;
-  }
-  draw(){
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = "rgba(180,0,255,0.7)";
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-  }
 /* ================ core functions ================ */
 function explode(x, y, colorObj){
   try{ fireworkSound.currentTime = 0; fireworkSound.play(); } catch(e){}
   for(let i=0;i<80;i++) particles.push(new Particle(x, y, colorObj));
-
-  if(galaxyModeActive){
-    // subtle shake per explosion
-    canvas.style.transform = `translate(
-      ${(Math.random()-0.5)*6}px,
-      ${(Math.random()-0.5)*6}px
-    )`;
-    setTimeout(()=>canvas.style.transform="",40);
-
-    // spawn galaxy sparks
-    for(let i=0;i<6;i++){
-      galaxyParticles.push(new GalaxyParticle(x, y));
-    }
-  }
-
   money += colorObj.value * (rebirthCount + 1);
   document.getElementById('money').textContent = money;
-  saveProgressOnline().catch(()=>{});
+  // save on action (safe)
+  saveProgressOnline().catch(()=>{/* ignore save errors */});
 }
-
 
 function launchFirework(x, y){
   // ensure colors array available
@@ -316,22 +271,12 @@ function animate(){
     if(particles[i].life <= 0) particles.splice(i,1);
   }
 
-  for(let i = galaxyParticles.length - 1; i >= 0; i--){
-  galaxyParticles[i].update();
-  galaxyParticles[i].draw();
-  if(galaxyParticles[i].life <= 0) galaxyParticles.splice(i,1);
-  }
-
   // cooldown bar
   const elapsed = Date.now() - lastClick;
   const pct = Math.min(100, (elapsed / clickDelay) * 100);
   document.getElementById('cooldownFill').style.width = pct + '%';
   // multiplier
   document.getElementById('moneyMultiplier').textContent = (rebirthCount + 1);
-
-    if(galaxyModeActive && Date.now() > galaxyEndTime){
-    galaxyModeActive = false;
-  }
 
   requestAnimationFrame(animate);
 }
@@ -417,42 +362,6 @@ document.getElementById('rebirth').addEventListener('click', async ()=>{
   showNotification('Rebirth complete!');
 });
 
-  function triggerGalaxyEvent(){
-  galaxyModeActive = false;
-
-  let t = 0;
-  const spiral = setInterval(()=>{
-    t += 0.08;
-    ctx.save();
-    ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "rgba(0,0,0,0.15)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    ctx.translate(canvas.width/2, canvas.height/2);
-    ctx.rotate(t);
-    ctx.strokeStyle = "rgba(180,0,255,0.8)";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(0,0, t*40, 0, Math.PI*2);
-    ctx.stroke();
-    ctx.restore();
-  }, 16);
-
-  setTimeout(()=>{
-    clearInterval(spiral);
-
-    // white flash (<0.5s)
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    setTimeout(()=>{
-      galaxyModeActive = true;
-      galaxyEndTime = Date.now() + 45000;
-    }, 120);
-  }, 700);
-}
-
-
 /* admin UI buttons */
 document.getElementById('giveMoneyBtn').addEventListener('click', ()=>{ money += 1000; document.getElementById('money').textContent = money; saveProgressOnline().catch(()=>{}); });
 document.getElementById('unlockColorsBtn').addEventListener('click', ()=>{ unlockedColors = colors.length; updateButtons(); saveProgressOnline().catch(()=>{}); });
@@ -494,16 +403,6 @@ document.getElementById('adminFireworkBtnNuke').addEventListener('click', async 
   }
 });
 
-  document.getElementById('galaxyEventBtn').onclick = async ()=>{
-  const event = {
-    type:'GALAXY',
-    message:'Reality bends into a galaxy...',
-    timestamp:Date.now()
-  };
-  await db.ref('adminEvents/latest').set(event);
-};
-
-
 /* ================ admin events listener (init safely) ================ */
 async function initAdminEventsListener(){
   // set lastAdminTimestamp from DB once (so existing event won't trigger)
@@ -521,24 +420,14 @@ async function initAdminEventsListener(){
     if(!event || !event.timestamp) return;
     if(event.timestamp <= lastAdminTimestamp) return;
     lastAdminTimestamp = event.timestamp;
-  
     if(event.type === 'megaFirework'){
       for(let i=0;i<20;i++) launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2);
       showNotification(event.message || 'Mega Firework!');
     } else if(event.type === 'NUKE'){
       for(let i=0;i<200;i++) launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2);
       showNotification(event.message || 'NUKE!');
-    } else if(event.type === 'GALAXY'){
-      triggerGalaxyEvent();
-      showNotification(event.message || 'Galaxy Event!');
     }
   });
-
-
-  else if(event.type === 'GALAXY'){
-  triggerGalaxyEvent();
-  showNotification(event.message || 'Galaxy Event!');
-  }
 }
 
 /* ================ leaderboard / score ================ */
@@ -729,70 +618,35 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 /* login / signup handlers */
-document.getElementById('loginBtn').addEventListener('click', async () => {
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
   const email = document.getElementById('email').value.trim();
   const pass = document.getElementById('password').value;
-
-  if (!email || !pass) { 
-    loginMsg.textContent = 'Enter email & password!'; 
-    return; 
-  }
-
+  if(!email || !pass) { loginMsg.textContent = 'Enter email & password!'; return; }
   loginMsg.textContent = 'Signing in...';
-
   try {
     const cred = await auth.signInWithEmailAndPassword(email, pass);
-    const user = cred.user;
-
-    // ✅ Check if email is verified
-    if (!user.emailVerified) {
-      loginMsg.textContent = 'Please verify your email before logging in!';
-      await auth.signOut(); // prevent unverified login
-      return;
-    }
-
-    currentUser = user.uid;
-    loginMsg.textContent = 'Logged in successfully!';
-    // auth.onAuthStateChanged will handle further loading
-
-  } catch (err) {
+    currentUser = cred.user.uid;
+    loginMsg.textContent = '';
+    // auth.onAuthStateChanged will handle loading
+  } catch(err) {
     loginMsg.textContent = err.message;
   }
 });
 
-
-document.getElementById('signupBtn').addEventListener('click', async () => {
+document.getElementById('signupBtn').addEventListener('click', async ()=>{
   const uname = document.getElementById('username').value.trim();
   const email = document.getElementById('email').value.trim();
   const pass = document.getElementById('password').value;
-
-  if (!uname || !email || !pass) { 
-    loginMsg.textContent = 'Enter all fields!'; 
-    return; 
-  }
-  if (pass.length < 6) { 
-    loginMsg.textContent = 'Password must be at least 6 chars'; 
-    return; 
-  }
-
+  if(!uname || !email || !pass) { loginMsg.textContent = 'Enter all fields!'; return; }
+  if(pass.length < 6) { loginMsg.textContent = 'Password must be at least 6 chars'; return; }
   try {
-    // 1️⃣ Create the user
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    const user = cred.user;
-    currentUser = user.uid;
-
-    // 2️⃣ Store username
+    currentUser = cred.user.uid;
+    // store username
     await db.ref('usernames/' + currentUser).set(uname);
-
-    // 3️⃣ Send verification email
-    await user.sendEmailVerification();
-
-    // 4️⃣ Optional: sign out until verified
-    await auth.signOut();
-
-    loginMsg.textContent = `Account created! Check ${email} for verification.`;
-
-  } catch (err) {
+    loginMsg.textContent = 'Account created';
+    // auth.onAuthStateChanged will do further loading
+  } catch(err) {
     loginMsg.textContent = err.message;
   }
 });
