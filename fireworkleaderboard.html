@@ -90,7 +90,10 @@ async function loadLeaderboard(){
 
     Object.keys(progress).forEach(uid=>{
       const money = progress[uid]?.money ?? 0;
-      const uname = usernames[uid] ?? 'Unknown';
+      let uname = 'Unknown';
+      if(usernames[uid]) uname = usernames[uid];
+      else if(users[uid] && users[uid].username) uname = users[uid].username;
+
 
       let tag = 'regular';
       if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
@@ -124,3 +127,4 @@ loadLeaderboard();
 </script>
 </body>
 </html>
+
