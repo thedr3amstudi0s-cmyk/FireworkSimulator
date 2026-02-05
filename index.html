@@ -319,19 +319,94 @@ async function loadProgressOnline(uid){
   }
 }
 
-/* TAG UI */
-function loadTagsUI(userTags){
-  const tagInventoryList=document.getElementById('tagInventoryList');
-  tagInventoryList.innerHTML='';
-  if(!userTags || Object.keys(userTags).length===0){ document.getElementById('tagInventory').style.display='none'; return; }
-  document.getElementById('tagInventory').style.display='block';
-  for(const t in userTags){
-    const info=TAGS_INFO[t]||{name:t,description:'No description'};
-    const div=document.createElement('div'); div.className='tagRow';
-    div.innerHTML=`<span class="tagName">${info.name}</span><span class="tagDesc">${info.description}</span>`;
-    tagInventoryList.appendChild(div);
+async function loadTagsUI() {
+  const invDiv = document.getElementById('tagInventory');
+  const invList = document.getElementById('tagInventoryList');
+  invList.innerHTML = '';
+
+  invDiv.style.display = 'block'; // always show the inventory
+
+  try {
+    // get user's owned tags
+    const snap = await db.ref('tags/' + currentUser).once('value');
+    const owned = snap.val() || {};
+
+    // get currently active tag
+    let activeTag = null;
+    try {
+      const activeSnap = await db.ref('activeTag/' + currentUser).once('value');
+      activeTag = activeSnap.val();
+    } catch(e){ /* ignore */ }
+
+    // iterate over all tag types
+    for (const key in TAGS_INFO) {
+      const info = TAGS_INFO[key];
+      const row = document.createElement('div');
+      row.className = 'tagRow';
+
+      // tag name
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'tagName';
+      nameSpan.textContent = info.name;
+      row.appendChild(nameSpan);
+
+      // status
+      const status = document.createElement('span');
+      status.style.marginRight = '8px';
+
+      // button
+      const btn = document.createElement('button');
+      btn.style.marginLeft = '8px';
+      btn.style.padding = '2px 6px';
+      btn.style.borderRadius = '4px';
+      btn.style.cursor = 'pointer';
+
+      if (owned[key]) {
+        status.textContent = 'Owned';
+        status.style.color = 'lightgreen';
+
+        if (activeTag === key) {
+          btn.textContent = 'Unequip';
+          btn.onclick = async () => {
+            await db.ref(`activeTag/${currentUser}`).remove();
+            showNotification(`Unequipped ${info.name}`);
+            loadTagsUI(); // refresh UI
+          };
+        } else {
+          btn.textContent = 'Equip';
+          btn.onclick = async () => {
+            await db.ref(`activeTag/${currentUser}`).set(key);
+            showNotification(`Equipped ${info.name}`);
+            loadTagsUI(); // refresh UI
+          };
+        }
+      } else {
+        status.textContent = 'Locked';
+        status.style.color = 'lightcoral';
+        btn.textContent = 'Locked';
+        btn.disabled = true;
+      }
+
+      row.appendChild(status);
+      row.appendChild(btn);
+
+      // description
+      const desc = document.createElement('div');
+      desc.className = 'tagDesc';
+      desc.textContent = info.description;
+      row.appendChild(desc);
+
+      invList.appendChild(row);
+    }
+  } catch (e) {
+    console.error('loadTagsUI error', e);
+    const invErr = document.createElement('div');
+    invErr.textContent = 'Could not load tags (DB rules?)';
+    invErr.style.color = 'red';
+    invList.appendChild(invErr);
   }
 }
+
 
 /* LOGIN & AUTH */
 loginBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; auth.signInWithEmailAndPassword(email,pw).then(res=>{ currentUser=res.user.uid; currentUsername=res.user.displayName||res.user.email; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
@@ -341,12 +416,19 @@ forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('em
 logoutBtn.addEventListener('click',()=>{ auth.signOut().then(()=>{ location.reload(); }); });
 
 function afterLogin(){
-  loginBox.style.display='none'; ui.style.display='block'; resetBtn.style.display='block'; logoutBtn.style.display='block';
+  loginBox.style.display='none'; 
+  ui.style.display='block'; 
+  resetBtn.style.display='block'; 
+  logoutBtn.style.display='block';
+
   if(ADMIN_FALLBACK[currentUser]) ownerCommands.style.display='block';
+
   loadProgressOnline(currentUser).catch(()=>{});
-  db.ref('tags/'+currentUser).once('value').then(snap=>{ loadTagsUI(snap.val()); }).catch(()=>{});
+  loadTagsUI(); // <-- call without parameters
 }
+
 </script>
 </body>
 </html>
+
 
