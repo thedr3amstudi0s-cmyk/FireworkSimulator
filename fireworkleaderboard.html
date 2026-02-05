@@ -10,12 +10,12 @@
   th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; }
   th { background: #222; }
   tr:nth-child(even) { background: #1a1a1a; }
+  button { padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; font-size: 12px; }
 
   .tag.owner { color: orange; font-weight: bold; }
   .tag.vip { color: gold; font-weight: bold; }
   .tag.streamer { color: #981ab6; font-weight: bold; }
   .tag.regular { color: #0ff; }
-
   #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
 </style>
 </head>
@@ -31,6 +31,7 @@
       <th>Tag</th>
       <th>Username</th>
       <th>Money</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody id="leaderboardBody"></tbody>
@@ -52,6 +53,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
 
 // Owner fallback UID
 const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
@@ -64,98 +66,147 @@ const TAGS = {
   regular: { name: "Regular", class: "regular" }
 };
 
-const body = document.getElementById('leaderboardBody');
-const loading = document.getElementById('loading');
+let currentUserUID = null;
 
-// --- Data storage ---
-let progress = {}, usernames = {}, users = {}, admins = {}, activeTags = {};
+// Wait for auth
+auth.onAuthStateChanged(user => {
+  if(user) {
+    currentUserUID = user.uid;
+    loadLeaderboard();
+    listenTagChanges();
+  } else {
+    currentUserUID = null;
+    document.getElementById('loading').textContent = 'Please log in to view leaderboard.';
+  }
+});
 
-// --- Build leaderboard ---
-function buildLeaderboard() {
+// Load leaderboard
+async function loadLeaderboard() {
+  const body = document.getElementById('leaderboardBody');
   body.innerHTML = '';
-  const uids = new Set([
-    ...Object.keys(progress || {}),
-    ...Object.keys(usernames || {}),
-    ...Object.keys(users || {})
-  ]);
 
-  const data = [];
-  uids.forEach(uid => {
-    const money = progress[uid]?.money ?? 0;
-    let uname = usernames[uid] || (users[uid]?.username) || 'Unknown';
+  try {
+    const [
+      progressSnap,
+      usernamesSnap,
+      usersSnap,
+      adminsSnap,
+      activeTagSnap
+    ] = await Promise.all([
+      db.ref('progress').once('value'),
+      db.ref('usernames').once('value'),
+      db.ref('users').once('value'),
+      db.ref('admins').once('value'),
+      db.ref('activeTag').once('value')
+    ]);
 
-    // Tag priority: admin > owner fallback > active tag > regular
-    let tag = 'regular';
-    if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
-    else if(activeTags[uid]) tag = activeTags[uid];
+    const progress = progressSnap.val() || {};
+    const usernames = usernamesSnap.val() || {};
+    const users = usersSnap.val() || {};
+    const admins = adminsSnap.val() || {};
+    const activeTags = activeTagSnap.val() || {};
 
-    data.push({ uid, money, uname, tag });
-  });
+    const uids = new Set([...Object.keys(progress), ...Object.keys(usernames), ...Object.keys(users)]);
+    const data = [];
 
-  // Sort by money descending
-  data.sort((a,b) => b.money - a.money);
+    uids.forEach(uid => {
+      const money = progress[uid]?.money ?? 0;
+      let uname = usernames[uid] ?? users[uid]?.username ?? 'Unknown';
+      let tag = 'regular';
+      if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
+      else if(activeTags[uid]) tag = activeTags[uid];
+      data.push({ uid, money, uname, tag });
+    });
 
-  data.forEach((u, i) => {
-    const tr = document.createElement('tr');
-    tr.dataset.uid = u.uid; // for live updates
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
-      <td>${u.uname}</td>
-      <td>${u.money}</td>
-    `;
-    body.appendChild(tr);
-  });
+    data.sort((a,b) => b.money - a.money);
 
-  loading.style.display = 'none';
-  document.getElementById('leaderboard').style.display = 'table';
+    data.forEach((u,i) => {
+      const tr = document.createElement('tr');
+      tr.dataset.uid = u.uid;
+
+      const tagName = TAGS[u.tag]?.name || 'Regular';
+      const tagClass = TAGS[u.tag]?.class || 'regular';
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="tag ${tagClass}">${tagName}</td>
+        <td>${u.uname}</td>
+        <td>${u.money}</td>
+        <td></td>
+      `;
+      const actionCell = tr.querySelector('td:last-child');
+
+      // Equip/unequip only for current logged-in owner
+      if(u.uid === currentUserUID){
+        const equipBtn = document.createElement('button');
+        if(activeTags[u.uid] === u.tag){
+          equipBtn.textContent = 'Unequip';
+        } else {
+          equipBtn.textContent = 'Equip';
+        }
+        equipBtn.onclick = async () => {
+          if(activeTags[u.uid] === u.tag){
+            await db.ref(`activeTag/${u.uid}`).remove();
+            showNotification(`Unequipped ${tagName}`);
+          } else {
+            await db.ref(`activeTag/${u.uid}`).set(u.tag);
+            showNotification(`Equipped ${tagName}`);
+          }
+        };
+        actionCell.appendChild(equipBtn);
+      }
+
+      body.appendChild(tr);
+    });
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('leaderboard').style.display = 'table';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loading').textContent = 'Error loading leaderboard. Check DB paths & rules.';
+  }
 }
 
-// --- Load static data once ---
-Promise.all([
-  db.ref('progress').once('value'),
-  db.ref('usernames').once('value'),
-  db.ref('users').once('value'),
-  db.ref('admins').once('value'),
-  db.ref('activeTag').once('value')
-]).then(([pSnap, uSnap, usSnap, aSnap, tSnap])=>{
-  progress = pSnap.val() || {};
-  usernames = uSnap.val() || {};
-  users = usSnap.val() || {};
-  admins = aSnap.val() || {};
-  activeTags = tSnap.val() || {};
-  buildLeaderboard();
-});
+// Listen for activeTag changes and update table live
+function listenTagChanges(){
+  db.ref('activeTag').on('value', snap => {
+    const activeTags = snap.val() || {};
+    const rows = document.querySelectorAll('#leaderboardBody tr');
+    rows.forEach(row => {
+      const uid = row.dataset.uid;
+      const tagCell = row.children[1];
+      const actionCell = row.children[4];
+      const currentTag = tagCell.textContent;
 
-// --- Listen for progress changes ---
-db.ref('progress').on('value', snap => {
-  progress = snap.val() || {};
-  buildLeaderboard();
-});
+      let newTag = 'Regular';
+      let tagClass = 'regular';
+      if(activeTags[uid]){
+        newTag = TAGS[activeTags[uid]]?.name || 'Regular';
+        tagClass = TAGS[activeTags[uid]]?.class || 'regular';
+      } else if(OWNER_UIDS[uid]){
+        newTag = 'Owner';
+        tagClass = 'owner';
+      }
 
-// --- Listen for usernames changes ---
-db.ref('usernames').on('value', snap => {
-  usernames = snap.val() || {};
-  buildLeaderboard();
-});
+      tagCell.textContent = newTag;
+      tagCell.className = 'tag ' + tagClass;
 
-// --- Listen for users changes ---
-db.ref('users').on('value', snap => {
-  users = snap.val() || {};
-  buildLeaderboard();
-});
+      // Update equip button text for current owner
+      if(uid === currentUserUID && actionCell.firstChild){
+        const btn = actionCell.firstChild;
+        if(activeTags[uid] === activeTags[uid]){
+          btn.textContent = 'Unequip';
+        } else {
+          btn.textContent = 'Equip';
+        }
+      }
+    });
+  });
+}
 
-// --- Listen for admin changes ---
-db.ref('admins').on('value', snap => {
-  admins = snap.val() || {};
-  buildLeaderboard();
-});
-
-// --- Listen for activeTag changes (equip/unequip) ---
-db.ref('activeTag').on('value', snap => {
-  activeTags = snap.val() || {};
-  buildLeaderboard();
-});
+// Simple notification
+function showNotification(msg){
+  alert(msg); // quick alert for demo; replace with nicer UI if desired
+}
 </script>
 </body>
 </html>
