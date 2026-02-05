@@ -53,10 +53,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const OWNER_UIDS = {
-  "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true
-};
+// Owner fallback UID
+const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
 
+// Tag definitions
 const TAGS = {
   owner: { name: "Owner", class: "owner" },
   vip: { name: "VIP", class: "vip" },
@@ -64,7 +64,7 @@ const TAGS = {
   regular: { name: "Regular", class: "regular" }
 };
 
-async function loadLeaderboard(){
+async function loadLeaderboard() {
   const body = document.getElementById('leaderboardBody');
   body.innerHTML = '';
 
@@ -72,29 +72,41 @@ async function loadLeaderboard(){
     const [
       progressSnap,
       usernamesSnap,
+      usersSnap,
       adminsSnap,
       activeTagSnap
     ] = await Promise.all([
       db.ref('progress').once('value'),
       db.ref('usernames').once('value'),
+      db.ref('users').once('value'),
       db.ref('admins').once('value'),
       db.ref('activeTag').once('value')
     ]);
 
     const progress = progressSnap.val() || {};
     const usernames = usernamesSnap.val() || {};
+    const users = usersSnap.val() || {};
     const admins = adminsSnap.val() || {};
     const activeTags = activeTagSnap.val() || {};
 
+    // Combine all UIDs from progress, usernames, and users
+    const uids = new Set([
+      ...Object.keys(progress),
+      ...Object.keys(usernames),
+      ...Object.keys(users)
+    ]);
+
     const data = [];
 
-    Object.keys(progress).forEach(uid=>{
+    uids.forEach(uid => {
       const money = progress[uid]?.money ?? 0;
+
+      // Username fallback: usernames > users > Unknown
       let uname = 'Unknown';
       if(usernames[uid]) uname = usernames[uid];
       else if(users[uid] && users[uid].username) uname = users[uid].username;
 
-
+      // Tag priority: admin > owner fallback > active tag > regular
       let tag = 'regular';
       if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
       else if(activeTags[uid]) tag = activeTags[uid];
@@ -102,9 +114,10 @@ async function loadLeaderboard(){
       data.push({ uid, money, uname, tag });
     });
 
-    data.sort((a,b)=>b.money - a.money);
+    // Sort by money descending
+    data.sort((a,b) => b.money - a.money);
 
-    data.forEach((u,i)=>{
+    data.forEach((u,i) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${i+1}</td>
@@ -117,9 +130,9 @@ async function loadLeaderboard(){
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('leaderboard').style.display = 'table';
-  } catch(e){
+  } catch(e) {
     console.error(e);
-    document.getElementById('loading').textContent = 'Error loading leaderboard.';
+    document.getElementById('loading').textContent = 'Error loading leaderboard. Check DB paths & rules.';
   }
 }
 
@@ -127,4 +140,3 @@ loadLeaderboard();
 </script>
 </body>
 </html>
-
