@@ -655,7 +655,7 @@ document.getElementById('goLeaderboardBtn').addEventListener('click', ()=>{
   window.open('fireworkleaderboard.html', '_blank');
 });
 
-async function loadTagsUI(){
+async function loadTagsUI() {
   const invDiv = document.getElementById('tagInventory');
   const invList = document.getElementById('tagInventoryList');
   invList.innerHTML = '';
@@ -672,7 +672,7 @@ async function loadTagsUI(){
       activeTag = activeSnap.val();
     } catch(e){ /* ignore */ }
 
-    for(const key in TAGS_INFO){
+    for (const key in TAGS_INFO) {
       const info = TAGS_INFO[key];
       const row = document.createElement('div');
       row.className = 'tagRow';
@@ -683,16 +683,19 @@ async function loadTagsUI(){
       row.appendChild(nameSpan);
 
       const status = document.createElement('span');
+      status.style.marginRight = '8px';
+
       const btn = document.createElement('button');
       btn.style.marginLeft = '8px';
       btn.style.padding = '2px 6px';
       btn.style.borderRadius = '4px';
       btn.style.cursor = 'pointer';
 
-      if(owned[key]){
-        if(activeTag === key){
-          status.textContent = 'Owned';
-          status.style.color = 'lightgreen';
+      if (owned[key]) {
+        status.textContent = 'Owned';
+        status.style.color = 'lightgreen';
+
+        if (activeTag === key) {
           btn.textContent = 'Unequip';
           btn.onclick = async () => {
             await db.ref(`activeTag/${currentUser}`).remove();
@@ -700,8 +703,6 @@ async function loadTagsUI(){
             loadTagsUI(); // refresh UI
           };
         } else {
-          status.textContent = 'Owned';
-          status.style.color = 'lightgreen';
           btn.textContent = 'Equip';
           btn.onclick = async () => {
             await db.ref(`activeTag/${currentUser}`).set(key);
@@ -728,7 +729,7 @@ async function loadTagsUI(){
     }
 
     invDiv.style.display = 'block';
-  } catch(e){
+  } catch (e) {
     console.error('loadTagsUI error', e);
     const invErr = document.createElement('div');
     invErr.textContent = 'Could not load tags (DB rules?)';
@@ -739,8 +740,10 @@ async function loadTagsUI(){
 }
 
 
+
 </script>
 </body>
 </html>
+
 
 
