@@ -295,7 +295,16 @@ async function initAdminEventsListener(){
       lastAdminTimestamp=val.timestamp;
       showNotification(`ADMIN EVENT: ${val.type}`);
       if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:100}));
-      if(val.type==='megaFirework') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'red', value:50}));
+      if(val.type === 'megaFirework') {
+        for(let i = 0; i < 10; i++) {
+          // random X across canvas, targetY somewhere in upper half
+          const x = Math.random() * canvas.width;
+          const targetY = Math.random() * canvas.height / 2 + 50; // between 50px and half screen
+          fireworks.push(new Firework(x, targetY, {color:'red', value:50}));
+        }
+        showNotification('Mega Firework launched!');
+      }
+
     }
   });
 }
@@ -445,6 +454,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
