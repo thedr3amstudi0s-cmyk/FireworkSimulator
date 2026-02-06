@@ -1,41 +1,43 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <title>Firework Simulator</title>
 <style>
-html,body { margin:0; padding:0; height:100%; background:#000; font-family:Arial, sans-serif; }
-canvas { display:block; width:100%; height:100%; background: radial-gradient(circle at bottom,#0a0a0a,#000); }
+  html,body { margin:0; padding:0; height:100%; background:#000; font-family:Arial, sans-serif; }
+  canvas { display:block; width:100%; height:100%; background: radial-gradient(circle at bottom,#0a0a0a,#000); }
 
-#loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-   background:#222; padding:28px; border-radius:10px; color:white; z-index:200; width:280px; }
-#loginBox input, #loginBox button { display:block; margin:8px 0; padding:10px; width:100%; border-radius:6px; border:none; box-sizing:border-box; }
-#loginBox button { background:cyan; color:#000; cursor:pointer; font-weight:700; }
-#loginBox button:hover{ filter:brightness(1.05); }
+  #loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+     background:#222; padding:28px; border-radius:10px; color:white; z-index:200; width:280px; }
+  #loginBox input, #loginBox button { display:block; margin:8px 0; padding:10px; width:100%; border-radius:6px; border:none; box-sizing:border-box; }
+  #loginBox button { background:cyan; color:#000; cursor:pointer; font-weight:700; }
+  #loginBox button:hover{ filter:brightness(1.05); }
 
-#ui { position:fixed; top:10px; left:10px; color:white; z-index:150; }
-#ui h2{ margin:0 0 8px 0; color:#fff; font-size:18px; }
-#ui button { margin:4px 4px 4px 0; padding:6px 8px; border-radius:6px; border:none; cursor:pointer; }
-#ownerCommands{ margin-top:8px; display:none; background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; }
-#cooldownBar{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.12); border-radius:9px; z-index:160; }
-#cooldownFill{ height:100%; width:0%; background:limegreen; border-radius:8px; transition:width 0.05s; }
-#resetBtn { position:fixed; top:10px; right:10px; padding:6px 8px; background:#c0392b; color:white; border:none; border-radius:6px; display:none; z-index:150; }
-#logoutBtn { position:fixed; top:50px; right:10px; padding:6px 8px; background:orange; color:white; border:none; border-radius:6px; z-index:150; }
-#notifications { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:300; color:#0ff; font-weight:700; text-shadow:0 0 6px rgba(0,0,0,0.8); pointer-events:none; }
+  #ui { position:fixed; top:10px; left:10px; color:white; z-index:150; }
+  #ui h2{ margin:0 0 8px 0; color:#fff; font-size:18px; }
+  #ui button { margin:4px 4px 4px 0; padding:6px 8px; border-radius:6px; border:none; cursor:pointer; }
+  #ownerCommands{ margin-top:8px; display:none; background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; }
+  #cooldownBar{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.12); border-radius:9px; z-index:160; }
+  #cooldownFill{ height:100%; width:0%; background:limegreen; border-radius:8px; transition:width 0.05s; }
+  #resetBtn { position:fixed; top:10px; right:10px; padding:6px 8px; background:#c0392b; color:white; border:none; border-radius:6px; display:none; z-index:150; }
+  #logoutBtn { position:fixed; top:50px; right:10px; padding:6px 8px; background:orange; color:white; border:none; border-radius:6px; z-index:150; }
+  #notifications { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:300; color:#0ff; font-weight:700; text-shadow:0 0 6px rgba(0,0,0,0.8); pointer-events:none; }
 
-#ui p { margin:6px 0; font-size:13px; color:#ddd; }
-#tagInventory { margin-top:10px; background:rgba(255,255,255,0.02); padding:8px; border-radius:8px; max-width:320px; }
-#tagInventory h4 { margin:0 0 6px 0; color:#fff; font-size:14px; }
-#tagInventory .tagRow { margin:6px 0; font-size:13px; color:#ddd; }
-#tagInventory .tagName { color:#0ff; font-weight:700; margin-right:6px; }
-#tagInventory .tagDesc { color:#aaa; font-style:italic; display:block; margin-top:2px; }
+  #ui p { margin:6px 0; font-size:13px; color:#ddd; }
+  #tagInventory { margin-top:10px; background:rgba(255,255,255,0.02); padding:8px; border-radius:8px; max-width:320px; }
+  #tagInventory h4 { margin:0 0 6px 0; color:#fff; font-size:14px; }
+  #tagInventory .tagRow { margin:6px 0; font-size:13px; color:#ddd; }
+  #tagInventory .tagName { color:#0ff; font-weight:700; margin-right:6px; }
+  #tagInventory .tagDesc { color:#aaa; font-style:italic; display:block; margin-top:2px; }
 
-.tag-owner .tagName { color: gold; }
-.tag-vip .tagName { color: cyan; }
-.tag-donator .tagName { color: green; }
-.tag-streamer .tagName { color: purple; } 
-.tag-youtuber .tagName { color: red; }
-.tag-regular .tagName { color: white; }
+  .tag-owner .tagName { color: gold; }
+  .tag-vip .tagName { color: cyan; }
+  .tag-donator .tagName { color: green; }
+  .tag-streamer .tagName { color: purple; } 
+  .tag-youtuber .tagName { color: red; }
+  .tag-regular .tagName { color: white; }
+
 </style>
 </head>
 <body>
@@ -96,7 +98,6 @@ canvas { display:block; width:100%; height:100%; background: radial-gradient(cir
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// ===== FIREBASE INIT =====
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -110,7 +111,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ===== DOM ELEMENTS =====
 const loginBox = document.getElementById('loginBox');
 const loginBtn = document.getElementById('loginBtn');
 const signupBtn = document.getElementById('signupBtn');
@@ -125,7 +125,11 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const fireworkSound = document.getElementById('fireworkSound');
 
-// ===== GAME STATE =====
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+/* GAME STATE */
 let currentUser="", currentUsername="";
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now();
 let rebirthCount=0, colorPrice=50, delayPrice=100, rebirthPrice=500, autoPrice=200;
@@ -143,21 +147,17 @@ const baseColors=[
 let colors=[...baseColors];
 
 const ADMIN_FALLBACK = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true, "BxQ1aTqPndOfHzuX3OzlCcD4pbC3": true };
+
 const TAGS_INFO = {
   owner: { name: "Owner", description: "Assigned to admins (managed in /admins)" },
   vip: { name: "VIP", description: "Give to some supporters — can be given" },
   donator: { name: "Donator", description: "Cosmetic thank-you for supporting dr3am studi0s" },
   streamer: { name: "Streamer", description: "Given to verified streamers" },
-  youtuber: { name: "Youtuber", description: "Given to verified youtubers" },
+  streamer: { name: "Youtuber", description: "Given to verified youtubers" },
   regular: { name: "Regular", description: "Default player tag" }
 };
 
 let lastAdminTimestamp=0;
-
-// ===== UTIL =====
-function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
 
 function showNotification(text,time=2500){
   notifications.textContent=text;
@@ -165,7 +165,7 @@ function showNotification(text,time=2500){
   setTimeout(()=>{ notifications.style.opacity='0'; },time);
 }
 
-// ===== FIREWORK CLASSES =====
+/* FIREWORK CLASSES */
 class Firework{
   constructor(x,y,colorObj){ this.x=x; this.y=canvas.height; this.targetY=y; this.speed=Math.random()*2+4; this.colorObj=colorObj; this.exploded=false; }
   update(){ 
@@ -181,7 +181,7 @@ class Particle{
   draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
 }
 
-// ===== CORE FIREWORK FUNCTIONS =====
+/* CORE FUNCTIONS */
 function explode(x,y,colorObj){
   try{ fireworkSound.currentTime=0; fireworkSound.play(); } catch(e){}
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
@@ -189,6 +189,7 @@ function explode(x,y,colorObj){
   document.getElementById('money').textContent=money;
   saveProgressOnline().catch(()=>{});
 }
+
 function launchFirework(x,y){
   if(colors.length===0) colors=[...baseColors];
   const max=Math.min(unlockedColors,colors.length);
@@ -197,9 +198,9 @@ function launchFirework(x,y){
   fireworks.push(new Firework(x,y,colorObj));
   lastClick=Date.now();
 }
+
 document.addEventListener('click',(e)=>{ if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY); });
 
-// ===== ANIMATION LOOP =====
 function animate(){
   ctx.fillStyle="rgba(0,0,0,0.2)";
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -216,7 +217,7 @@ function animate(){
 }
 animate();
 
-// ===== UPGRADES & BUTTONS =====
+/* ======= UPGRADES & UI ======= */
 function getRebirthColors(rc){
   const scheme=[{base:60},{base:80},{base:100},{base:120}][rc%4];
   const num=Math.min(10+rc,50);
@@ -224,6 +225,7 @@ function getRebirthColors(rc){
   for(let i=0;i<num;i++){ const hue=Math.floor(Math.random()*360); out.push({ color:`hsl(${hue},${scheme.base}%,60%)`, value:i+1 }); }
   return out;
 }
+
 function updateButtons(){
   document.getElementById('buyColor').textContent=unlockedColors>=colors.length?'MAX':`Buy Color ($${colorPrice})`;
   document.getElementById('reduceDelay').textContent=clickDelay<=100?'MAX':`Reduce Delay ($${delayPrice})`;
@@ -234,57 +236,166 @@ function updateButtons(){
   document.getElementById('unlockedColors').textContent=unlockedColors;
 }
 
-// ===== RESET BUTTON =====
 resetBtn.addEventListener('click', async () => {
   if (!currentUser) return showNotification('Not logged in!');
   if (!confirm('Are you sure you want to reset your progress?')) return;
 
-  // Reset local state
-  money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0; autoAmount=0; autoSpeed=2.5;
-  colorPrice=50; delayPrice=100; rebirthPrice=500; colors=[...baseColors];
+  // Reset all local game state to defaults
+  money = 0;
+  unlockedColors = 1;
+  clickDelay = 1200;
+  rebirthCount = 0;
+  autoAmount = 0;
+  autoSpeed = 2.5;
+  colorPrice = 50;
+  delayPrice = 100;
+  rebirthPrice = 500;
+  colors = [...baseColors];
 
-  // Stop auto-launch
-  if(autoInterval){ clearInterval(autoInterval); autoInterval=null; }
+  // Update UI
+  document.getElementById('money').textContent = money;
+  updateButtons();
+  startAutoLaunch(); // stop auto if any
 
-  updateButtons(); document.getElementById('money').textContent=money;
-
-  try{
-    await db.ref('progress/'+currentUser).set({
-      money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed, colorPrice, delayPrice, rebirthPrice
+  // Reset progress in Firebase
+  try {
+    await db.ref('progress/' + currentUser).set({
+      money,
+      unlockedColors,
+      clickDelay,
+      rebirthCount,
+      autoAmount,
+      autoSpeed,
+      colorPrice,
+      delayPrice,
+      rebirthPrice
     });
-    await db.ref(`activeTag/${currentUser}`).remove();
     showNotification('Progress has been reset!');
-    loadTagsUI();
-  } catch(e){ console.error(e); showNotification('Error resetting progress'); }
+  } catch (e) {
+    console.error('Failed to reset progress', e);
+    showNotification('Error resetting progress.');
+  }
 });
 
-// ===== PURCHASE BUTTONS =====
+
+/* BUTTON HANDLERS */
 document.getElementById('buyColor').addEventListener('click',()=>{
-  if(money>=colorPrice && unlockedColors<colors.length){ money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.7); document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Color unlocked!'); }
+  if(money>=colorPrice && unlockedColors<colors.length){
+    money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.7);
+    document.getElementById('money').textContent=money;
+    updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Color unlocked!');
+  }
 });
 document.getElementById('reduceDelay').addEventListener('click',()=>{
-  if(money>=delayPrice && clickDelay>100){ money-=delayPrice; clickDelay=Math.max(100,clickDelay-100); delayPrice=Math.floor(delayPrice*1.7); document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Delay reduced!'); }
+  if(money>=delayPrice && clickDelay>100){
+    money-=delayPrice; clickDelay=Math.max(100,clickDelay-100); delayPrice=Math.floor(delayPrice*1.7);
+    document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Delay reduced!');
+  }
 });
 document.getElementById('buyAuto').addEventListener('click',()=>{
-  if(money>=autoPrice && autoAmount<3){ money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7); document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); startAutoLaunch(); showNotification('Auto-launch purchased!'); }
+  if(money>=autoPrice && autoAmount<3){
+    money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7);
+    document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); startAutoLaunch(); showNotification('Auto-launch purchased!');
+  }
 });
 document.getElementById('rebirth').addEventListener('click', async ()=>{
   if(money<rebirthPrice){ showNotification(`Need $${rebirthPrice} to rebirth!`); return; }
   if(!confirm(`Are you sure you want to rebirth for $${rebirthPrice}?`)) return;
-
-  money=0; rebirthCount++; unlockedColors=1; clickDelay=1200; autoAmount=0; autoSpeed=2.5; colorPrice=50; delayPrice=100;
+  money=0; rebirthCount++; unlockedColors=1; clickDelay=1200; autoAmount=0; autoSpeed=2.5; autoPrice=200; colorPrice=50; delayPrice=100;
   rebirthPrice=Math.floor(500*Math.pow(1.5,rebirthCount));
   colors=[...baseColors,...getRebirthColors(rebirthCount)];
-  
-  // Clear active tag
-  await db.ref(`activeTag/${currentUser}`).remove();
-  loadTagsUI();
-
-  updateButtons(); document.getElementById('money').textContent=money; await saveProgressOnline().catch(()=>{}); startAutoLaunch();
-  showNotification('Rebirth complete!');
+  updateButtons(); document.getElementById('money').textContent=money; await saveProgressOnline().catch(()=>{}); saveScore(); startAutoLaunch(); showNotification('Rebirth complete!');
+});
+document.getElementById('goLeaderboardBtn').addEventListener('click', () => {
+  window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html', '_blank');
 });
 
-// ===== AUTO-LAUNCH =====
+
+/* ADMIN BUTTONS */
+document.getElementById('giveMoneyBtn').addEventListener('click',()=>{ money+=1000; document.getElementById('money').textContent=money; saveProgressOnline().catch(()=>{}); });
+document.getElementById('unlockColorsBtn').addEventListener('click',()=>{ unlockedColors=colors.length; updateButtons(); saveProgressOnline().catch(()=>{}); });
+document.getElementById('maxAutoBtn').addEventListener('click',()=>{ autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline().catch(()=>{}); });
+document.getElementById('viewUsersBtn').addEventListener('click',()=>{ showNotification('Check Firebase console for users.'); });
+
+async function sendAdminEvent(type,message){
+  try{
+    const snap=await db.ref('admins/'+currentUser).once('value');
+    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){ showNotification('Not admin'); return; }
+    await db.ref('adminEvents/latest').set({type,message,timestamp:Date.now()});
+  }catch(e){
+    if(ADMIN_FALLBACK[currentUser]){
+      try{ await db.ref('adminEvents/latest').set({type,message,timestamp:Date.now()}); }catch(err){ showNotification('Permission denied writing admin event'); return; }
+    }else{ showNotification('Not admin'); return; }
+  }
+}
+document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
+document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
+document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
+
+async function initAdminEventsListener(){
+  try{ const snap=await db.ref('adminEvents/latest').once('value'); lastAdminTimestamp=(snap.val()?.timestamp)||0; }catch(e){}
+  db.ref('adminEvents/latest').on('value',snap=>{
+    const val=snap.val(); if(!val) return; 
+    if(val.timestamp>lastAdminTimestamp){
+      lastAdminTimestamp=val.timestamp;
+      showNotification(`ADMIN EVENT: ${val.type}`);
+      if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
+      if(val.type === 'megaFirework') {
+        for(let i = 0; i < 10; i++) {
+          // random X across canvas, targetY somewhere in upper half
+          const x = Math.random() * canvas.width;
+          const targetY = Math.random() * canvas.height / 2 + 50; // between 50px and half screen
+          fireworks.push(new Firework(x, targetY, {color:'red', value:50}));
+        }
+        showNotification('Mega Firework launched!');
+      }
+        if(val.type === 'Galaxy') {
+          const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height; // start at bottom
+        
+          for(let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2; // random starting angle
+            const radius = Math.random() * 20 + 10; // initial radius from center
+            const speed = 2 + Math.random() * 2; // speed of upward spiral
+        
+            // create a custom Firework that spirals
+            class SpiralFirework extends Firework {
+              constructor(centerX, centerY, angle, radius, speed, colorObj) {
+                super(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle), colorObj);
+                this.centerX = centerX;
+                this.centerY = centerY;
+                this.angle = angle;
+                this.radius = radius;
+                this.speed = speed;
+              }
+              update() {
+                this.centerY -= 2;          // move upward
+                this.angle += 0.2;           // rotate for spiral
+                this.radius += 0.5;          // slowly move outward
+                this.x = this.centerX + this.radius * Math.cos(this.angle);
+                this.y = this.centerY + this.radius * Math.sin(this.angle);
+        
+                // explode at top
+                if(this.centerY < canvas.height / 2) {
+                  explode(this.x, this.y, this.colorObj);
+                  return true;
+                }
+                return false;
+              }
+            }
+        
+            fireworks.push(new SpiralFirework(centerX, centerY, angle, radius, speed, {color:'purple', value:1}));
+          }
+        
+          showNotification('🌌 Galaxy Event launched!');
+        }
+    }
+  });
+}
+initAdminEventsListener();
+
+/* AUTO-LAUNCH */
 function startAutoLaunch(){
   if(autoInterval) clearInterval(autoInterval);
   if(autoAmount>0){
@@ -296,26 +407,166 @@ function startAutoLaunch(){
   }
 }
 
-// ===== SAVE/LOAD =====
+/* SAVE & LOAD PROGRESS */
 async function saveProgressOnline(){
   if(!currentUser) return;
-  await db.ref('progress/'+currentUser).set({ money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed, colorPrice, delayPrice, rebirthPrice });
+  await db.ref('progress/'+currentUser).set({
+    money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed, colorPrice, delayPrice, rebirthPrice
+  });
 }
 async function loadProgressOnline(uid){
-  const snap = await db.ref('progress/' + uid).once('value');
-  if(snap.exists()){ 
-    const p = snap.val();
-    money = p.money || 0; unlockedColors = p.unlockedColors || 1; clickDelay = p.clickDelay || 1200;
-    rebirthCount = p.rebirthCount || 0; autoAmount = p.autoAmount || 0; autoSpeed = p.autoSpeed || 2.5;
-    colorPrice = p.colorPrice || 50; delayPrice = p.delayPrice || 100; rebirthPrice = p.rebirthPrice || 500;
-    colors = [...baseColors, ...getRebirthColors(rebirthCount)];
-    updateButtons();
-    document.getElementById('money').textContent = money;
-    document.getElementById('moneyMultiplier').textContent = (rebirthCount+1);
+  const snap=await db.ref('progress/'+uid).once('value');
+  if(snap.exists()){ const p=snap.val();
+    money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
+    rebirthCount=p.rebirthCount||0; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
+    colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100; rebirthPrice=p.rebirthPrice||500;
+    colors=[...baseColors,...getRebirthColors(rebirthCount)];
+    Buttons(); document.getElementById('money').textContent=money;
     startAutoLaunch();
   }
 }
-</script>
 
+async function loadTagsUI() {
+  const invDiv = document.getElementById('tagInventory');
+  const invList = document.getElementById('tagInventoryList');
+  invList.innerHTML = '';
+
+  invDiv.style.display = 'block'; // always show the inventory
+
+  try {
+    // get user's owned tags
+    const snap = await db.ref('tags/' + currentUser).once('value');
+    const owned = snap.val() || {};
+
+    // get currently active tag
+    let activeTag = null;
+    try {
+      const activeSnap = await db.ref('activeTag/' + currentUser).once('value');
+      activeTag = activeSnap.val();
+    } catch(e){ /* ignore */ }
+
+    // iterate over all tag types
+    for (const key in TAGS_INFO) {
+      const info = TAGS_INFO[key];
+      const row = document.createElement('div');
+
+      // ADD CLASS FOR CSS COLOR
+      row.className = 'tagRow tag-' + key; // e.g., tag-owner, tag-vip, etc.
+
+      // tag name
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'tagName';
+      nameSpan.textContent = info.name;
+      row.appendChild(nameSpan);
+
+      // status
+      const status = document.createElement('span');
+      status.style.marginRight = '8px';
+
+      // button
+      const btn = document.createElement('button');
+      btn.style.marginLeft = '8px';
+      btn.style.padding = '2px 6px';
+      btn.style.borderRadius = '4px';
+      btn.style.cursor = 'pointer';
+
+      if (owned[key]) {
+        status.textContent = 'Owned';
+        status.style.color = 'lightgreen';
+
+        if (activeTag === key) {
+          btn.textContent = 'Unequip';
+          btn.onclick = async () => {
+            await db.ref(`activeTag/${currentUser}`).remove();
+            showNotification(`Unequipped ${info.name}`);
+            loadTagsUI(); // refresh UI
+          };
+        } else {
+          btn.textContent = 'Equip';
+          btn.onclick = async () => {
+            await db.ref(`activeTag/${currentUser}`).set(key);
+            showNotification(`Equipped ${info.name}`);
+            loadTagsUI(); // refresh UI
+          };
+        }
+      } else {
+        status.textContent = 'Locked';
+        status.style.color = 'lightcoral';
+        btn.textContent = 'Locked';
+        btn.disabled = true;
+      }
+
+      row.appendChild(status);
+      row.appendChild(btn);
+
+      // description
+      const desc = document.createElement('div');
+      desc.className = 'tagDesc';
+      desc.textContent = info.description;
+      row.appendChild(desc);
+
+      invList.appendChild(row);
+    }
+  } catch (e) {
+    console.error('loadTagsUI error', e);
+    const invErr = document.createElement('div');
+    invErr.textContent = 'Could not load tags (DB rules?)';
+    invErr.style.color = 'red';
+    invList.appendChild(invErr);
+  }
+}
+
+
+/* LOGIN & AUTH */
+loginBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; auth.signInWithEmailAndPassword(email,pw).then(res=>{ currentUser=res.user.uid; currentUsername=res.user.displayName||res.user.email; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
+signupBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; const username=document.getElementById('username').value||'Player'; auth.createUserWithEmailAndPassword(email,pw).then(res=>{ res.user.updateProfile({displayName:username}); currentUser=res.user.uid; currentUsername=username; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
+forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
+
+logoutBtn.addEventListener('click',()=>{ auth.signOut().then(()=>{ location.reload(); }); });
+
+function afterLogin(){
+  loginBox.style.display='none'; 
+  ui.style.display='block'; 
+  resetBtn.style.display='block'; 
+  logoutBtn.style.display='block';
+
+  if(ADMIN_FALLBACK[currentUser]) ownerCommands.style.display='block';
+
+  loadProgressOnline(currentUser).catch(()=>{});
+  loadTagsUI(); // <-- call without parameters
+}
+
+  // Auto-login if user refreshes page and is already authenticated
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user.uid;
+    currentUsername = user.displayName || user.email;
+    afterLogin(); // load progress, tags, UI
+  } else {
+    // Not logged in, show login box
+    loginBox.style.display = 'block';
+    ui.style.display = 'none';
+  }
+});
+
+
+</script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
