@@ -308,6 +308,7 @@ async function initAdminEventsListener(){
       }
       if(val.type === 'Galaxy') {
         const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
+        const centerY = canvas.width;
         const centerY = canvas.height / 2;
       
         for(let i = 0; i < count; i++) {
@@ -469,6 +470,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
