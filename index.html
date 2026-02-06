@@ -296,7 +296,7 @@ async function initAdminEventsListener(){
     if(val.timestamp>lastAdminTimestamp){
       lastAdminTimestamp=val.timestamp;
       showNotification(`ADMIN EVENT: ${val.type}`);
-      if(val.type==='NUKE') for(let i=0;i<100;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
+      if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
       if(val.type === 'megaFirework') {
         for(let i = 0; i < 10; i++) {
           // random X across canvas, targetY somewhere in upper half
@@ -496,6 +496,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
