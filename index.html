@@ -39,6 +39,16 @@
   .tag-regular .tagName { color: white; }
   .tag-fart .tagName { color: purple; }
 
+  #muteBtn {
+  background:#444;
+  color:white;
+  font-weight:600;
+}
+#muteBtn.muted {
+  background:#c0392b;
+}
+
+
 </style>
 </head>
 <body>
@@ -90,6 +100,7 @@
 
 <button id="resetBtn">Reset Progress</button>
 <button id="logoutBtn">Logout</button>
+<button id="muteBtn">🔊 Sound: ON</button>
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 <div id="notifications"></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
@@ -183,9 +194,33 @@ class Particle{
   draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
 }
 
+let soundMuted = false;
+
+const muteBtn = document.getElementById('muteBtn');
+
+muteBtn.addEventListener('click', () => {
+  soundMuted = !soundMuted;
+
+  // Mute/unmute all game sounds
+  fireworkSound.muted = soundMuted;
+
+  // UI feedback
+  muteBtn.textContent = soundMuted ? '🔇 Sound: OFF' : '🔊 Sound: ON';
+  muteBtn.classList.toggle('muted', soundMuted);
+
+  showNotification(soundMuted ? 'Game sound muted' : 'Game sound on');
+});
+
+
 /* CORE FUNCTIONS */
 function explode(x,y,colorObj){
-  try{ fireworkSound.currentTime=0; fireworkSound.play(); } catch(e){}
+  if (!soundMuted) {
+    try {
+      fireworkSound.currentTime = 0;
+      fireworkSound.play();
+    } catch(e){}
+  }
+
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
   money+=colorObj.value*(rebirthCount+1);
   document.getElementById('money').textContent=money;
@@ -587,6 +622,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
