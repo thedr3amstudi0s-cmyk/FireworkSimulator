@@ -219,6 +219,8 @@ function explode(x,y,colorObj){
   money+=colorObj.value*(rebirthCount+1);
   document.getElementById('money').textContent=money;
   saveProgressOnline().catch(()=>{});
+
+  grantTag('regular');
 }
 
 function launchFirework(x,y){
@@ -618,6 +620,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
