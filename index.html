@@ -381,7 +381,6 @@ async function initAdminEventsListener(){
         showNotification('Mega Firework launched!');
       }
         if(val.type === 'Galaxy') {
-          for(let gxy = 0; gxy = 5; gxy++) {
           const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
           const centerX = canvas.width / (Math.random() * (3 - 1) + 1);
           const centerY = canvas.height; // start at bottom
@@ -422,7 +421,7 @@ async function initAdminEventsListener(){
         
           showNotification('🌌 Galaxy Event launched!');
         }
-      }
+      
     }
   });
 }
@@ -619,6 +618,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
