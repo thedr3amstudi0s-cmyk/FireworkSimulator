@@ -306,21 +306,23 @@ async function initAdminEventsListener(){
         }
         showNotification('Mega Firework launched!');
       }
-      if(val.type === 'Galaxy') {
-        const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
-        const centerY = canvas.width;
-        const centerY = canvas.height / 2;
-      
-        for(let i = 0; i < count; i++) {
-          const angle = (i / count) * Math.PI * 4; // makes a spiral
-          const radius = 50 + i * 5; // gradually increase radius
-          const x = centerX + radius * Math.cos(angle) + (Math.random() * 20 - 10); // slight randomness
-          const targetY = Math.random() * canvas.height / 2 + 50; // upper half
-          fireworks.push(new Firework(x, targetY, {color:'purple', value:50}));
+        if(val.type === 'Galaxy') {
+          const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
+          const centerX = canvas.width;
+          const centerY = canvas.height / 2;
+        
+          for(let i = 0; i < count; i++) {
+            // Spiral math
+            const angle = i * 0.5; // controls how tight the spiral is
+            const radius = i * 8;  // gradually increases distance from center
+            const x = centerX + radius * Math.cos(angle); 
+            const targetY = canvas.height - (i * 15 + 50); // staggered vertical positions
+            fireworks.push(new Firework(x, targetY, {color:'purple', value:50}));
+          }
+        
+          showNotification('🌌 Galaxy Event launched!');
         }
-      
-        showNotification('🌌 Galaxy Event launched!');
-      }
+
     }
   });
 }
@@ -470,6 +472,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
