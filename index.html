@@ -29,6 +29,14 @@
   #tagInventory .tagRow { margin:6px 0; font-size:13px; color:#ddd; }
   #tagInventory .tagName { color:#0ff; font-weight:700; margin-right:6px; }
   #tagInventory .tagDesc { color:#aaa; font-style:italic; display:block; margin-top:2px; }
+
+  .tag-owner .tagName { color: gold; }
+  .tag-vip .tagName { color: cyan; }
+  .tag-donator .tagName { color: green; }
+  .tag-streamer .tagName { color: purple; } 
+  .tag-youtuber .tagName { color: red; }
+  .tag-regular .tagName { color: white; }
+
 </style>
 </head>
 <body>
@@ -143,6 +151,7 @@ const TAGS_INFO = {
   vip: { name: "VIP", description: "Give to some supporters — can be given" },
   donator: { name: "Donator", description: "Cosmetic thank-you for supporting dr3am studi0s" },
   streamer: { name: "Streamer", description: "Given to verified streamers" },
+  streamer: { name: "Youtuber", description: "Given to verified youtubers" },
   regular: { name: "Regular", description: "Default player tag" }
 };
 
@@ -346,7 +355,9 @@ async function loadTagsUI() {
     for (const key in TAGS_INFO) {
       const info = TAGS_INFO[key];
       const row = document.createElement('div');
-      row.className = 'tagRow';
+
+      // ADD CLASS FOR CSS COLOR
+      row.className = 'tagRow tag-' + key; // e.g., tag-owner, tag-vip, etc.
 
       // tag name
       const nameSpan = document.createElement('span');
@@ -434,6 +445,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
