@@ -235,6 +235,48 @@ function updateButtons(){
   document.getElementById('unlockedColors').textContent=unlockedColors;
 }
 
+resetBtn.addEventListener('click', async () => {
+  if (!currentUser) return showNotification('Not logged in!');
+  if (!confirm('Are you sure you want to reset your progress?')) return;
+
+  // Reset all local game state to defaults
+  money = 0;
+  unlockedColors = 1;
+  clickDelay = 1200;
+  rebirthCount = 0;
+  autoAmount = 0;
+  autoSpeed = 2.5;
+  colorPrice = 50;
+  delayPrice = 100;
+  rebirthPrice = 500;
+  colors = [...baseColors];
+
+  // Update UI
+  document.getElementById('money').textContent = money;
+  updateButtons();
+  startAutoLaunch(); // stop auto if any
+
+  // Reset progress in Firebase
+  try {
+    await db.ref('progress/' + currentUser).set({
+      money,
+      unlockedColors,
+      clickDelay,
+      rebirthCount,
+      autoAmount,
+      autoSpeed,
+      colorPrice,
+      delayPrice,
+      rebirthPrice
+    });
+    showNotification('Progress has been reset!');
+  } catch (e) {
+    console.error('Failed to reset progress', e);
+    showNotification('Error resetting progress.');
+  }
+});
+
+
 /* BUTTON HANDLERS */
 document.getElementById('buyColor').addEventListener('click',()=>{
   if(money>=colorPrice && unlockedColors<colors.length){
@@ -496,6 +538,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
