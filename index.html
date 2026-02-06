@@ -30,6 +30,31 @@
   #tagInventory .tagRow { margin:6px 0; font-size:13px; color:#ddd; }
   #tagInventory .tagName { color:#0ff; font-weight:700; margin-right:6px; }
   #tagInventory .tagDesc { color:#aaa; font-style:italic; display:block; margin-top:2px; }
+ 
+  #topRightControls {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1000;
+}
+
+#topRightControls button {
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#muteBtn.muted {
+  background: #c0392b;
+}
+
 
   .tag-owner .tagName { color: gold; }
   .tag-vip .tagName { color: cyan; }
@@ -99,8 +124,10 @@
 </div>
 
 <button id="resetBtn">Reset Progress</button>
-<button id="logoutBtn">Logout</button>
-<button id="muteBtn">🔊 Sound: ON</button>
+<div id="topRightControls">
+  <button id="signOutBtn">Sign Out</button>
+  <button id="muteBtn">🔊 Sound: ON</button>
+</div>
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 <div id="notifications"></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
@@ -200,16 +227,11 @@ const muteBtn = document.getElementById('muteBtn');
 
 muteBtn.addEventListener('click', () => {
   soundMuted = !soundMuted;
-
-  // Mute/unmute all game sounds
   fireworkSound.muted = soundMuted;
-
-  // UI feedback
   muteBtn.textContent = soundMuted ? '🔇 Sound: OFF' : '🔊 Sound: ON';
   muteBtn.classList.toggle('muted', soundMuted);
-
-  showNotification(soundMuted ? 'Game sound muted' : 'Game sound on');
 });
+
 
 
 /* CORE FUNCTIONS */
@@ -622,6 +644,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
