@@ -37,6 +37,7 @@
   .tag-streamer .tagName { color: purple; } 
   .tag-youtuber .tagName { color: red; }
   .tag-regular .tagName { color: white; }
+  .tag-fart .tagName { color: gold; }
 
 </style>
 </head>
@@ -154,6 +155,7 @@ const TAGS_INFO = {
   donator: { name: "Donator", description: "Cosmetic thank-you for supporting dr3am studi0s" },
   streamer: { name: "Streamer", description: "Given to verified streamers" },
   streamer: { name: "Youtuber", description: "Given to verified youtubers" },
+  streamer: { name: "Fart", description: "A tag for the fart" },
   regular: { name: "Regular", description: "Default player tag" }
 };
 
@@ -536,19 +538,6 @@ function afterLogin(){
   loadTagsUI(); // <-- call without parameters
 }
 
-  // Auto-login if user refreshes page and is already authenticated
-auth.onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user.uid;
-    currentUsername = user.displayName || user.email;
-    afterLogin(); // load progress, tags, UI
-  } else {
-    // Not logged in, show login box
-    loginBox.style.display = 'block';
-    ui.style.display = 'none';
-  }
-});
-
 // --- AUTO-LOGIN & LOAD PROGRESS ---
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -598,6 +587,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
