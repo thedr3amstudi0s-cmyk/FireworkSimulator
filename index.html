@@ -254,9 +254,9 @@ document.getElementById('rebirth').addEventListener('click', async ()=>{
   updateButtons(); document.getElementById('money').textContent=money; await saveProgressOnline().catch(()=>{}); saveScore(); startAutoLaunch(); showNotification('Rebirth complete!');
 });
 document.getElementById('goLeaderboardBtn').addEventListener('click', () => {
-    // Open the leaderboard in a new tab
-    window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html', '_blank');
+  window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html', '_blank');
 });
+
 
 /* ADMIN BUTTONS */
 document.getElementById('giveMoneyBtn').addEventListener('click',()=>{ money+=1000; document.getElementById('money').textContent=money; saveProgressOnline().catch(()=>{}); });
@@ -434,6 +434,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
