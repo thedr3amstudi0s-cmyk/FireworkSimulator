@@ -549,10 +549,56 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+// --- AUTO-LOGIN & LOAD PROGRESS ---
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user.uid;
+    currentUsername = user.displayName || user.email;
+    afterLogin(); // show UI, load progress, tags, owner commands
+  } else {
+    loginBox.style.display = 'block';
+    ui.style.display = 'none';
+  }
+});
+
+async function loadProgressOnline(uid){
+  const snap = await db.ref('progress/' + uid).once('value');
+  if(snap.exists()){
+    const p = snap.val();
+    money = p.money || 0;
+    unlockedColors = p.unlockedColors || 1;
+    clickDelay = p.clickDelay || 1200;
+    rebirthCount = p.rebirthCount || 0;
+    autoAmount = p.autoAmount || 0;
+    autoSpeed = p.autoSpeed || 2.5;
+    colorPrice = p.colorPrice || 50;
+    delayPrice = p.delayPrice || 100;
+    rebirthPrice = p.rebirthPrice || 500;
+
+    // Rebuild color array based on rebirths
+    colors = [...baseColors, ...getRebirthColors(rebirthCount)];
+
+    // Update UI elements
+    document.getElementById('money').textContent = money;
+    updateButtons();
+
+    // Start auto-launch if purchased
+    startAutoLaunch();
+  } else {
+    // No saved progress, initialize defaults
+    money = 0; unlockedColors = 1; clickDelay = 1200;
+    rebirthCount = 0; autoAmount = 0; autoSpeed = 2.5;
+    colorPrice = 50; delayPrice = 100; rebirthPrice = 500;
+    colors = [...baseColors];
+    updateButtons();
+    startAutoLaunch();
+  }
+}
 
 </script>
 </body>
 </html>
+
 
 
 
