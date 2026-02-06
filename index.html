@@ -308,21 +308,45 @@ async function initAdminEventsListener(){
       }
         if(val.type === 'Galaxy') {
           const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
-          const centerX = canvas.width;
-          const centerY = canvas.height / 2;
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height; // start at bottom
         
           for(let i = 0; i < count; i++) {
-            // Spiral math
-            const angle = i * 0.5; // controls how tight the spiral is
-            const radius = i * 8;  // gradually increases distance from center
-            const x = centerX + radius * Math.cos(angle); 
-            const targetY = canvas.height - (i * 15 + 50); // staggered vertical positions
-            fireworks.push(new Firework(x, targetY, {color:'purple', value:50}));
+            const angle = Math.random() * Math.PI * 2; // random starting angle
+            const radius = Math.random() * 20 + 10; // initial radius from center
+            const speed = 2 + Math.random() * 2; // speed of upward spiral
+        
+            // create a custom Firework that spirals
+            class SpiralFirework extends Firework {
+              constructor(centerX, centerY, angle, radius, speed, colorObj) {
+                super(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle), colorObj);
+                this.centerX = centerX;
+                this.centerY = centerY;
+                this.angle = angle;
+                this.radius = radius;
+                this.speed = speed;
+              }
+              update() {
+                this.centerY -= 2;          // move upward
+                this.angle += 0.2;           // rotate for spiral
+                this.radius += 0.5;          // slowly move outward
+                this.x = this.centerX + this.radius * Math.cos(this.angle);
+                this.y = this.centerY + this.radius * Math.sin(this.angle);
+        
+                // explode at top
+                if(this.centerY < canvas.height / 2) {
+                  explode(this.x, this.y, this.colorObj);
+                  return true;
+                }
+                return false;
+              }
+            }
+        
+            fireworks.push(new SpiralFirework(centerX, centerY, angle, radius, speed, {color:'purple', value:50}));
           }
         
           showNotification('🌌 Galaxy Event launched!');
         }
-
     }
   });
 }
@@ -472,6 +496,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
