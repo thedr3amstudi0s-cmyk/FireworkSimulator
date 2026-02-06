@@ -535,9 +535,24 @@ function afterLogin(){
   loadTagsUI(); // <-- call without parameters
 }
 
+  // Auto-login if user refreshes page and is already authenticated
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user.uid;
+    currentUsername = user.displayName || user.email;
+    afterLogin(); // load progress, tags, UI
+  } else {
+    // Not logged in, show login box
+    loginBox.style.display = 'block';
+    ui.style.display = 'none';
+  }
+});
+
+
 </script>
 </body>
 </html>
+
 
 
 
