@@ -553,6 +553,7 @@ loginBtn.addEventListener('click',()=>{ const email=document.getElementById('ema
 signupBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; const username=document.getElementById('username').value||'Player'; auth.createUserWithEmailAndPassword(email,pw).then(res=>{ res.user.updateProfile({displayName:username}); currentUser=res.user.uid; currentUsername=username; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
 forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
 
+//logout button code
 logoutBtn.addEventListener('click',()=>{ auth.signOut().then(()=>{ location.reload(); }); });
 
 function afterLogin(){
@@ -616,6 +617,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
