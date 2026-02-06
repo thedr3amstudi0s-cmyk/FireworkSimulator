@@ -77,6 +77,7 @@
     <button id="viewUsersBtn">View Users</button>
     <button id="adminFireworkBtn">Mega Firework</button>
     <button id="adminFireworkBtnNuke">NUKE</button>
+    <button id="adminFireworkBtnGalaxy">Galaxy</button>
   </div>
 
   <div id="tagInventory" style="display:none;">
@@ -286,6 +287,7 @@ async function sendAdminEvent(type,message){
 }
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
+document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
 
 async function initAdminEventsListener(){
   try{ const snap=await db.ref('adminEvents/latest').once('value'); lastAdminTimestamp=(snap.val()?.timestamp)||0; }catch(e){}
@@ -304,7 +306,21 @@ async function initAdminEventsListener(){
         }
         showNotification('Mega Firework launched!');
       }
-
+      if(val.type === 'Galaxy') {
+        const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+      
+        for(let i = 0; i < count; i++) {
+          const angle = (i / count) * Math.PI * 4; // makes a spiral
+          const radius = 50 + i * 5; // gradually increase radius
+          const x = centerX + radius * Math.cos(angle) + (Math.random() * 20 - 10); // slight randomness
+          const targetY = Math.random() * canvas.height / 2 + 50; // upper half
+          fireworks.push(new Firework(x, targetY, {color:'purple', value:50}));
+        }
+      
+        showNotification('🌌 Galaxy Event launched!');
+      }
     }
   });
 }
@@ -454,6 +470,7 @@ function afterLogin(){
 </script>
 </body>
 </html>
+
 
 
 
