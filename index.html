@@ -199,7 +199,7 @@ muteBtn.addEventListener('click', () => {
   fireworkSound.muted = soundMuted;
 
   // UI feedback
-  muteBtn.textContent = soundMuted ? '🔇 Sound: OFF' : '🔊 Sound: ON';
+  muteBtn.textContent = soundMuted ? 'Sound: OFF' : 'Sound: ON';
   muteBtn.classList.toggle('muted', soundMuted);
 
   showNotification(soundMuted ? 'Game sound muted' : 'Game sound on');
@@ -616,4 +616,5 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
