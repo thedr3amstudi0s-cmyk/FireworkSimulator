@@ -698,9 +698,47 @@ async function loadTagsUI() {
 
 
 /* LOGIN & AUTH */
-loginBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; auth.signInWithEmailAndPassword(email,pw).then(res=>{ currentUser=res.user.uid; currentUsername=res.user.displayName||res.user.email; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
-signupBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; const username=document.getElementById('username').value||'Player'; auth.createUserWithEmailAndPassword(email,pw).then(res=>{ res.user.updateProfile({displayName:username}); currentUser=res.user.uid; currentUsername=username; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
-forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
+/* LOGIN & AUTH */
+loginBtn.addEventListener('click', async () => {  // <-- make async
+  const email = document.getElementById('email').value;
+  const pw = document.getElementById('password').value;
+
+  try {
+    const res = await auth.signInWithEmailAndPassword(email, pw);
+    currentUser = res.user.uid;
+    currentUsername = res.user.displayName || res.user.email;
+    afterLogin();
+  } catch(e) {
+    loginMsg.textContent = e.message;
+  }
+});
+
+signupBtn.addEventListener('click', async () => {  // <-- make async
+  const email = document.getElementById('email').value;
+  const pw = document.getElementById('password').value;
+  const username = document.getElementById('username').value || 'Player';
+
+  try {
+    const res = await auth.createUserWithEmailAndPassword(email, pw);
+    await res.user.updateProfile({ displayName: username });
+    currentUser = res.user.uid;
+    currentUsername = username;
+    afterLogin();
+  } catch(e) {
+    loginMsg.textContent = e.message;
+  }
+});
+
+forgotBtn.addEventListener('click', async () => {  // <-- make async
+  const email = document.getElementById('email').value;
+
+  try {
+    await auth.sendPasswordResetEmail(email);
+    loginMsg.textContent = 'Reset email sent!';
+  } catch(e) {
+    loginMsg.textContent = e.message;
+  }
+});
 
 //logout button code
 logoutBtn.addEventListener('click',()=>{ auth.signOut().then(()=>{ location.reload(); }); });
@@ -766,6 +804,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
