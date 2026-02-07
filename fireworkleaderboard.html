@@ -59,10 +59,13 @@ const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
 
 // Tag definitions
 const TAGS = {
-  owner: { name: "Owner", class: "owner" },
-  vip: { name: "VIP", class: "vip" },
-  streamer: { name: "STREAMER", class: "streamer" },
-  regular: { name: "Regular", class: "regular" }
+  owner: { name: "Owner", description: "Assigned to the owner" },
+  vip: { name: "VIP", description: "Give to some supporters — can be given" },
+  donator: { name: "Donator", description: "Cosmetic thank-you for supporting dr3am studi0s" },
+  streamer: { name: "Streamer", description: "Given to verified streamers" },
+  youtuber: { name: "Youtuber", description: "Given to verified youtubers" },
+  regular: { name: "Regular", description: "Default player tag" },
+  fart: { name: "Fart", description: "A tag for the fart" }
 };
 
 const body = document.getElementById('leaderboardBody');
@@ -160,3 +163,4 @@ db.ref('activeTag').on('value', snap => {
 </script>
 </body>
 </html>
+
