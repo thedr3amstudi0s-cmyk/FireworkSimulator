@@ -431,7 +431,7 @@ document.getElementById('adminMessageBtn').addEventListener('click', async () =>
 });
 
   document.getElementById('glitchEventBtn').addEventListener('click', () => {
-  sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (1.5x)', 10000);
+  sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (2x)', 10000);
 });
 
 async function sendAdminEvent(type, message = '', duration = 3000){
@@ -556,7 +556,7 @@ function startAutoLaunch(){
   if (glitchActive) return;
 
   glitchActive = true;
-  globalMultiplier = 1.5;
+  globalMultiplier = 2;
   document.body.classList.add('glitch-ui');
 
   setTimeout(() => {
@@ -745,6 +745,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
