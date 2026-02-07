@@ -435,33 +435,38 @@ document.getElementById('adminMessageBtn').addEventListener('click', async () =>
   sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (1.5x)', 10000);
 });
 
-async function sendAdminEvent(type, message = '', duration = 3000){
-  try{
-    const snap = await db.ref('admins/' + currentUser).once('value');
-    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){
-      showNotification('Not admin');
-      return;
-    }
+async function initAdminEventsListener(){
+  try {
+    const snap = await db.ref('adminEvents/latest').once('value');
+    lastAdminTimestamp = (snap.val()?.timestamp) || 0;
+  } catch(e){ console.error(e); }
 
-    await db.ref('adminEvents/latest').set({
-      type,
-      message,
-      duration,
-      timestamp: Date.now()
-    });
-  }catch(e){
-    if(ADMIN_FALLBACK[currentUser]){
-      await db.ref('adminEvents/latest').set({
-        type,
-        message,
-        duration,
-        timestamp: Date.now()
-      });
-    }else{
-      showNotification('Not admin');
+  db.ref('adminEvents/latest').on('value', snap => {
+    try {
+      const val = snap.val();
+      if(!val) return;
+      if(val.timestamp <= lastAdminTimestamp) return;
+
+      lastAdminTimestamp = val.timestamp;
+
+      // handle events safely
+      if(val.type === 'MESSAGE') showNotification('📢 ' + val.message, val.duration || 5000);
+      else if(val.type === 'GLITCH') startGlitchEvent(val.duration || 10000);
+      else if(val.type === 'NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
+      else if(val.type === 'megaFirework') {
+        for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height/2+50, {color:'red', value:50}));
+        showNotification('Mega Firework launched!');
+      }
+      else if(val.type === 'Galaxy') {
+        // call our safe galaxy code
+        runGalaxyEvent();
+      }
+    } catch(e){
+      console.error('Admin event handler error', e);
     }
-  }
+  });
 }
+
 
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
@@ -494,63 +499,57 @@ async function initAdminEventsListener(){
         }
         showNotification('Mega Firework launched!');
       }
-    if(val.type === 'Galaxy') {
-  const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
-  const centerX = canvas.width / 2; // center
-  const centerY = canvas.height;    // start at bottom
+if(val.type === 'Galaxy') {
+  try {
+    const count = 20 + Math.floor(Math.random() * 11);
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height;
 
-  // Spiral Firework class (defined once)
-  class SpiralFirework extends Firework {
-    constructor(centerX, centerY, angle, radius, speed, colorObj) {
-      super(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle), colorObj);
-      this.centerX = centerX;
-      this.centerY = centerY;
-      this.angle = angle;
-      this.radius = radius;
-      this.speed = speed;
-    }
-    update() {
-      this.centerY -= this.speed;     // move upward
-      this.angle += 0.2;              // rotate for spiral
-      this.radius += 0.5;             // move outward
-      this.x = this.centerX + this.radius * Math.cos(this.angle);
-      this.y = this.centerY + this.radius * Math.sin(this.angle);
-
-      // explode at top
-      if(this.centerY < canvas.height / 2) {
-        explode(this.x, this.y, this.colorObj);
-        return true;
+    class SpiralFirework extends Firework {
+      constructor(centerX, centerY, angle, radius, speed, colorObj) {
+        super(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle), colorObj);
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.angle = angle;
+        this.radius = radius;
+        this.speed = speed;
       }
-      return false;
+      update() {
+        this.centerY -= this.speed;
+        this.angle += 0.2;
+        this.radius += 0.5;
+        this.x = this.centerX + this.radius * Math.cos(this.angle);
+        this.y = this.centerY + this.radius * Math.sin(this.angle);
+
+        if(this.centerY < canvas.height / 2) {
+          explode(this.x, this.y, this.colorObj);
+          return true;
+        }
+        return false;
+      }
     }
-  }
 
-  for(let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const radius = Math.random() * 20 + 10;
-    const speed = 2 + Math.random() * 2;
-    fireworks.push(new SpiralFirework(centerX, centerY, angle, radius, speed, {color:'purple', value:1}));
-  }
-
-  showNotification('🌌 Galaxy Event launched!');
-
-  // give mystery tag async, safely
-  (async function giveMysteryTag(){
-    try {
-      const usersSnap = await db.ref('users').once('value');
-      const users = Object.keys(usersSnap.val() || {});
-      if(users.length === 0) return;
-
-      const randomUser = users[Math.floor(Math.random() * users.length)];
-      const specialTagKey = 'mystery';
-      TAGS_INFO[specialTagKey] = { name: '???', description: 'A mysterious rare tag' };
-      await db.ref(`tags/${randomUser}/${specialTagKey}`).set(true);
-
-      showNotification(`🎉 ${TAGS_INFO[specialTagKey].name} tag given to ${randomUser}!`, 6000);
-    } catch(e){
-      console.error('Failed to give ??? tag', e);
+    for(let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 20 + 10;
+      const speed = 2 + Math.random() * 2;
+      fireworks.push(new SpiralFirework(centerX, centerY, angle, radius, speed, {color:'purple', value:1}));
     }
-  })();
+
+    showNotification('🌌 Galaxy Event launched!');
+
+    // async tag safely
+    (async function giveMysteryTag(){
+      try {
+        const usersSnap = await db.ref('users').once('value');
+        const users = Object.keys(usersSnap.val() || {});
+        if(users.length === 0) return;
+        const randomUser = users[Math.floor(Math.random() * users.length)];
+        await db.ref(`tags/${randomUser}/mystery`).set(true);
+      } catch(e) { console.error('Failed to give mystery tag', e); }
+    })();
+
+  } catch(e) { console.error('Galaxy admin event error', e); }
 }
 
 initAdminEventsListener();
@@ -760,6 +759,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
