@@ -18,6 +18,7 @@
   .tag.fart { color: #FF4DEE; font-weight: bold; }
   .tag.donator { color: #0BBF06; font-weight: bold; }
   .tag.youtuber { color: #F00000; font-weight: bold; }
+  .tag.mystery { color: #000000; font-weight: bold; }
   .tag.regular { color: #0ff; }
 
   #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
@@ -68,7 +69,8 @@ const TAGS = {
   fart: { name: "Fart", class: "fart" },
   donator: { name: "DONATOR", class: "donator" },
   youtuber: { name: "YOUTUBER", class: "youtuber" },
-  regular: { name: "Regular", class: "regular" }
+  regular: { name: "Regular", class: "regular" },
+  mystery: { name: "???", class: "mystery" }
 };
 
 const body = document.getElementById('leaderboardBody');
@@ -166,6 +168,7 @@ db.ref('activeTag').on('value', snap => {
 </script>
 </body>
 </html>
+
 
 
 
