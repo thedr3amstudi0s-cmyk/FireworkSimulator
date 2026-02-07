@@ -85,6 +85,7 @@
     <button id="adminFireworkBtn">Mega Firework</button>
     <button id="adminFireworkBtnNuke">NUKE</button>
     <button id="adminFireworkBtnGalaxy">Galaxy</button>
+    <button id="adminMessageBtn">Send Message</button>
   </div>
 
   <div id="tagInventory" style="display:none;">
@@ -352,15 +353,42 @@ document.getElementById('unlockColorsBtn').addEventListener('click',()=>{ unlock
 document.getElementById('maxAutoBtn').addEventListener('click',()=>{ autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline().catch(()=>{}); });
 document.getElementById('viewUsersBtn').addEventListener('click',()=>{ showNotification('Check Firebase console for users.'); });
 
-async function sendAdminEvent(type,message){
+document.getElementById('adminMessageBtn').addEventListener('click', async () => {
+  const msg = prompt('Enter message for players:');
+  if (!msg || msg.trim().length < 2) return;
+
+  const duration = parseInt(prompt('Display time (seconds)?', '6'));
+  const ms = isNaN(duration) ? 6000 : Math.min(Math.max(duration * 1000, 2000), 15000);
+
+  await sendAdminEvent('MESSAGE', msg.trim(), ms);
+});
+
+
+async function sendAdminEvent(type, message, duration = 3000){
   try{
-    const snap=await db.ref('admins/'+currentUser).once('value');
-    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){ showNotification('Not admin'); return; }
-    await db.ref('adminEvents/latest').set({type,message,timestamp:Date.now()});
+    const snap = await db.ref('admins/' + currentUser).once('value');
+    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){
+      showNotification('Not admin');
+      return;
+    }
+
+    await db.ref('adminEvents/latest').set({
+      type,
+      message,
+      duration,
+      timestamp: Date.now()
+    });
   }catch(e){
     if(ADMIN_FALLBACK[currentUser]){
-      try{ await db.ref('adminEvents/latest').set({type,message,timestamp:Date.now()}); }catch(err){ showNotification('Permission denied writing admin event'); return; }
-    }else{ showNotification('Not admin'); return; }
+      await db.ref('adminEvents/latest').set({
+        type,
+        message,
+        duration,
+        timestamp: Date.now()
+      });
+    }else{
+      showNotification('Not admin');
+    }
   }
 }
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
@@ -373,7 +401,12 @@ async function initAdminEventsListener(){
     const val=snap.val(); if(!val) return; 
     if(val.timestamp>lastAdminTimestamp){
       lastAdminTimestamp=val.timestamp;
-      showNotification(`ADMIN EVENT: ${val.type}`);
+      if (val.type === 'MESSAGE') {
+        showNotification('📢 ' + val.message, val.duration || 5000);
+      } else {
+        showNotification(`ADMIN EVENT: ${val.type}`);
+      }
+
       if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
       if(val.type === 'megaFirework') {
         for(let i = 0; i < 10; i++) {
@@ -622,5 +655,6 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
