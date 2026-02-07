@@ -699,11 +699,7 @@ const usernameInput = document.getElementById('username');
 loginBtn.addEventListener('click', async () => {
   const email = emailInput.value.trim();
   const pw = passwordInput.value;
-
-  if (!email || !pw) {
-    loginMsg.textContent = 'Please enter email and password.';
-    return;
-  }
+  if (!email || !pw) return loginMsg.textContent = 'Enter email & password.';
 
   try {
     const res = await auth.signInWithEmailAndPassword(email, pw);
@@ -712,11 +708,12 @@ loginBtn.addEventListener('click', async () => {
     loginMsg.textContent = '';
     afterLogin();
   } catch (e) {
-    console.error('Login failed:', e);
-    if (e.code === 'auth/user-not-found') loginMsg.textContent = 'User not found. Please sign up.';
-    else if (e.code === 'auth/wrong-password') loginMsg.textContent = 'Incorrect password.';
-    else if (e.code === 'auth/invalid-email') loginMsg.textContent = 'Invalid email format.';
-    else loginMsg.textContent = e.message;
+    console.error(e);
+    loginMsg.textContent = {
+      'auth/user-not-found':'User not found.',
+      'auth/wrong-password':'Wrong password.',
+      'auth/invalid-email':'Invalid email'
+    }[e.code] || e.message;
   }
 });
 
@@ -787,24 +784,12 @@ function afterLogin(){
   ui.style.display='block'; 
   resetBtn.style.display='block'; 
   logoutBtn.style.display='block';
-
   if(ADMIN_FALLBACK[currentUser]) ownerCommands.style.display='block';
 
-  loadProgressOnline(currentUser).catch(()=>{});
-  loadTagsUI(); // <-- call without parameters
+  loadProgressOnline(currentUser).catch(console.error);
+  loadTagsUI().catch(console.error);
 }
 
-// --- AUTO-LOGIN & LOAD PROGRESS ---
-auth.onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user.uid;
-    currentUsername = user.displayName || user.email;
-    afterLogin(); // show UI, load progress, tags, owner commands
-  } else {
-    loginBox.style.display = 'block';
-    ui.style.display = 'none';
-  }
-});
 
 async function loadProgressOnline(uid){
   const snap = await db.ref('progress/' + uid).once('value');
@@ -843,6 +828,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
