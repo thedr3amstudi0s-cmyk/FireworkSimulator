@@ -594,7 +594,7 @@ async function loadProgressOnline(uid){
     rebirthCount=p.rebirthCount||0; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
     colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100; rebirthPrice=p.rebirthPrice||500;
     colors=[...baseColors,...getRebirthColors(rebirthCount)];
-    Buttons(); document.getElementById('money').textContent=money;
+    updateButtons(); document.getElementById('money').textContent=money;
     startAutoLaunch();
   }
 }
@@ -843,6 +843,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
