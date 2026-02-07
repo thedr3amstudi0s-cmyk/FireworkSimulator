@@ -12,14 +12,10 @@
   th { background: #222; }
   tr:nth-child(even) { background: #1a1a1a; }
 
-  .tag-owner .tagName { color: orange; font-weight: bold; }
-  .tag-vip .tagName { color: gold; font-weight: bold; }
-  .tag-donator .tagName { color: green; font-weight: bold; }
-  .tag-streamer .tagName { color: #981ab6; font-weight: bold; }
-  .tag-youtuber .tagName { color: red; font-weight: bold; }
-  .tag-regular .tagName { color: #0ff; font-weight: normal; }
-  .tag-fart .tagName { color: magenta; font-weight: bold; }
-
+  .tag.owner { color: orange; font-weight: bold; }
+  .tag.vip { color: gold; font-weight: bold; }
+  .tag.streamer { color: #981ab6; font-weight: bold; }
+  .tag.regular { color: #0ff; }
 
   #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
 </style>
@@ -63,13 +59,10 @@ const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
 
 // Tag definitions
 const TAGS = {
-  owner: { name: "Owner", description: "Assigned to the owner" },
-  vip: { name: "VIP", description: "Give to some supporters — can be given" },
-  donator: { name: "Donator", description: "Cosmetic thank-you for supporting dr3am studi0s" },
-  streamer: { name: "Streamer", description: "Given to verified streamers" },
-  youtuber: { name: "Youtuber", description: "Given to verified youtubers" },
-  regular: { name: "Regular", description: "Default player tag" },
-  fart: { name: "Fart", description: "A tag for the fart" }
+  owner: { name: "Owner", class: "owner" },
+  vip: { name: "VIP", class: "vip" },
+  streamer: { name: "STREAMER", class: "streamer" },
+  regular: { name: "Regular", class: "regular" }
 };
 
 const body = document.getElementById('leaderboardBody');
@@ -167,8 +160,3 @@ db.ref('activeTag').on('value', snap => {
 </script>
 </body>
 </html>
-
-
-
-
-
