@@ -44,6 +44,19 @@
   
   #goGoogleForm {position:fixed; top:130px; right:10px; padding:6px 8px; background:#444; color:white; font-weight:600; border:none;}
 
+  @keyframes glitch {
+  0% { transform: translate(0,0); filter: hue-rotate(0deg); }
+  20% { transform: translate(-2px,2px); }
+  40% { transform: translate(2px,-2px); filter: hue-rotate(90deg); }
+  60% { transform: translate(-2px,-1px); }
+  80% { transform: translate(1px,2px); filter: hue-rotate(180deg); }
+  100% { transform: translate(0,0); }
+}
+
+.glitch-ui button {
+  animation: glitch 0.15s infinite;
+}
+
 </style>
 </head>
 <body>
@@ -85,6 +98,7 @@
     <button id="adminFireworkBtn">Mega Firework</button>
     <button id="adminFireworkBtnNuke">NUKE</button>
     <button id="adminFireworkBtnGalaxy">Galaxy</button>
+    <button id="glitchEventBtn">Glitch Event</button>
     <button id="adminMessageBtn">Send Message</button>
   </div>
 
@@ -167,6 +181,9 @@ const TAGS_INFO = {
   fart: { name: "Fart", description: "A tag for the fart" }
 };
 
+let globalMultiplier = 1;
+let glitchActive = false;
+  
 let lastAdminTimestamp=0;
 
 function showNotification(text,time=2500){
@@ -176,20 +193,69 @@ function showNotification(text,time=2500){
 }
 
 /* FIREWORK CLASSES */
-class Firework{
-  constructor(x,y,colorObj){ this.x=x; this.y=canvas.height; this.targetY=y; this.speed=Math.random()*2+4; this.colorObj=colorObj; this.exploded=false; }
-  update(){ 
-    this.y-=this.speed; 
-    if(this.y<=this.targetY && !this.exploded){ this.exploded=true; explode(this.x,this.y,this.colorObj); return true; } 
-    return false; 
+class Firework {
+  constructor(x, y, colorObj) {
+    this.x = x;
+    this.y = canvas.height;
+    this.targetY = y;
+    this.speed = Math.random() * 2 + 4;
+    this.colorObj = colorObj;
+    this.exploded = false;
   }
-  draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.colorObj.color; ctx.fill(); }
+
+  update() {
+    // glitch shake
+    if (glitchActive) {
+      this.x += (Math.random() - 0.5) * 6;
+      this.y += (Math.random() - 0.5) * 6;
+    }
+
+    this.y -= this.speed;
+    if (this.y <= this.targetY && !this.exploded) {
+      this.exploded = true;
+      explode(this.x, this.y, this.colorObj);
+      return true;
+    }
+    return false;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = glitchActive
+      ? `hsl(${Math.random() * 360},100%,60%)`
+      : this.colorObj.color;
+    ctx.fill();
+  }
 }
-class Particle{
-  constructor(x,y,colorObj){ this.x=x; this.y=y; this.color=colorObj.color; this.vx=(Math.random()-0.5)*6; this.vy=(Math.random()-0.5)*6; this.life=100; }
-  update(){ this.vy+=gravity; this.x+=this.vx; this.y+=this.vy; this.life--; }
-  draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
+
+class Particle {
+  constructor(x, y, colorObj) {
+    this.x = x;
+    this.y = y;
+    this.color = colorObj.color;
+    this.vx = (Math.random() - 0.5) * 6;
+    this.vy = (Math.random() - 0.5) * 6;
+    this.life = 100;
+  }
+
+  update() {
+    this.vy += gravity;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life--;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = glitchActive
+      ? `hsl(${Math.random() * 360},100%,60%)`
+      : this.color;
+    ctx.fill();
+  }
 }
+
 
 let soundMuted = false;
 
@@ -219,7 +285,7 @@ function explode(x,y,colorObj){
   }
 
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
-  money+=colorObj.value*(rebirthCount+1);
+  money += colorObj.value * (rebirthCount + 1) * globalMultiplier;
   document.getElementById('money').textContent=money;
   saveProgressOnline().catch(()=>{});
 }
@@ -363,8 +429,11 @@ document.getElementById('adminMessageBtn').addEventListener('click', async () =>
   await sendAdminEvent('MESSAGE', msg.trim(), ms);
 });
 
+  document.getElementById('glitchEventBtn').addEventListener('click', () => {
+  sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (1.5x)', 10000);
+});
 
-async function sendAdminEvent(type, message, duration = 3000){
+async function sendAdminEvent(type, message = '', duration = 3000){
   try{
     const snap = await db.ref('admins/' + currentUser).once('value');
     if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){
@@ -391,6 +460,7 @@ async function sendAdminEvent(type, message, duration = 3000){
     }
   }
 }
+
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
 document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
@@ -401,11 +471,16 @@ async function initAdminEventsListener(){
     const val=snap.val(); if(!val) return; 
     if(val.timestamp>lastAdminTimestamp){
       lastAdminTimestamp=val.timestamp;
-      if (val.type === 'MESSAGE') {
-        showNotification('📢 ' + val.message, val.duration || 5000);
-      } else {
-        showNotification(`ADMIN EVENT: ${val.type}`);
-      }
+    if (val.type === 'MESSAGE') {
+      showNotification('📢 ' + val.message, val.duration || 5000);
+    }
+    else if (val.type === 'GLITCH') {
+      showNotification(val.message || '⚠ GLITCH EVENT', val.duration || 8000);
+      startGlitchEvent(val.duration || 10000);
+    }
+    else {
+      showNotification(`ADMIN EVENT: ${val.type}`);
+    }
 
       if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
       if(val.type === 'megaFirework') {
@@ -474,6 +549,20 @@ function startAutoLaunch(){
       }
     },autoSpeed*1000);
   }
+}
+
+  function startGlitchEvent(duration){
+  if (glitchActive) return;
+
+  glitchActive = true;
+  globalMultiplier = 1.5;
+  document.body.classList.add('glitch-ui');
+
+  setTimeout(() => {
+    glitchActive = false;
+    globalMultiplier = 1;
+    document.body.classList.remove('glitch-ui');
+  }, duration);
 }
 
 /* SAVE & LOAD PROGRESS */
@@ -655,6 +744,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
