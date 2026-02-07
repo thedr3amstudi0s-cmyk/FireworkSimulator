@@ -515,7 +515,7 @@ async function initAdminEventsListener(){
               }
               update() {
                 this.centerY -= 2;          // move upward
-                this.angle += 0.2;           // rotate for spiral
+                this.angle += 0.5;           // rotate for spiral
                 this.radius += 0.5;          // slowly move outward
                 this.x = this.centerX + this.radius * Math.cos(this.angle);
                 this.y = this.centerY + this.radius * Math.sin(this.angle);
@@ -745,6 +745,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
