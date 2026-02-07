@@ -690,9 +690,93 @@ async function loadTagsUI() {
 }
 
 
-/* LOGIN & AUTH */
-loginBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; auth.signInWithEmailAndPassword(email,pw).then(res=>{ currentUser=res.user.uid; currentUsername=res.user.displayName||res.user.email; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
-signupBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; const username=document.getElementById('username').value||'Player'; auth.createUserWithEmailAndPassword(email,pw).then(res=>{ res.user.updateProfile({displayName:username}); currentUser=res.user.uid; currentUsername=username; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
+/* ===== LOGIN / SIGNUP / PASSWORD RESET ===== */
+
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const usernameInput = document.getElementById('username');
+
+loginBtn.addEventListener('click', async () => {
+  const email = emailInput.value.trim();
+  const pw = passwordInput.value;
+
+  if (!email || !pw) {
+    loginMsg.textContent = 'Please enter email and password.';
+    return;
+  }
+
+  try {
+    const res = await auth.signInWithEmailAndPassword(email, pw);
+    currentUser = res.user.uid;
+    currentUsername = res.user.displayName || res.user.email;
+    loginMsg.textContent = '';
+    afterLogin();
+  } catch (e) {
+    console.error('Login failed:', e);
+    if (e.code === 'auth/user-not-found') loginMsg.textContent = 'User not found. Please sign up.';
+    else if (e.code === 'auth/wrong-password') loginMsg.textContent = 'Incorrect password.';
+    else if (e.code === 'auth/invalid-email') loginMsg.textContent = 'Invalid email format.';
+    else loginMsg.textContent = e.message;
+  }
+});
+
+signupBtn.addEventListener('click', async () => {
+  const email = emailInput.value.trim();
+  const pw = passwordInput.value;
+  const username = usernameInput.value.trim() || 'Player';
+
+  if (!email || !pw) {
+    loginMsg.textContent = 'Please enter email and password.';
+    return;
+  }
+
+  try {
+    const res = await auth.createUserWithEmailAndPassword(email, pw);
+    // Wait for displayName update before continuing
+    await res.user.updateProfile({ displayName: username });
+    currentUser = res.user.uid;
+    currentUsername = username;
+    loginMsg.textContent = '';
+    afterLogin();
+  } catch (e) {
+    console.error('Signup failed:', e);
+    if (e.code === 'auth/email-already-in-use') loginMsg.textContent = 'Email already in use.';
+    else if (e.code === 'auth/weak-password') loginMsg.textContent = 'Password is too weak.';
+    else if (e.code === 'auth/invalid-email') loginMsg.textContent = 'Invalid email format.';
+    else loginMsg.textContent = e.message;
+  }
+});
+
+forgotBtn.addEventListener('click', async () => {
+  const email = emailInput.value.trim();
+  if (!email) {
+    loginMsg.textContent = 'Please enter your email.';
+    return;
+  }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    loginMsg.textContent = 'Password reset email sent!';
+  } catch (e) {
+    console.error('Password reset failed:', e);
+    if (e.code === 'auth/user-not-found') loginMsg.textContent = 'No user found with this email.';
+    else if (e.code === 'auth/invalid-email') loginMsg.textContent = 'Invalid email format.';
+    else loginMsg.textContent = e.message;
+  }
+});
+
+// Auto-login when page loads
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user.uid;
+    currentUsername = user.displayName || user.email;
+    afterLogin();
+  } else {
+    loginBox.style.display = 'block';
+    ui.style.display = 'none';
+  }
+});
+
+
 forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
 
 //logout button code
@@ -759,6 +843,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
