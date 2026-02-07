@@ -527,7 +527,7 @@ async function initAdminEventsListener(){
     }
     else if (val.type === 'GLITCH') {
       showNotification(val.message || '⚠ GLITCH EVENT', val.duration || 8000);
-      startGlitchEvent(val.duration || 10000);
+      startGlitchEvent(val.duration || 60000); // 1 min
     }
     else {
       showNotification(`ADMIN EVENT: ${val.type}`);
@@ -545,7 +545,7 @@ async function initAdminEventsListener(){
       }
         if (val.type === 'Galaxy') {
           galaxyEventActive = true;
-          galaxyEventEnd = Date.now() + 15000; // 15 seconds
+          galaxyEventEnd = Date.now() + 60000; // 1 min
         
           showNotification('🌌 GALAXY EVENT ACTIVE!', 4000);
         }
@@ -759,6 +759,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
