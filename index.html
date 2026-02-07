@@ -397,7 +397,7 @@ resetBtn.addEventListener('click', async () => {
 
 function spawnGalaxySpiral() {
   const centerX = Math.random() * canvas.width;
-  let centerY = canvas.height + 20;
+  let centerY = Math.random()*canvas.height/2+100;
 
   const angleOffset = Math.random() * Math.PI * 2;
 
@@ -474,7 +474,7 @@ document.getElementById('adminMessageBtn').addEventListener('click', async () =>
   const msg = prompt('Enter message for players:');
   if (!msg || msg.trim().length < 2) return;
 
-  const duration = parseInt(prompt('Display time (seconds)?', '6'));
+  const duration = parseInt(prompt('Display time (seconds)?', '10'));
   const ms = isNaN(duration) ? 6000 : Math.min(Math.max(duration * 1000, 2000), 15000);
 
   await sendAdminEvent('MESSAGE', msg.trim(), ms);
@@ -759,6 +759,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
