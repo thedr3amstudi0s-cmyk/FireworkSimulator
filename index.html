@@ -495,69 +495,64 @@ async function initAdminEventsListener(){
         showNotification('Mega Firework launched!');
       }
     if(val.type === 'Galaxy') {
-      const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
-      const centerX = canvas.width / (Math.random() * (3 - 1) + 1);
-      const centerY = canvas.height; // start at bottom
-    
-      for(let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2; // random starting angle
-        const radius = Math.random() * 20 + 10; // initial radius from center
-        const speed = 2 + Math.random() * 2; // speed of upward spiral
-    
-        class SpiralFirework extends Firework {
-          constructor(centerX, centerY, angle, radius, speed, colorObj) {
-            super(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle), colorObj);
-            this.centerX = centerX;
-            this.centerY = centerY;
-            this.angle = angle;
-            this.radius = radius;
-            this.speed = speed;
-          }
-          update() {
-            this.centerY -= 2;          // move upward
-            this.angle += 0.2;           // rotate for spiral
-            this.radius += 0.5;          // slowly move outward
-            this.x = this.centerX + this.radius * Math.cos(this.angle);
-            this.y = this.centerY + this.radius * Math.sin(this.angle);
-    
-            // explode at top
-            if(this.centerY < canvas.height / 2) {
-              explode(this.x, this.y, this.colorObj);
-              return true;
-            }
-            return false;
-          }
-        }
-    
-        fireworks.push(new SpiralFirework(centerX, centerY, angle, radius, speed, {color:'purple', value:1}));
-      }
-    
-      showNotification('🌌 Galaxy Event launched!');
+  const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
+  const centerX = canvas.width / 2; // center
+  const centerY = canvas.height;    // start at bottom
 
-      if(glitchActive && Math.random() < 0.01){ // 1% chance
-        try {
-          // get all users
-          const usersSnap = await db.ref('users').once('value');
-          const users = Object.keys(usersSnap.val() || {});
-          if(users.length > 0){
-            // pick random user
-            const randomUser = users[Math.floor(Math.random() * users.length)];
-      
-            // hardcode ??? tag
-            const specialTagKey = 'mystery'; // you can add this to TAGS_INFO below
-            TAGS_INFO[specialTagKey] = { name: '???', description: 'A mysterious rare tag' };
-      
-            // give ??? tag
-            await db.ref(`tags/${randomUser}/${specialTagKey}`).set(true);
-      
-            showNotification(`🎉 ${TAGS_INFO[specialTagKey].name} tag given to ${randomUser}!`, 6000);
-          }
-        } catch(e){
-          console.error('Failed to give ??? tag', e);
-        }
+  // Spiral Firework class (defined once)
+  class SpiralFirework extends Firework {
+    constructor(centerX, centerY, angle, radius, speed, colorObj) {
+      super(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle), colorObj);
+      this.centerX = centerX;
+      this.centerY = centerY;
+      this.angle = angle;
+      this.radius = radius;
+      this.speed = speed;
+    }
+    update() {
+      this.centerY -= this.speed;     // move upward
+      this.angle += 0.2;              // rotate for spiral
+      this.radius += 0.5;             // move outward
+      this.x = this.centerX + this.radius * Math.cos(this.angle);
+      this.y = this.centerY + this.radius * Math.sin(this.angle);
+
+      // explode at top
+      if(this.centerY < canvas.height / 2) {
+        explode(this.x, this.y, this.colorObj);
+        return true;
       }
-  });
+      return false;
+    }
+  }
+
+  for(let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * 20 + 10;
+    const speed = 2 + Math.random() * 2;
+    fireworks.push(new SpiralFirework(centerX, centerY, angle, radius, speed, {color:'purple', value:1}));
+  }
+
+  showNotification('🌌 Galaxy Event launched!');
+
+  // give mystery tag async, safely
+  (async function giveMysteryTag(){
+    try {
+      const usersSnap = await db.ref('users').once('value');
+      const users = Object.keys(usersSnap.val() || {});
+      if(users.length === 0) return;
+
+      const randomUser = users[Math.floor(Math.random() * users.length)];
+      const specialTagKey = 'mystery';
+      TAGS_INFO[specialTagKey] = { name: '???', description: 'A mysterious rare tag' };
+      await db.ref(`tags/${randomUser}/${specialTagKey}`).set(true);
+
+      showNotification(`🎉 ${TAGS_INFO[specialTagKey].name} tag given to ${randomUser}!`, 6000);
+    } catch(e){
+      console.error('Failed to give ??? tag', e);
+    }
+  })();
 }
+
 initAdminEventsListener();
 
 /* AUTO-LAUNCH */
@@ -765,6 +760,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
