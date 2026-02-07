@@ -397,7 +397,7 @@ resetBtn.addEventListener('click', async () => {
 
 function spawnGalaxySpiral() {
   const centerX = Math.random() * canvas.width;
-  let centerY = 0;
+  let centerY = canvas.height - 50;
 
   const angleOffset = Math.random() * Math.PI * 2;
 
@@ -416,7 +416,7 @@ function spawnGalaxySpiral() {
       this.x = centerX + Math.cos(this.angle) * this.radius;
       this.y = centerY + Math.sin(this.angle) * this.radius;
 
-      if (this.y < canvas.height * 0.35) {
+      if (this.y < canvas.height * 0.25) {
         explode(this.x, this.y, this.colorObj);
         return true;
       }
@@ -759,6 +759,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
