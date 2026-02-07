@@ -12,13 +12,13 @@
   th { background: #222; }
   tr:nth-child(even) { background: #1a1a1a; }
 
-  .tag.owner { color: #FFD700; font-weight: bold; }    /* gold */
-  .tag.vip { color: #00FFFF; font-weight: bold; }      /* cyan */
-  .tag.donator { color: #00FF00; font-weight: bold; }  /* green */
-  .tag.streamer { color: #FF00FF; font-weight: bold; } /* magenta */
-  .tag.youtuber { color: #FF0000; font-weight: bold; } /* red */
-  .tag.regular { color: #FFFFFF; }                     /* white */
-  .tag.fart { color: #FF00FF; font-weight: bold; }     /* magenta */
+  .tag.owner { color: gold; font-weight: bold; }
+  .tag.vip { color: cyan; font-weight: bold; }
+  .tag.donator { color: green; font-weight: bold; }
+  .tag.streamer { color: magenta; font-weight: bold; }
+  .tag.youtuber { color: red; font-weight: bold; }
+  .tag.regular { color: white; }
+  .tag.fart { color: magenta; font-weight: bold; }
 
 
   #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
@@ -167,5 +167,6 @@ db.ref('activeTag').on('value', snap => {
 </script>
 </body>
 </html>
+
 
 
