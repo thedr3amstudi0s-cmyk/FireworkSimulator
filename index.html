@@ -37,7 +37,7 @@
   .tag-streamer .tagName { color: magenta; } 
   .tag-youtuber .tagName { color: red; }
   .tag-regular .tagName { color: white; }
-  .tag-fart .tagName { color:#fff; }
+  .tag-fart .tagName { color: magenta; }
 
   #muteBtn {position:fixed; top:90px; right:10px; padding:6px 8px; background:#444; color:white; font-weight:600; border:none;}
   #muteBtn.muted {background:#c0392b;}
@@ -155,13 +155,13 @@ let colors=[...baseColors];
 const ADMIN_FALLBACK = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true, "BxQ1aTqPndOfHzuX3OzlCcD4pbC3": true };
 
 const TAGS_INFO = {
-  owner: { name: "Owner", description: "Assigned to admins (managed in /admins)" },
+  owner: { name: "Owner", description: "Assigned to the owner" },
   vip: { name: "VIP", description: "Give to some supporters — can be given" },
   donator: { name: "Donator", description: "Cosmetic thank-you for supporting dr3am studi0s" },
   streamer: { name: "Streamer", description: "Given to verified streamers" },
   youtuber: { name: "Youtuber", description: "Given to verified youtubers" },
-  fart: { name: "Fart", description: "A tag for the fart" },
-  regular: { name: "Regular", description: "Default player tag" }
+  regular: { name: "Regular", description: "Default player tag" },
+  fart: { name: "Fart", description: "A tag for the fart" }
 };
 
 let lastAdminTimestamp=0;
@@ -618,6 +618,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
