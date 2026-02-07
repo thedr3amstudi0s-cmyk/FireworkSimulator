@@ -136,6 +136,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
+/* UI Elements */
 const loginBox = document.getElementById('loginBox');
 const loginBtn = document.getElementById('loginBtn');
 const signupBtn = document.getElementById('signupBtn');
@@ -186,9 +187,9 @@ const TAGS_INFO = {
 
 let globalMultiplier = 1;
 let glitchActive = false;
-  
 let lastAdminTimestamp=0;
 
+/* NOTIFICATIONS */
 function showNotification(text,time=2500){
   notifications.textContent=text;
   notifications.style.opacity='1';
@@ -207,90 +208,47 @@ class Firework {
   }
 
   update() {
-    // glitch shake
-    if (glitchActive) {
-      this.x += (Math.random() - 0.5) * 6;
-      this.y += (Math.random() - 0.5) * 6;
-    }
-
+    if (glitchActive) { this.x += (Math.random() - 0.5) * 6; this.y += (Math.random() - 0.5) * 6; }
     this.y -= this.speed;
-    if (this.y <= this.targetY && !this.exploded) {
-      this.exploded = true;
-      explode(this.x, this.y, this.colorObj);
-      return true;
-    }
+    if (this.y <= this.targetY && !this.exploded) { this.exploded = true; explode(this.x, this.y, this.colorObj); return true; }
     return false;
   }
 
   draw() {
     ctx.beginPath();
     ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = glitchActive
-      ? `hsl(${Math.random() * 360},100%,60%)`
-      : this.colorObj.color;
+    ctx.fillStyle = glitchActive ? `hsl(${Math.random() * 360},100%,60%)` : this.colorObj.color;
     ctx.fill();
   }
 }
 
 class Particle {
   constructor(x, y, colorObj) {
-    this.x = x;
-    this.y = y;
-    this.color = colorObj.color;
-    this.vx = (Math.random() - 0.5) * 6;
-    this.vy = (Math.random() - 0.5) * 6;
+    this.x = x; this.y = y; this.color = colorObj.color;
+    this.vx = (Math.random() - 0.5) * 6; this.vy = (Math.random() - 0.5) * 6;
     this.life = 100;
   }
-
-  update() {
-    this.vy += gravity;
-    this.x += this.vx;
-    this.y += this.vy;
-    this.life--;
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = glitchActive
-      ? `hsl(${Math.random() * 360},100%,60%)`
-      : this.color;
-    ctx.fill();
-  }
+  update() { this.vy += gravity; this.x += this.vx; this.y += this.vy; this.life--; }
+  draw() { ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2); ctx.fillStyle=glitchActive?`hsl(${Math.random()*360},100%,60%)`:this.color; ctx.fill();}
 }
 
-
 let soundMuted = false;
-
 const muteBtn = document.getElementById('muteBtn');
-
 muteBtn.addEventListener('click', () => {
   soundMuted = !soundMuted;
-
-  // Mute/unmute all game sounds
   fireworkSound.muted = soundMuted;
-
-  // UI feedback
   muteBtn.textContent = soundMuted ? 'Sound: OFF' : 'Sound: ON';
   muteBtn.classList.toggle('muted', soundMuted);
-
   showNotification(soundMuted ? 'Game sound muted' : 'Game sound on');
 });
 
-
-/* CORE FUNCTIONS */
+/* FIREWORK FUNCTIONS */
 function explode(x,y,colorObj){
-  if (!soundMuted) {
-    try {
-      fireworkSound.currentTime = 0;
-      fireworkSound.play();
-    } catch(e){}
-  }
-
+  if(!soundMuted){ try{ fireworkSound.currentTime=0; fireworkSound.play(); }catch(e){console.log('sound error',e);} }
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
   money += colorObj.value * (rebirthCount + 1) * globalMultiplier;
   document.getElementById('money').textContent=money;
-  saveProgressOnline().catch(()=>{});
+  saveProgressOnline().catch(e=>console.log('saveProgressOnline error:',e));
 }
 
 function launchFirework(x,y){
@@ -301,34 +259,22 @@ function launchFirework(x,y){
   fireworks.push(new Firework(x,y,colorObj));
   lastClick=Date.now();
 }
-
 document.addEventListener('click',(e)=>{ if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY); });
 
 function animate(){
   ctx.fillStyle="rgba(0,0,0,0.2)";
   ctx.fillRect(0,0,canvas.width,canvas.height);
-
   for(let i=fireworks.length-1;i>=0;i--){ if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw(); }
   for(let i=particles.length-1;i>=0;i--){ particles[i].update(); particles[i].draw(); if(particles[i].life<=0) particles.splice(i,1); }
-
   const elapsed=Date.now()-lastClick;
   const pct=Math.min(100,(elapsed/clickDelay)*100);
   document.getElementById('cooldownFill').style.width=pct+'%';
   document.getElementById('moneyMultiplier').textContent=(rebirthCount+1);
-
   requestAnimationFrame(animate);
 }
 animate();
 
-/* ======= UPGRADES & UI ======= */
-function getRebirthColors(rc){
-  const scheme=[{base:60},{base:80},{base:100},{base:120}][rc%4];
-  const num=Math.min(10+rc,50);
-  const out=[];
-  for(let i=0;i<num;i++){ const hue=Math.floor(Math.random()*360); out.push({ color:`hsl(${hue},${scheme.base}%,60%)`, value:i+1 }); }
-  return out;
-}
-
+/* BUTTONS & UPGRADES */
 function updateButtons(){
   document.getElementById('buyColor').textContent=unlockedColors>=colors.length?'MAX':`Buy Color ($${colorPrice})`;
   document.getElementById('reduceDelay').textContent=clickDelay<=100?'MAX':`Reduce Delay ($${delayPrice})`;
@@ -339,475 +285,153 @@ function updateButtons(){
   document.getElementById('unlockedColors').textContent=unlockedColors;
 }
 
+/* RESET PROGRESS */
 resetBtn.addEventListener('click', async () => {
-  if (!currentUser) return showNotification('Not logged in!');
-  if (!confirm('Are you sure you want to reset your progress?')) return;
-
-  // Reset all local game state to defaults
-  money = 0;
-  unlockedColors = 1;
-  clickDelay = 1200;
-  rebirthCount = 0;
-  autoAmount = 0;
-  autoSpeed = 2.5;
-  colorPrice = 50;
-  delayPrice = 100;
-  rebirthPrice = 500;
-  colors = [...baseColors];
-
-  // Update UI
-  document.getElementById('money').textContent = money;
-  updateButtons();
-  startAutoLaunch(); // stop auto if any
-
-  // Reset progress in Firebase
-  try {
-    await db.ref('progress/' + currentUser).set({
-      money,
-      unlockedColors,
-      clickDelay,
-      rebirthCount,
-      autoAmount,
-      autoSpeed,
-      colorPrice,
-      delayPrice,
-      rebirthPrice
-    });
-    showNotification('Progress has been reset!');
-  } catch (e) {
-    console.error('Failed to reset progress', e);
-    showNotification('Error resetting progress.');
-  }
-});
-
-
-/* BUTTON HANDLERS */
-document.getElementById('buyColor').addEventListener('click',()=>{
-  if(money>=colorPrice && unlockedColors<colors.length){
-    money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.5);
-    document.getElementById('money').textContent=money;
-    updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Color unlocked!');
-  }
-});
-document.getElementById('reduceDelay').addEventListener('click',()=>{
-  if(money>=delayPrice && clickDelay>100){
-    money-=delayPrice; clickDelay=Math.max(100,clickDelay-100); delayPrice=Math.floor(delayPrice*1.7);
-    document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Delay reduced!');
-  }
-});
-document.getElementById('buyAuto').addEventListener('click',()=>{
-  if(money>=autoPrice && autoAmount<3){
-    money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7);
-    document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); startAutoLaunch(); showNotification('Auto-launch purchased!');
-  }
-});
-document.getElementById('rebirth').addEventListener('click', async ()=>{
-  if(money<rebirthPrice){ showNotification(`Need $${rebirthPrice} to rebirth!`); return; }
-  if(!confirm(`Are you sure you want to rebirth for $${rebirthPrice}?`)) return;
-  money=0; rebirthCount++; unlockedColors=1; clickDelay=1200; autoAmount=0; autoSpeed=2.5; autoPrice=200; colorPrice=50; delayPrice=100;
-  rebirthPrice=Math.floor(500*Math.pow(1.5,rebirthCount));
-  colors=[...baseColors,...getRebirthColors(rebirthCount)];
-  updateButtons(); document.getElementById('money').textContent=money; await saveProgressOnline().catch(()=>{}); saveScore(); startAutoLaunch(); showNotification('Rebirth complete!');
-});
-document.getElementById('goLeaderboardBtn').addEventListener('click', () => {
-  window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html', '_blank');
-});
-document.getElementById('goGoogleForm').addEventListener('click', () => {
-  window.open('https://docs.google.com/forms/d/e/1FAIpQLScUs9xr7EYuAUnPg5OaYuzzbI8Ti8xnKtM-daPskoHrKG5OBw/viewform?usp=header', '_blank');
-});
-
-/* ADMIN BUTTONS */
-document.getElementById('giveMoneyBtn').addEventListener('click',()=>{ money+=1000; document.getElementById('money').textContent=money; saveProgressOnline().catch(()=>{}); });
-document.getElementById('unlockColorsBtn').addEventListener('click',()=>{ unlockedColors=colors.length; updateButtons(); saveProgressOnline().catch(()=>{}); });
-document.getElementById('maxAutoBtn').addEventListener('click',()=>{ autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline().catch(()=>{}); });
-document.getElementById('viewUsersBtn').addEventListener('click',()=>{ showNotification('Check Firebase console for users.'); });
-
-document.getElementById('adminMessageBtn').addEventListener('click', async () => {
-  const msg = prompt('Enter message for players:');
-  if (!msg || msg.trim().length < 2) return;
-
-  const duration = parseInt(prompt('Display time (seconds)?', '6'));
-  const ms = isNaN(duration) ? 6000 : Math.min(Math.max(duration * 1000, 2000), 15000);
-
-  await sendAdminEvent('MESSAGE', msg.trim(), ms);
-});
-
-  document.getElementById('glitchEventBtn').addEventListener('click', () => {
-  sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (1.5x)', 10000);
-});
-
-async function sendAdminEvent(type, message = '', duration = 3000){
+  if(!currentUser){ showNotification('Not logged in!'); return; }
+  if(!confirm('Are you sure you want to reset your progress?')) return;
+  money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0; autoAmount=0; autoSpeed=2.5; colorPrice=50; delayPrice=100; rebirthPrice=500; colors=[...baseColors];
+  updateButtons(); startAutoLaunch();
   try{
-    const snap = await db.ref('admins/' + currentUser).once('value');
-    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){
-      showNotification('Not admin');
-      return;
-    }
-
-    await db.ref('adminEvents/latest').set({
-      type,
-      message,
-      duration,
-      timestamp: Date.now()
-    });
-  }catch(e){
-    if(ADMIN_FALLBACK[currentUser]){
-      await db.ref('adminEvents/latest').set({
-        type,
-        message,
-        duration,
-        timestamp: Date.now()
-      });
-    }else{
-      showNotification('Not admin');
-    }
-  }
-}
-
-document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
-document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
-document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
-
-async function initAdminEventsListener(){
-  try{ const snap=await db.ref('adminEvents/latest').once('value'); lastAdminTimestamp=(snap.val()?.timestamp)||0; }catch(e){}
-  db.ref('adminEvents/latest').on('value',snap=>{
-    const val=snap.val(); if(!val) return; 
-    if(val.timestamp>lastAdminTimestamp){
-      lastAdminTimestamp=val.timestamp;
-    if (val.type === 'MESSAGE') {
-      showNotification('📢 ' + val.message, val.duration || 5000);
-    }
-    else if (val.type === 'GLITCH') {
-      showNotification(val.message || '⚠ GLITCH EVENT', val.duration || 8000);
-      startGlitchEvent(val.duration || 10000);
-    }
-    else {
-      showNotification(`ADMIN EVENT: ${val.type}`);
-    }
-
-      if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
-      if(val.type === 'megaFirework') {
-        for(let i = 0; i < 10; i++) {
-          // random X across canvas, targetY somewhere in upper half
-          const x = Math.random() * canvas.width;
-          const targetY = Math.random() * canvas.height / 2 + 50; // between 50px and half screen
-          fireworks.push(new Firework(x, targetY, {color:'red', value:50}));
-        }
-        showNotification('Mega Firework launched!');
-      }
-    if(val.type === 'Galaxy') {
-      const count = 20 + Math.floor(Math.random() * 11); // 20–30 fireworks
-      const centerX = canvas.width / (Math.random() * (3 - 1) + 1);
-      const centerY = canvas.height; // start at bottom
-    
-      for(let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2; // random starting angle
-        const radius = Math.random() * 20 + 10; // initial radius from center
-        const speed = 2 + Math.random() * 2; // speed of upward spiral
-    
-        class SpiralFirework extends Firework {
-          constructor(centerX, centerY, angle, radius, speed, colorObj) {
-            super(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle), colorObj);
-            this.centerX = centerX;
-            this.centerY = centerY;
-            this.angle = angle;
-            this.radius = radius;
-            this.speed = speed;
-          }
-          update() {
-            this.centerY -= 2;          // move upward
-            this.angle += 0.2;           // rotate for spiral
-            this.radius += 0.5;          // slowly move outward
-            this.x = this.centerX + this.radius * Math.cos(this.angle);
-            this.y = this.centerY + this.radius * Math.sin(this.angle);
-    
-            // explode at top
-            if(this.centerY < canvas.height / 2) {
-              explode(this.x, this.y, this.colorObj);
-              return true;
-            }
-            return false;
-          }
-        }
-    
-        fireworks.push(new SpiralFirework(centerX, centerY, angle, radius, speed, {color:'purple', value:1}));
-      }
-    
-      showNotification('🌌 Galaxy Event launched!');
-
-      if(glitchActive && Math.random() < 0.01){ // 1% chance
-        try {
-          // get all users
-          const usersSnap = await db.ref('users').once('value');
-          const users = Object.keys(usersSnap.val() || {});
-          if(users.length > 0){
-            // pick random user
-            const randomUser = users[Math.floor(Math.random() * users.length)];
-      
-            // hardcode ??? tag
-            const specialTagKey = 'mystery'; // you can add this to TAGS_INFO below
-            TAGS_INFO[specialTagKey] = { name: '???', description: 'A mysterious rare tag' };
-      
-            // give ??? tag
-            await db.ref(`tags/${randomUser}/${specialTagKey}`).set(true);
-      
-            showNotification(`🎉 ${TAGS_INFO[specialTagKey].name} tag given to ${randomUser}!`, 6000);
-          }
-        } catch(e){
-          console.error('Failed to give ??? tag', e);
-        }
-      }
-  });
-}
-initAdminEventsListener();
-
-/* AUTO-LAUNCH */
-function startAutoLaunch(){
-  if(autoInterval) clearInterval(autoInterval);
-  if(autoAmount>0){
-    autoInterval=setInterval(()=>{
-      for(let i=0;i<autoAmount;i++){
-        launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2+100);
-      }
-    },autoSpeed*1000);
-  }
-}
-
-  function startGlitchEvent(duration){
-  if (glitchActive) return;
-
-  glitchActive = true;
-  globalMultiplier = 1.5;
-  document.body.classList.add('glitch-ui');
-
-  setTimeout(() => {
-    glitchActive = false;
-    globalMultiplier = 1;
-    document.body.classList.remove('glitch-ui');
-  }, duration);
-}
-
-/* SAVE & LOAD PROGRESS */
-async function saveProgressOnline(){
-  if(!currentUser) return;
-  await db.ref('progress/'+currentUser).set({
-    money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed, colorPrice, delayPrice, rebirthPrice
-  });
-}
-async function loadProgressOnline(uid){
-  const snap=await db.ref('progress/'+uid).once('value');
-  if(snap.exists()){ const p=snap.val();
-    money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
-    rebirthCount=p.rebirthCount||0; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
-    colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100; rebirthPrice=p.rebirthPrice||500;
-    colors=[...baseColors,...getRebirthColors(rebirthCount)];
-    Buttons(); document.getElementById('money').textContent=money;
-    startAutoLaunch();
-  }
-}
-
-async function loadTagsUI() {
-  const invDiv = document.getElementById('tagInventory');
-  const invList = document.getElementById('tagInventoryList');
-  invList.innerHTML = '';
-
-  invDiv.style.display = 'block'; // always show the inventory
-
-  try {
-    // get user's owned tags
-    const snap = await db.ref('tags/' + currentUser).once('value');
-    const owned = snap.val() || {};
-
-    // get currently active tag
-    let activeTag = null;
-    try {
-      const activeSnap = await db.ref('activeTag/' + currentUser).once('value');
-      activeTag = activeSnap.val();
-    } catch(e){ /* ignore */ }
-
-    // iterate over all tag types
-    for (const key in TAGS_INFO) {
-      const info = TAGS_INFO[key];
-      const row = document.createElement('div');
-
-      // ADD CLASS FOR CSS COLOR
-      row.className = 'tagRow tag-' + key; // e.g., tag-owner, tag-vip, etc.
-
-      // tag name
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'tagName';
-      nameSpan.textContent = info.name;
-      row.appendChild(nameSpan);
-
-      // status
-      const status = document.createElement('span');
-      status.style.marginRight = '8px';
-
-      // button
-      const btn = document.createElement('button');
-      btn.style.marginLeft = '8px';
-      btn.style.padding = '2px 6px';
-      btn.style.borderRadius = '4px';
-      btn.style.cursor = 'pointer';
-
-      if (owned[key]) {
-        status.textContent = 'Owned';
-        status.style.color = 'lightgreen';
-
-        if (activeTag === key) {
-          btn.textContent = 'Unequip';
-          btn.onclick = async () => {
-            await db.ref(`activeTag/${currentUser}`).remove();
-            showNotification(`Unequipped ${info.name}`);
-            loadTagsUI(); // refresh UI
-          };
-        } else {
-          btn.textContent = 'Equip';
-          btn.onclick = async () => {
-            await db.ref(`activeTag/${currentUser}`).set(key);
-            showNotification(`Equipped ${info.name}`);
-            loadTagsUI(); // refresh UI
-          };
-        }
-      } else {
-        status.textContent = 'Locked';
-        status.style.color = 'lightcoral';
-        btn.textContent = 'Locked';
-        btn.disabled = true;
-      }
-
-      row.appendChild(status);
-      row.appendChild(btn);
-
-      // description
-      const desc = document.createElement('div');
-      desc.className = 'tagDesc';
-      desc.textContent = info.description;
-      row.appendChild(desc);
-
-      invList.appendChild(row);
-    }
-  } catch (e) {
-    console.error('loadTagsUI error', e);
-    const invErr = document.createElement('div');
-    invErr.textContent = 'Could not load tags (DB rules?)';
-    invErr.style.color = 'red';
-    invList.appendChild(invErr);
-  }
-}
-
-
-/* LOGIN & AUTH */
-/* LOGIN & AUTH */
-loginBtn.addEventListener('click', async () => {  // <-- make async
-  const email = document.getElementById('email').value;
-  const pw = document.getElementById('password').value;
-
-  try {
-    const res = await auth.signInWithEmailAndPassword(email, pw);
-    currentUser = res.user.uid;
-    currentUsername = res.user.displayName || res.user.email;
-    afterLogin();
-  } catch(e) {
-    loginMsg.textContent = e.message;
-  }
+    await db.ref('progress/'+currentUser).set({money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed, colorPrice, delayPrice, rebirthPrice});
+    console.log('Progress reset successfully');
+    showNotification('Progress has been reset!');
+  }catch(e){ console.log('Reset progress error:',e); showNotification('Error resetting progress.'); }
 });
 
-signupBtn.addEventListener('click', async () => {  // <-- make async
-  const email = document.getElementById('email').value;
-  const pw = document.getElementById('password').value;
-  const username = document.getElementById('username').value || 'Player';
-
-  try {
-    const res = await auth.createUserWithEmailAndPassword(email, pw);
-    await res.user.updateProfile({ displayName: username });
-    currentUser = res.user.uid;
-    currentUsername = username;
+/* LOGIN & AUTH */
+loginBtn.addEventListener('click', async ()=>{
+  const email=document.getElementById('email').value;
+  const pw=document.getElementById('password').value;
+  try{
+    const res = await auth.signInWithEmailAndPassword(email,pw);
+    console.log('Login success:', res);
+    currentUser=res.user.uid;
+    currentUsername=res.user.displayName||res.user.email;
     afterLogin();
-  } catch(e) {
-    loginMsg.textContent = e.message;
-  }
+  }catch(e){ console.log('Login error:', e); loginMsg.textContent=e.message; }
 });
 
-forgotBtn.addEventListener('click', async () => {  // <-- make async
-  const email = document.getElementById('email').value;
+signupBtn.addEventListener('click', async ()=>{
+  const email=document.getElementById('email').value;
+  const pw=document.getElementById('password').value;
+  const username=document.getElementById('username').value||'Player';
+  try{
+    const res = await auth.createUserWithEmailAndPassword(email,pw);
+    await res.user.updateProfile({displayName:username});
+    console.log('Signup success:', res);
+    currentUser=res.user.uid;
+    currentUsername=username;
+    afterLogin();
+  }catch(e){ console.log('Signup error:', e); loginMsg.textContent=e.message; }
+});
 
-  try {
+forgotBtn.addEventListener('click', async ()=>{
+  const email=document.getElementById('email').value;
+  try{
     await auth.sendPasswordResetEmail(email);
-    loginMsg.textContent = 'Reset email sent!';
-  } catch(e) {
-    loginMsg.textContent = e.message;
-  }
+    console.log('Password reset email sent');
+    loginMsg.textContent='Reset email sent!';
+  }catch(e){ console.log('Forgot password error:', e); loginMsg.textContent=e.message; }
 });
 
-//logout button code
-logoutBtn.addEventListener('click',()=>{ auth.signOut().then(()=>{ location.reload(); }); });
+logoutBtn.addEventListener('click', ()=>{ auth.signOut().then(()=>{ console.log('Logged out'); location.reload(); }).catch(e=>console.log('Logout error:', e)); });
 
 function afterLogin(){
-  loginBox.style.display='none'; 
-  ui.style.display='block'; 
-  resetBtn.style.display='block'; 
+  loginBox.style.display='none';
+  ui.style.display='block';
+  resetBtn.style.display='block';
   logoutBtn.style.display='block';
-
   if(ADMIN_FALLBACK[currentUser]) ownerCommands.style.display='block';
-
-  loadProgressOnline(currentUser).catch(()=>{});
-  loadTagsUI(); // <-- call without parameters
+  if(currentUser){
+    loadProgressOnline(currentUser).catch(e=>console.log('Load progress error:',e));
+    loadTagsUI().catch(e=>console.log('Load tags error:',e));
+  }
 }
 
-// --- AUTO-LOGIN & LOAD PROGRESS ---
-auth.onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user.uid;
-    currentUsername = user.displayName || user.email;
-    afterLogin(); // show UI, load progress, tags, owner commands
-  } else {
-    loginBox.style.display = 'block';
-    ui.style.display = 'none';
+/* AUTO-LOGIN */
+auth.onAuthStateChanged(user=>{
+  if(user){
+    console.log('Auth state changed: logged in', user);
+    currentUser=user.uid;
+    currentUsername=user.displayName||user.email;
+    afterLogin();
+  }else{
+    console.log('Auth state changed: logged out');
+    loginBox.style.display='block';
+    ui.style.display='none';
   }
 });
 
-async function loadProgressOnline(uid){
-  const snap = await db.ref('progress/' + uid).once('value');
-  if(snap.exists()){
-    const p = snap.val();
-    money = p.money || 0;
-    unlockedColors = p.unlockedColors || 1;
-    clickDelay = p.clickDelay || 1200;
-    rebirthCount = p.rebirthCount || 0;
-    autoAmount = p.autoAmount || 0;
-    autoSpeed = p.autoSpeed || 2.5;
-    colorPrice = p.colorPrice || 50;
-    delayPrice = p.delayPrice || 100;
-    rebirthPrice = p.rebirthPrice || 500;
-
-    // Rebuild color array based on rebirths
-    colors = [...baseColors, ...getRebirthColors(rebirthCount)];
-
-    // Update UI elements
-    document.getElementById('money').textContent = money;
-    updateButtons();
-
-    // Start auto-launch if purchased
-    startAutoLaunch();
-  } else {
-    // No saved progress, initialize defaults
-    money = 0; unlockedColors = 1; clickDelay = 1200;
-    rebirthCount = 0; autoAmount = 0; autoSpeed = 2.5;
-    colorPrice = 50; delayPrice = 100; rebirthPrice = 500;
-    colors = [...baseColors];
-    updateButtons();
-    startAutoLaunch();
-  }
+/* SAVE & LOAD */
+async function saveProgressOnline(){
+  if(!currentUser) return;
+  try{
+    await db.ref('progress/'+currentUser).set({money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed, colorPrice, delayPrice, rebirthPrice});
+    console.log('Progress saved successfully');
+  }catch(e){ console.log('saveProgressOnline error:',e);}
 }
 
+async function loadProgressOnline(uid){
+  try{
+    const snap = await db.ref('progress/'+uid).once('value');
+    if(snap.exists()){
+      const p=snap.val();
+      money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
+      rebirthCount=p.rebirthCount||0; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
+      colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100; rebirthPrice=p.rebirthPrice||500;
+      colors=[...baseColors,...getRebirthColors(rebirthCount)];
+      document.getElementById('money').textContent=money;
+      updateButtons();
+      startAutoLaunch();
+      console.log('Progress loaded', p);
+    }else{
+      console.log('No saved progress, initializing defaults');
+      money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0; autoAmount=0; autoSpeed=2.5;
+      colorPrice=50; delayPrice=100; rebirthPrice=500; colors=[...baseColors]; updateButtons(); startAutoLaunch();
+    }
+  }catch(e){ console.log('loadProgressOnline error:', e);}
+}
+
+/* LOAD TAGS */
+async function loadTagsUI(){
+  try{
+    const invDiv=document.getElementById('tagInventory');
+    const invList=document.getElementById('tagInventoryList');
+    invList.innerHTML='';
+    invDiv.style.display='block';
+
+    const snap = await db.ref('tags/' + currentUser).once('value');
+    const owned = snap.val() || {};
+    console.log('Loaded tags for user', currentUser, owned);
+
+    let activeTag = null;
+    try{ activeTag = (await db.ref('activeTag/'+currentUser).once('value')).val(); }catch(e){ console.log('Active tag read error:',e); }
+
+    for(const key in TAGS_INFO){
+      const info=TAGS_INFO[key];
+      const row=document.createElement('div'); row.className='tagRow tag-'+key;
+      const nameSpan=document.createElement('span'); nameSpan.className='tagName'; nameSpan.textContent=info.name; row.appendChild(nameSpan);
+      const status=document.createElement('span'); status.style.marginRight='8px';
+      const btn=document.createElement('button'); btn.style.marginLeft='8px'; btn.style.padding='2px 6px'; btn.style.borderRadius='4px'; btn.style.cursor='pointer';
+
+      if(owned[key]){
+        status.textContent='Owned'; status.style.color='lightgreen';
+        if(activeTag===key){ btn.textContent='Unequip'; btn.onclick=async ()=>{ try{ await db.ref('activeTag/'+currentUser).remove(); showNotification('Unequipped '+info.name); loadTagsUI(); }catch(e){console.log('Unequip tag error:',e);} }; }
+        else{ btn.textContent='Equip'; btn.onclick=async ()=>{ try{ await db.ref('activeTag/'+currentUser).set(key); showNotification('Equipped '+info.name); loadTagsUI(); }catch(e){console.log('Equip tag error:',e);} }; }
+      } else{ status.textContent='Locked'; status.style.color='lightcoral'; btn.textContent='Locked'; btn.disabled=true; }
+
+      row.appendChild(status); row.appendChild(btn);
+      const desc=document.createElement('div'); desc.className='tagDesc'; desc.textContent=info.description; row.appendChild(desc);
+      invList.appendChild(row);
+    }
+  }catch(e){ console.log('loadTagsUI error:',e); }
+}
+
+/* HELPER */
+function getRebirthColors(rc){
+  const scheme=[{base:60},{base:80},{base:100},{base:120}][rc%4]; const num=Math.min(10+rc,50); const out=[];
+  for(let i=0;i<num;i++){ const hue=Math.floor(Math.random()*360); out.push({color:`hsl(${hue},${scheme.base}%,60%)`, value:i+1}); } return out;
+}
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
