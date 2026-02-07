@@ -42,7 +42,21 @@
 
   #muteBtn {position:fixed; top:90px; right:10px; padding:6px 8px; background:#444; color:white; font-weight:600; border:none;}
   #muteBtn.muted {background:#c0392b;}
+  
+  #goGoogleForm {position:fixed; top:130px; right:10px; padding:6px 8px; background:#444; color:white; font-weight:600; border:none;}
 
+  @keyframes glitch {
+  0% { transform: translate(0,0); filter: hue-rotate(0deg); }
+  20% { transform: translate(-2px,2px); }
+  40% { transform: translate(2px,-2px); filter: hue-rotate(90deg); }
+  60% { transform: translate(-2px,-1px); }
+  80% { transform: translate(1px,2px); filter: hue-rotate(180deg); }
+  100% { transform: translate(0,0); }
+}
+
+.glitch-ui button {
+  animation: glitch 0.15s infinite;
+}
 
 </style>
 </head>
@@ -85,6 +99,8 @@
     <button id="adminFireworkBtn">Mega Firework</button>
     <button id="adminFireworkBtnNuke">NUKE</button>
     <button id="adminFireworkBtnGalaxy">Galaxy</button>
+    <button id="glitchEventBtn">Glitch Event</button>
+    <button id="adminMessageBtn">Send Message</button>
   </div>
 
   <div id="tagInventory" style="display:none;">
@@ -96,6 +112,7 @@
 <button id="resetBtn">Reset Progress</button>
 <button id="logoutBtn">Logout</button>
 <button id="muteBtn">Sound: ON</button>
+<button id="goGoogleForm">Forms</button>
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 <div id="notifications"></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
@@ -165,6 +182,9 @@ const TAGS_INFO = {
   fart: { name: "Fart", description: "A tag for the fart" }
 };
 
+let globalMultiplier = 1;
+let glitchActive = false;
+  
 let lastAdminTimestamp=0;
 
 function showNotification(text,time=2500){
@@ -174,20 +194,69 @@ function showNotification(text,time=2500){
 }
 
 /* FIREWORK CLASSES */
-class Firework{
-  constructor(x,y,colorObj){ this.x=x; this.y=canvas.height; this.targetY=y; this.speed=Math.random()*2+4; this.colorObj=colorObj; this.exploded=false; }
-  update(){ 
-    this.y-=this.speed; 
-    if(this.y<=this.targetY && !this.exploded){ this.exploded=true; explode(this.x,this.y,this.colorObj); return true; } 
-    return false; 
+class Firework {
+  constructor(x, y, colorObj) {
+    this.x = x;
+    this.y = canvas.height;
+    this.targetY = y;
+    this.speed = Math.random() * 2 + 4;
+    this.colorObj = colorObj;
+    this.exploded = false;
   }
-  draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.colorObj.color; ctx.fill(); }
+
+  update() {
+    // glitch shake
+    if (glitchActive) {
+      this.x += (Math.random() - 0.5) * 6;
+      this.y += (Math.random() - 0.5) * 6;
+    }
+
+    this.y -= this.speed;
+    if (this.y <= this.targetY && !this.exploded) {
+      this.exploded = true;
+      explode(this.x, this.y, this.colorObj);
+      return true;
+    }
+    return false;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = glitchActive
+      ? `hsl(${Math.random() * 360},100%,60%)`
+      : this.colorObj.color;
+    ctx.fill();
+  }
 }
-class Particle{
-  constructor(x,y,colorObj){ this.x=x; this.y=y; this.color=colorObj.color; this.vx=(Math.random()-0.5)*6; this.vy=(Math.random()-0.5)*6; this.life=100; }
-  update(){ this.vy+=gravity; this.x+=this.vx; this.y+=this.vy; this.life--; }
-  draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
+
+class Particle {
+  constructor(x, y, colorObj) {
+    this.x = x;
+    this.y = y;
+    this.color = colorObj.color;
+    this.vx = (Math.random() - 0.5) * 6;
+    this.vy = (Math.random() - 0.5) * 6;
+    this.life = 100;
+  }
+
+  update() {
+    this.vy += gravity;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life--;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = glitchActive
+      ? `hsl(${Math.random() * 360},100%,60%)`
+      : this.color;
+    ctx.fill();
+  }
 }
+
 
 let soundMuted = false;
 
@@ -217,7 +286,7 @@ function explode(x,y,colorObj){
   }
 
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
-  money+=colorObj.value*(rebirthCount+1);
+  money += colorObj.value * (rebirthCount + 1) * globalMultiplier;
   document.getElementById('money').textContent=money;
   saveProgressOnline().catch(()=>{});
 }
@@ -341,7 +410,9 @@ document.getElementById('rebirth').addEventListener('click', async ()=>{
 document.getElementById('goLeaderboardBtn').addEventListener('click', () => {
   window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html', '_blank');
 });
-
+document.getElementById('goGoogleForm').addEventListener('click', () => {
+  window.open('https://docs.google.com/forms/d/e/1FAIpQLScUs9xr7EYuAUnPg5OaYuzzbI8Ti8xnKtM-daPskoHrKG5OBw/viewform?usp=header', '_blank');
+});
 
 /* ADMIN BUTTONS */
 document.getElementById('giveMoneyBtn').addEventListener('click',()=>{ money+=1000; document.getElementById('money').textContent=money; saveProgressOnline().catch(()=>{}); });
@@ -349,17 +420,48 @@ document.getElementById('unlockColorsBtn').addEventListener('click',()=>{ unlock
 document.getElementById('maxAutoBtn').addEventListener('click',()=>{ autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline().catch(()=>{}); });
 document.getElementById('viewUsersBtn').addEventListener('click',()=>{ showNotification('Check Firebase console for users.'); });
 
-async function sendAdminEvent(type,message){
+document.getElementById('adminMessageBtn').addEventListener('click', async () => {
+  const msg = prompt('Enter message for players:');
+  if (!msg || msg.trim().length < 2) return;
+
+  const duration = parseInt(prompt('Display time (seconds)?', '6'));
+  const ms = isNaN(duration) ? 6000 : Math.min(Math.max(duration * 1000, 2000), 15000);
+
+  await sendAdminEvent('MESSAGE', msg.trim(), ms);
+});
+
+  document.getElementById('glitchEventBtn').addEventListener('click', () => {
+  sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (1.5x)', 10000);
+});
+
+async function sendAdminEvent(type, message = '', duration = 3000){
   try{
-    const snap=await db.ref('admins/'+currentUser).once('value');
-    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){ showNotification('Not admin'); return; }
-    await db.ref('adminEvents/latest').set({type,message,timestamp:Date.now()});
+    const snap = await db.ref('admins/' + currentUser).once('value');
+    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){
+      showNotification('Not admin');
+      return;
+    }
+
+    await db.ref('adminEvents/latest').set({
+      type,
+      message,
+      duration,
+      timestamp: Date.now()
+    });
   }catch(e){
     if(ADMIN_FALLBACK[currentUser]){
-      try{ await db.ref('adminEvents/latest').set({type,message,timestamp:Date.now()}); }catch(err){ showNotification('Permission denied writing admin event'); return; }
-    }else{ showNotification('Not admin'); return; }
+      await db.ref('adminEvents/latest').set({
+        type,
+        message,
+        duration,
+        timestamp: Date.now()
+      });
+    }else{
+      showNotification('Not admin');
+    }
   }
 }
+
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
 document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
@@ -370,7 +472,17 @@ async function initAdminEventsListener(){
     const val=snap.val(); if(!val) return; 
     if(val.timestamp>lastAdminTimestamp){
       lastAdminTimestamp=val.timestamp;
+    if (val.type === 'MESSAGE') {
+      showNotification('📢 ' + val.message, val.duration || 5000);
+    }
+    else if (val.type === 'GLITCH') {
+      showNotification(val.message || '⚠ GLITCH EVENT', val.duration || 8000);
+      startGlitchEvent(val.duration || 10000);
+    }
+    else {
       showNotification(`ADMIN EVENT: ${val.type}`);
+    }
+
       if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
       if(val.type === 'megaFirework') {
         for(let i = 0; i < 10; i++) {
@@ -438,6 +550,20 @@ function startAutoLaunch(){
       }
     },autoSpeed*1000);
   }
+}
+
+  function startGlitchEvent(duration){
+  if (glitchActive) return;
+
+  glitchActive = true;
+  globalMultiplier = 1.5;
+  document.body.classList.add('glitch-ui');
+
+  setTimeout(() => {
+    glitchActive = false;
+    globalMultiplier = 1;
+    document.body.classList.remove('glitch-ui');
+  }, duration);
 }
 
 /* SAVE & LOAD PROGRESS */
@@ -619,3 +745,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
+
+
+
