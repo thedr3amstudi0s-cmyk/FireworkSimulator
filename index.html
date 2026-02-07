@@ -312,7 +312,7 @@ resetBtn.addEventListener('click', async () => {
 /* BUTTON HANDLERS */
 document.getElementById('buyColor').addEventListener('click',()=>{
   if(money>=colorPrice && unlockedColors<colors.length){
-    money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.7);
+    money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.5);
     document.getElementById('money').textContent=money;
     updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Color unlocked!');
   }
@@ -618,6 +618,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
