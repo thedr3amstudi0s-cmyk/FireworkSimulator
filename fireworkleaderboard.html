@@ -12,14 +12,13 @@
   th { background: #222; }
   tr:nth-child(even) { background: #1a1a1a; }
 
-  .tag.owner { color: gold; font-weight: bold; }
-  .tag.vip { color: cyan; font-weight: bold; }
-  .tag.donator { color: green; font-weight: bold; }
-  .tag.streamer { color: magenta; font-weight: bold; }
-  .tag.youtuber { color: red; font-weight: bold; }
-  .tag.regular { color: white; }
-  .tag.fart { color: magenta; font-weight: bold; }
-
+  .tag-owner { color: gold; font-weight: bold; }
+  .tag-vip { color: cyan; font-weight: bold; }
+  .tag-donator { color: green; font-weight: bold; }
+  .tag-streamer { color: magenta; font-weight: bold; }
+  .tag-youtuber { color: red; font-weight: bold; }
+  .tag-regular { color: white; }
+  .tag-fart { color: magenta; font-weight: bold; }
 
   #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
 </style>
@@ -167,6 +166,7 @@ db.ref('activeTag').on('value', snap => {
 </script>
 </body>
 </html>
+
 
 
 
