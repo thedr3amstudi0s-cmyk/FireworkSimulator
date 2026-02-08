@@ -481,7 +481,7 @@ document.getElementById('adminMessageBtn').addEventListener('click', async () =>
 });
 
   document.getElementById('glitchEventBtn').addEventListener('click', () => {
-  sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (2x)', 60000);
+  sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (2x)', 30000);
 });
 
 async function sendAdminEvent(type, message = '', duration = 3000){
@@ -527,7 +527,7 @@ async function initAdminEventsListener(){
     }
     else if (val.type === 'GLITCH') {
       showNotification(val.message || '⚠ GLITCH EVENT', val.duration || 8000);
-      startGlitchEvent(val.duration || 60000); // 1 min
+      startGlitchEvent(val.duration || 30000); // 30 seconds
     }
     else {
       showNotification(`ADMIN EVENT: ${val.type}`);
@@ -545,9 +545,9 @@ async function initAdminEventsListener(){
       }
         if (val.type === 'Galaxy') {
           galaxyEventActive = true;
-          galaxyEventEnd = Date.now() + 60000; // 1 min
+          galaxyEventEnd = Date.now() + 30000; // 30 sec
         
-          showNotification('🌌 GALAXY EVENT ACTIVE!', 4000);
+          showNotification('🌌 GALAXY EVENT ACTIVE!', 30000);
         }
     }
   });
@@ -759,6 +759,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
