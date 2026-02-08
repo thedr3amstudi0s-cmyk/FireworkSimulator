@@ -410,7 +410,7 @@ function spawnGalaxySpiral() {
 
     update() {
       this.angle += 0.25;
-      this.radius += 0.6;
+      this.radius += Math.random(0.4,1);
       centerY -= 1;
 
       this.x = centerX + Math.cos(this.angle) * this.radius;
@@ -759,6 +759,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
