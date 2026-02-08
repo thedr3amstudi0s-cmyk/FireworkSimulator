@@ -191,6 +191,56 @@ let galaxyEventEnd = 0;
   
 let lastAdminTimestamp=0;
 
+// === SUPER-STRICT USERNAME CENSOR ===
+const bannedWords = ["slut","fuck","shit","bitch","ass","damn"]; // extend as needed
+
+// Map leetspeak and common symbol substitutions
+const leetMap = {
+  '4': 'a',
+  '@': 'a',
+  '8': 'b',
+  '3': 'e',
+  '1': 'i',
+  '!': 'i',
+  '0': 'o',
+  '5': 's',
+  '$': 's',
+  '7': 't',
+  '+': 't'
+};
+
+// Normalize username to lowercase and replace leet chars
+function normalizeName(name){
+  return name
+    .toLowerCase()
+    .split('')
+    .map(c => leetMap[c] || c)
+    .join('');
+}
+
+// Super-strict censor function
+function censorUsername(username){
+  let normalized = normalizeName(username);
+
+  bannedWords.forEach(word => {
+    const regex = new RegExp(word, "gi");
+
+    // If normalized username contains banned word
+    if(normalized.includes(word)){
+      // Replace the matched part in original username with asterisks
+      // This uses a loose regex to catch variations like S41T, $h1t, etc.
+      const replaceRegex = new RegExp(
+        word.split('').map(c => `[${c}${Object.keys(leetMap).join('')}]`).join(''),
+        "gi"
+      );
+      username = username.replace(replaceRegex, "*".repeat(word.length));
+    }
+  });
+
+  return username;
+}
+
+  
 function showNotification(text,time=2500){
   notifications.textContent=text;
   notifications.style.opacity='1';
@@ -693,13 +743,31 @@ async function loadTagsUI() {
 
 /* LOGIN & AUTH */
 loginBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; auth.signInWithEmailAndPassword(email,pw).then(res=>{ currentUser=res.user.uid; currentUsername=res.user.displayName||res.user.email; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
-signupBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; const username=document.getElementById('username').value||'Player'; auth.createUserWithEmailAndPassword(email,pw).then(res=>{ res.user.updateProfile({displayName:username}); currentUser=res.user.uid; currentUsername=username; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
+signupBtn.addEventListener('click',()=>{
+  const email = document.getElementById('email').value;
+  const pw = document.getElementById('password').value;
+  let username = document.getElementById('username').value || 'Player';
+
+  // Apply censor here
+  username = censorUsername(username);
+
+  auth.createUserWithEmailAndPassword(email, pw).then(res=>{
+    res.user.updateProfile({displayName: username});
+    currentUser = res.user.uid;
+    currentUsername = username;
+    afterLogin();
+  }).catch(e => loginMsg.textContent = e.message);
+});
+
 forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
 
 //logout button code
 logoutBtn.addEventListener('click',()=>{ auth.signOut().then(()=>{ location.reload(); }); });
 
 function afterLogin(){
+  // Censor username after login
+  currentUsername = censorUsername(currentUsername);
+
   loginBox.style.display='none'; 
   ui.style.display='block'; 
   resetBtn.style.display='block'; 
@@ -710,8 +778,9 @@ function afterLogin(){
   if(ADMIN_FALLBACK[currentUser]) ownerCommands.style.display='block';
 
   loadProgressOnline(currentUser).catch(()=>{});
-  loadTagsUI(); // <-- call without parameters
+  loadTagsUI();
 }
+
 
 // --- AUTO-LOGIN & LOAD PROGRESS ---
 auth.onAuthStateChanged(user => {
@@ -762,6 +831,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
