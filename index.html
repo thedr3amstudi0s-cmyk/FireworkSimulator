@@ -22,7 +22,7 @@
   #cooldownBar{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:280px; height:18px; background:rgba(255,255,255,0.12); border-radius:9px; z-index:160; }
   #cooldownFill{ height:100%; width:0%; background:limegreen; border-radius:8px; transition:width 0.05s; }
   #resetBtn { position:fixed; top:10px; right:10px; padding:6px 8px; background:#c0392b; color:white; border:none; border-radius:6px; display:none; z-index:150; }
-  #logoutBtn { position:fixed; top:50px; right:10px; padding:6px 8px; background:orange; color:white; border:none; border-radius:6px; z-index:150; }
+  #logoutBtn { position:fixed; top:50px; right:10px; padding:6px 8px; background:orange; color:white; border:none; border-radius:6px; display:none; z-index:150; }
   #notifications { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:300; color:#0ff; font-weight:700; text-shadow:0 0 6px rgba(0,0,0,0.8); pointer-events:none; }
 
   #ui p { margin:6px 0; font-size:13px; color:#ddd; }
@@ -40,10 +40,10 @@
   .tag-regular .tagName { color: white; }
   .tag-fart .tagName { color: magenta; }
 
-  #muteBtn {position:fixed; top:90px; right:10px; padding:6px 8px; background:#444; color:white; font-weight:600; border:none;  z-index:150;}
+  #muteBtn {position:fixed; top:90px; right:10px; padding:6px 8px; background:#444; color:white; font-weight:600; border:none; display:none; z-index:150;}
   #muteBtn.muted {background:#c0392b;}
   
-  #goGoogleForm {position:fixed; top:130px; right:10px; padding:6px 8px; background:#444; color:white; font-weight:600; border:none; z-index:150;}
+  #goGoogleForm {position:fixed; top:130px; right:10px; padding:6px 8px; background:#444; color:white; font-weight:600; border:none; display:none; z-index:150;}
 
   @keyframes glitch {
   0% { transform: translate(0,0); filter: hue-rotate(0deg); }
@@ -761,6 +761,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
