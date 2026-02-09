@@ -598,33 +598,6 @@ async function initAdminEventsListener() {
   });
 }
 
-// DISCO event function
-function startDiscoEvent(duration){
-  let discoEnd = Date.now() + duration;
-  let discoColors = ['red','orange','yellow','lime','cyan','magenta'];
-
-  function discoLoop(){
-    if(Date.now() > discoEnd) return; // end event
-
-    // Flash background color
-    canvas.style.background = discoColors[Math.floor(Math.random()*discoColors.length)];
-
-    // Spawn random fireworks everywhere
-    for(let i=0;i<5;i++){
-      fireworks.push(new Firework(
-        Math.random()*canvas.width, 
-        Math.random()*canvas.height, 
-        { color: discoColors[Math.floor(Math.random()*discoColors.length)], value: 5 }
-      ));
-    }
-
-    setTimeout(discoLoop, 150); // 6-7 flashes per second
-  }
-
-  discoLoop();
-}
-
-
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
 document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
@@ -691,6 +664,32 @@ function startAutoLaunch(){
     globalMultiplier = 1;
     document.body.classList.remove('glitch-ui');
   }, duration);
+}
+
+// DISCO event function
+function startDiscoEvent(duration){
+  let discoEnd = Date.now() + duration;
+  let discoColors = ['red','orange','yellow','lime','cyan','magenta'];
+
+  function discoLoop(){
+    if(Date.now() > discoEnd) return; // end event
+
+    // Flash background color
+    canvas.style.background = discoColors[Math.floor(Math.random()*discoColors.length)];
+
+    // Spawn random fireworks everywhere
+    for(let i=0;i<5;i++){
+      fireworks.push(new Firework(
+        Math.random()*canvas.width, 
+        Math.random()*canvas.height, 
+        { color: discoColors[Math.floor(Math.random()*discoColors.length)], value: 5 }
+      ));
+    }
+
+    setTimeout(discoLoop, 150); // 6-7 flashes per second
+  }
+
+  discoLoop();
 }
 
 /* SAVE & LOAD PROGRESS */
@@ -895,6 +894,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
