@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -161,7 +162,7 @@ function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = windo
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-/* ====== GAME STATE ====== */
+/* GAME STATE */
 let currentUser="", currentUsername="";
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now();
 let rebirthCount=0, colorPrice=50, delayPrice=100, rebirthPrice=500, autoPrice=200;
@@ -192,151 +193,202 @@ const TAGS_INFO = {
 
 let globalMultiplier = 1;
 let glitchActive = false;
+
 let galaxyEventActive = false;
 let galaxyEventEnd = 0;
-let discoEventActive = false;
-let discoEventEnd = 0;
-let discoSpotlights = [];
-
+  
 let lastAdminTimestamp=0;
 
-// ====== SUPER-STRICT USERNAME CENSOR ======
-const bannedWords = ["slut","fuck","shit","bitch","ass","damn","nigger","niger","pussy"];
-const leetMap = { '4':'a','@':'a','8':'b','3':'e','1':'i','!':'i','0':'o','5':'s','$':'s','7':'t','+':'t' };
+// === SUPER-STRICT USERNAME CENSOR ===
+const bannedWords = ["slut","fuck","shit","bitch","ass","damn","nigger","niger","pussy"]; // extend as needed
 
+// Map leetspeak and common symbol substitutions
+const leetMap = {
+  '4': 'a',
+  '@': 'a',
+  '8': 'b',
+  '3': 'e',
+  '1': 'i',
+  '!': 'i',
+  '0': 'o',
+  '5': 's',
+  '$': 's',
+  '7': 't',
+  '+': 't'
+};
+
+// Normalize username to lowercase and replace leet chars
 function normalizeName(name){
-  return name.toLowerCase().split('').map(c => leetMap[c] || c).join('');
+  return name
+    .toLowerCase()
+    .split('')
+    .map(c => leetMap[c] || c)
+    .join('');
 }
+
+// Super-strict censor function
 function censorUsername(username){
   let normalized = normalizeName(username);
-  bannedWords.forEach(word=>{
+
+  bannedWords.forEach(word => {
+    const regex = new RegExp(word, "gi");
+
+    // If normalized username contains banned word
     if(normalized.includes(word)){
-      const replaceRegex = new RegExp(word.split('').map(c=>`[${c}${Object.keys(leetMap).join('')}]`).join(''),"gi");
+      // Replace the matched part in original username with asterisks
+      // This uses a loose regex to catch variations like S41T, $h1t, etc.
+      const replaceRegex = new RegExp(
+        word.split('').map(c => `[${c}${Object.keys(leetMap).join('')}]`).join(''),
+        "gi"
+      );
       username = username.replace(replaceRegex, "*".repeat(word.length));
     }
   });
+
   return username;
 }
 
-function formatMoney(num){
-  if(num>=1_000_000_000) return (num/1_000_000_000).toFixed(1).replace(/\.0$/,'')+'B';
-  if(num>=1_000_000) return (num/1_000_000).toFixed(1).replace(/\.0$/,'')+'M';
-  if(num>=1_000) return (num/1_000).toFixed(1).replace(/\.0$/,'')+'k';
+function formatMoney(num) {
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
   return num;
 }
-
+  
 function showNotification(text,time=2500){
   notifications.textContent=text;
   notifications.style.opacity='1';
   setTimeout(()=>{ notifications.style.opacity='0'; },time);
 }
 
-/* ====== SPOTLIGHT CHECK ====== */
-function isInsideSpotlight(x, y){
-  if(!discoEventActive) return false;
-  return discoSpotlights.some(s=>{
-    const dx = x - s.x;
-    const dy = y - s.y;
-    return dx*dx + dy*dy <= s.radius*s.radius;
-  });
-}
-
-/* ====== FIREWORK CLASSES ====== */
+/* FIREWORK CLASSES */
 class Firework {
-  constructor(x, y, colorObj){
+  constructor(x, y, colorObj) {
     this.x = x;
     this.y = canvas.height;
     this.targetY = y;
-    this.speed = Math.random()*2+4;
+    this.speed = Math.random() * 2 + 4;
     this.colorObj = colorObj;
     this.exploded = false;
   }
-  update(){
-    if(glitchActive){
-      this.x += (Math.random()-0.5)*6;
-      this.y += (Math.random()-0.5)*6;
+
+  update() {
+    // glitch shake
+    if (glitchActive) {
+      this.x += (Math.random() - 0.5) * 6;
+      this.y += (Math.random() - 0.5) * 6;
     }
+
     this.y -= this.speed;
-    if(this.y <= this.targetY && !this.exploded){
+    if (this.y <= this.targetY && !this.exploded) {
       this.exploded = true;
       explode(this.x, this.y, this.colorObj);
       return true;
     }
     return false;
   }
-}
-Firework.prototype.draw = function(){
-  ctx.beginPath();
-  ctx.arc(this.x, this.y, 2, 0, Math.PI*2);
-  ctx.fillStyle = isInsideSpotlight(this.x, this.y) ? `hsl(${Math.random()*360},100%,60%)` : this.colorObj.color;
-  ctx.fill();
-};
 
-class Particle{
-  constructor(x,y,colorObj){
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = glitchActive
+      ? `hsl(${Math.random() * 360},100%,60%)`
+      : this.colorObj.color;
+    ctx.fill();
+  }
+}
+
+class Particle {
+  constructor(x, y, colorObj) {
     this.x = x;
     this.y = y;
     this.color = colorObj.color;
-    this.vx = (Math.random()-0.5)*6;
-    this.vy = (Math.random()-0.5)*6;
+    this.vx = (Math.random() - 0.5) * 6;
+    this.vy = (Math.random() - 0.5) * 6;
     this.life = 100;
   }
-  update(){
+
+  update() {
     this.vy += gravity;
     this.x += this.vx;
     this.y += this.vy;
     this.life--;
   }
-}
-Particle.prototype.draw = function(){
-  ctx.beginPath();
-  ctx.arc(this.x,this.y,2,0,Math.PI*2);
-  ctx.fillStyle = isInsideSpotlight(this.x,this.y) ? `hsl(${Math.random()*360},100%,60%)` : this.color;
-  ctx.fill();
-};
 
-/* ====== SOUND ====== */
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = glitchActive
+      ? `hsl(${Math.random() * 360},100%,60%)`
+      : this.color;
+    ctx.fill();
+  }
+}
+
+
 let soundMuted = false;
+
 const muteBtn = document.getElementById('muteBtn');
-muteBtn.addEventListener('click', ()=>{
+
+muteBtn.addEventListener('click', () => {
   soundMuted = !soundMuted;
+
+  // Mute/unmute all game sounds
   fireworkSound.muted = soundMuted;
-  muteBtn.textContent = soundMuted?'Sound: OFF':'Sound: ON';
+
+  // UI feedback
+  muteBtn.textContent = soundMuted ? 'Sound: OFF' : 'Sound: ON';
   muteBtn.classList.toggle('muted', soundMuted);
-  showNotification(soundMuted?'Game sound muted':'Game sound on');
+
+  showNotification(soundMuted ? 'Game sound muted' : 'Game sound on');
 });
 
-/* ====== CORE FUNCTIONS ====== */
+
+/* CORE FUNCTIONS */
 function explode(x,y,colorObj){
-  if(!soundMuted) try{ fireworkSound.currentTime=0; fireworkSound.play(); }catch(e){}
+  if (!soundMuted) {
+    try {
+      fireworkSound.currentTime = 0;
+      fireworkSound.play();
+    } catch(e){}
+  }
+
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
-  money += colorObj.value*(rebirthCount+1)*globalMultiplier;
+  money += colorObj.value * (rebirthCount + 1) * globalMultiplier;
   document.getElementById('money').textContent = formatMoney(money);
   saveProgressOnline().catch(()=>{});
 }
+
 function launchFirework(x,y){
   if(colors.length===0) colors=[...baseColors];
-  const max = Math.min(unlockedColors, colors.length);
-  const colorIndex = Math.floor(Math.random()*Math.max(1,max));
-  const colorObj = colors[colorIndex];
+  const max=Math.min(unlockedColors,colors.length);
+  const colorIndex=Math.floor(Math.random()*Math.max(1,max));
+  const colorObj=colors[colorIndex];
   fireworks.push(new Firework(x,y,colorObj));
-  lastClick = Date.now();
+  lastClick=Date.now();
 }
-document.addEventListener('click', e=>{ if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY); });
 
-/* ====== ANIMATION LOOP ====== */
+document.addEventListener('click',(e)=>{ if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY); });
+
 function animate(){
-  ctx.fillStyle = "rgba(0,0,0,0.2)";
+  ctx.fillStyle="rgba(0,0,0,0.2)";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  if(galaxyEventActive){
-    if(Math.random()<0.008) spawnGalaxySpiral();
-    if(Date.now()>galaxyEventEnd) galaxyEventActive=false;
-    ctx.fillStyle="rgba(20,0,40,0.12)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    if (galaxyEventActive) {
+    if (Math.random() < 0.008) { // 0.8% chance per frame
+      spawnGalaxySpiral();
+    }
+  
+    if (Date.now() > galaxyEventEnd) {
+      galaxyEventActive = false;
+    }
   }
-
-  for(let i=fireworks.length-1;i>=0;i--) if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw();
+  if (galaxyEventActive) {
+  ctx.fillStyle = "rgba(20, 0, 40, 0.12)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  for(let i=fireworks.length-1;i>=0;i--){ if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw(); }
   for(let i=particles.length-1;i>=0;i--){ particles[i].update(); particles[i].draw(); if(particles[i].life<=0) particles.splice(i,1); }
 
   const elapsed=Date.now()-lastClick;
@@ -344,57 +396,503 @@ function animate(){
   document.getElementById('cooldownFill').style.width=pct+'%';
   document.getElementById('moneyMultiplier').textContent=(rebirthCount+1);
 
-  if(discoEventActive && Date.now()>discoEventEnd){
-    discoEventActive = false;
-    discoSpotlights = [];
-  }
-
-  if(discoEventActive){
-    discoSpotlights.forEach(s=>{
-      s.x += s.vx; s.y += s.vy;
-      if(s.x<0 || s.x>canvas.width) s.vx*=-1;
-      if(s.y<0 || s.y>canvas.height) s.vy*=-1;
-      const gradient = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.radius);
-      gradient.addColorStop(0,'rgba(255,255,255,0.25)');
-      gradient.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(s.x,s.y,s.radius,0,Math.PI*2);
-      ctx.fill();
-    });
-  }
-
   requestAnimationFrame(animate);
 }
 animate();
 
-/* ====== DISCO EVENT ====== */
-function startDiscoEvent(duration){
-  discoEventActive = true;
-  discoEventEnd = Date.now() + duration;
+/* ======= UPGRADES & UI ======= */
+function getRebirthColors(rc){
+  const scheme=[{base:60},{base:80},{base:100},{base:120}][rc%4];
+  const num=Math.min(10+rc,50);
+  const out=[];
+  for(let i=0;i<num;i++){ const hue=Math.floor(Math.random()*360); out.push({ color:`hsl(${hue},${scheme.base}%,60%)`, value:i+1 }); }
+  return out;
+}
 
-  discoSpotlights = [];
-  for(let i=0;i<4;i++){
-    discoSpotlights.push({
-      x: Math.random()*canvas.width,
-      y: Math.random()*canvas.height,
-      radius: 150+Math.random()*50,
-      vx: (Math.random()-0.5)*4,
-      vy: (Math.random()-0.5)*4
+function updateButtons(){
+  document.getElementById('buyColor').textContent=unlockedColors>=colors.length?'MAX':`Buy Color ($${formatMoney(colorPrice)})`;
+  document.getElementById('reduceDelay').textContent=clickDelay<=100?'MAX':`Reduce Delay ($${formatMoney(delayPrice)})`;
+  document.getElementById('buyAuto').textContent=autoAmount>=4?'MAX':`Buy Auto-Launch ($${formatMoney(autoPrice)})`;
+  document.getElementById('rebirth').textContent=`Rebirth ($${formatMoney(rebirthPrice)})`;
+  document.getElementById('delayDisplay').textContent=clickDelay;
+  document.getElementById('autoSpeedDisplay').textContent=autoSpeed.toFixed(2);
+  document.getElementById('unlockedColors').textContent=unlockedColors;
+}
+
+resetBtn.addEventListener('click', async () => {
+  if (!currentUser) return showNotification('Not logged in!');
+  if (!confirm('Are you sure you want to reset your progress?')) return;
+
+  // Reset all local game state to defaults
+  money = 0;
+  unlockedColors = 1;
+  clickDelay = 1200;
+  rebirthCount = 0;
+  autoAmount = 0;
+  autoSpeed = 2.5;
+  colorPrice = 50;
+  delayPrice = 100;
+  rebirthPrice = 500;
+  colors = [...baseColors];
+
+  // Update UI
+  document.getElementById('money').textContent = money;
+  updateButtons();
+  startAutoLaunch(); // stop auto if any
+
+  // Reset progress in Firebase
+  try {
+    await db.ref('progress/' + currentUser).set({
+      money,
+      unlockedColors,
+      clickDelay,
+      rebirthCount,
+      autoAmount,
+      autoSpeed,
+      colorPrice,
+      delayPrice,
+      rebirthPrice
     });
+    showNotification('Your progress has been reset!');
+  } catch (e) {
+    console.error('Failed to reset progress', e);
+    showNotification('There was an error resetting progress.');
+  }
+});
+
+function spawnGalaxySpiral() {
+  const centerX = Math.random() * canvas.width;
+  let centerY = canvas.height - 60;
+
+  const angleOffset = Math.random() * Math.PI * 2;
+
+  class SpiralFirework extends Firework {
+    constructor(angle, radius) {
+      super(centerX, centerY, { color: 'hsl(260,100%,70%)', value: 1 });
+      this.angle = angle;
+      this.radius = radius;
+    }
+
+    update() {
+      this.angle += 0.25;
+      this.radius += Math.random(0.4,1);
+      centerY -= 1;
+
+      this.x = centerX + Math.cos(this.angle) * this.radius;
+      this.y = centerY + Math.sin(this.angle) * this.radius;
+
+      if (this.y < canvas.height * 0.25) {
+        explode(this.x, this.y, this.colorObj);
+        return true;
+      }
+      return false;
+    }
   }
 
-  // spawn extra fireworks during disco
-  const discoInterval = setInterval(()=>{
-    if(!discoEventActive){ clearInterval(discoInterval); return; }
-    for(let i=0;i<3;i++) fireworks.push(new Firework(
-      Math.random()*canvas.width,
-      Math.random()*canvas.height,
-      { color:'white', value:5 }
-    ));
-  },200);
+  for (let i = 0; i < 6; i++) {
+    fireworks.push(new SpiralFirework(angleOffset + i, i * 6));
+  }
 }
+
+/* BUTTON HANDLERS */
+document.getElementById('buyColor').addEventListener('click',()=>{
+  if(money>=colorPrice && unlockedColors<colors.length){
+    money-=colorPrice; unlockedColors++; colorPrice=Math.floor(colorPrice*1.5);
+    document.getElementById('money').textContent = formatMoney(money);
+    updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Color unlocked!');
+  }
+});
+document.getElementById('reduceDelay').addEventListener('click',()=>{
+  if(money>=delayPrice && clickDelay>100){
+    money-=delayPrice; clickDelay=Math.max(100,clickDelay-100); delayPrice=Math.floor(delayPrice*1.7);
+    document.getElementById('money').textContent = formatMoney(money); updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Delay reduced!');
+  }
+});
+document.getElementById('buyAuto').addEventListener('click',()=>{
+  if(money>=autoPrice && autoAmount<4){
+    money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7);
+    document.getElementById('money').textContent = formatMoney(money); updateButtons(); saveProgressOnline().catch(()=>{}); startAutoLaunch(); showNotification('Auto-launch purchased!');
+  }
+});
+document.getElementById('rebirth').addEventListener('click', async ()=>{
+  if(money<rebirthPrice){ showNotification(`Need $${rebirthPrice} to rebirth!`); return; }
+  if(!confirm(`Are you sure you want to rebirth for $${rebirthPrice}?`)) return;
+  money=0; rebirthCount++; unlockedColors=1; clickDelay=1200; autoAmount=0; autoSpeed=2.5; autoPrice=200; colorPrice=50; delayPrice=100;
+  rebirthPrice=Math.floor(500*Math.pow(1.5,rebirthCount));
+  colors=[...baseColors,...getRebirthColors(rebirthCount)];
+  updateButtons(); document.getElementById('money').textContent = formatMoney(money); await saveProgressOnline().catch(()=>{}); saveScore(); startAutoLaunch(); showNotification('Rebirth complete!');
+});
+document.getElementById('goLeaderboardBtn').addEventListener('click', () => {
+  window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html', '_blank');
+});
+document.getElementById('goGoogleForm').addEventListener('click', () => {
+  window.open('https://docs.google.com/forms/d/e/1FAIpQLScUs9xr7EYuAUnPg5OaYuzzbI8Ti8xnKtM-daPskoHrKG5OBw/viewform?usp=header', '_blank');
+});
+
+/* ADMIN BUTTONS */
+document.getElementById('giveMoneyBtn').addEventListener('click',()=>{ money+=1000; document.getElementById('money').textContent = formatMoney(money); saveProgressOnline().catch(()=>{}); });
+document.getElementById('unlockColorsBtn').addEventListener('click',()=>{ unlockedColors=colors.length; updateButtons(); saveProgressOnline().catch(()=>{}); });
+document.getElementById('maxAutoBtn').addEventListener('click',()=>{ autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline().catch(()=>{}); });
+document.getElementById('viewUsersBtn').addEventListener('click',()=>{ showNotification('Check Firebase console for users.'); });
+
+document.getElementById('adminMessageBtn').addEventListener('click', async () => {
+  const msg = prompt('Enter message for players:');
+  if (!msg || msg.trim().length < 2) return;
+
+  const duration = parseInt(prompt('Display time (seconds)?', '10'));
+  const ms = isNaN(duration) ? 6000 : Math.min(Math.max(duration * 1000, 2000), 15000);
+
+  await sendAdminEvent('MESSAGE', msg.trim(), ms);
+});
+
+  document.getElementById('glitchEventBtn').addEventListener('click', () => {
+  sendAdminEvent('GLITCH', '⚠ SYSTEM GLITCH ACTIVE (2x)', 30000);
+});
+
+async function sendAdminEvent(type, message = '', duration = 3000){
+  try{
+    const snap = await db.ref('admins/' + currentUser).once('value');
+    if(!snap.exists() && !ADMIN_FALLBACK[currentUser]){
+      showNotification('Not admin');
+      return;
+    }
+
+    await db.ref('adminEvents/latest').set({
+      type,
+      message,
+      duration,
+      timestamp: Date.now()
+    });
+  }catch(e){
+    if(ADMIN_FALLBACK[currentUser]){
+      await db.ref('adminEvents/latest').set({
+        type,
+        message,
+        duration,
+        timestamp: Date.now()
+      });
+    }else{
+      showNotification('Not admin');
+    }
+  }
+}
+
+document.getElementById('discoEventBtn').addEventListener('click', () => {
+  sendAdminEvent('DISCO', '🕺 DISCO TIME!', 20000); // 20 seconds
+});
+
+// Handle DISCO event from Firebase
+async function initAdminEventsListener() {
+  // existing code...
+  db.ref('adminEvents/latest').on('value', snap => {
+    const val = snap.val(); 
+    if(!val) return; 
+    if(val.timestamp > lastAdminTimestamp){
+      lastAdminTimestamp = val.timestamp;
+
+      if(val.type === 'DISCO'){
+        showNotification(val.message || 'DISCO EVENT!', val.duration || 20000);
+        startDiscoEvent(val.duration || 20000);
+      }
+
+      // ...existing handlers for MESSAGE, GLITCH, etc.
+    }
+  });
+}
+
+document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
+document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
+document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
+
+async function initAdminEventsListener(){
+  try{ const snap=await db.ref('adminEvents/latest').once('value'); lastAdminTimestamp=(snap.val()?.timestamp)||0; }catch(e){}
+  db.ref('adminEvents/latest').on('value',snap=>{
+    const val=snap.val(); if(!val) return; 
+    if(val.timestamp>lastAdminTimestamp){
+      lastAdminTimestamp=val.timestamp;
+    if (val.type === 'MESSAGE') {
+      showNotification('📢 ' + val.message, val.duration || 5000);
+    }
+    else if (val.type === 'GLITCH') {
+      showNotification(val.message || '⚠ GLITCH EVENT', val.duration || 8000);
+      startGlitchEvent(val.duration || 30000); // 30 seconds
+    }
+    else {
+      showNotification(`ADMIN EVENT: ${val.type}`);
+    }
+
+      if(val.type==='NUKE') for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height, {color:'white', value:10}));
+      if(val.type === 'megaFirework') {
+        for(let i = 0; i < 30; i++) {
+          // random X across canvas, targetY somewhere in upper half
+          const x = Math.random() * canvas.width;
+          const targetY = Math.random() * canvas.height / 2 + 50; // between 50px and half screen
+          fireworks.push(new Firework(x, targetY, {color:'red', value:50}));
+        }
+        showNotification('Mega Firework launched!');
+      }
+        if (val.type === 'Galaxy') {
+          galaxyEventActive = true;
+          galaxyEventEnd = Date.now() + 30000; // 30 sec
+        
+          showNotification('🌌 GALAXY EVENT ACTIVE!', 30000);
+        }
+    }
+  });
+}
+initAdminEventsListener();
+
+/* AUTO-LAUNCH */
+function startAutoLaunch(){
+  if(autoInterval) clearInterval(autoInterval);
+  if(autoAmount>0){
+    autoInterval=setInterval(()=>{
+      for(let i=0;i<autoAmount;i++){
+        launchFirework(Math.random()*canvas.width, Math.random()*canvas.height/2+100);
+      }
+    },autoSpeed*1000);
+  }
+}
+
+  function startGlitchEvent(duration){
+  if (glitchActive) return;
+
+  glitchActive = true;
+  globalMultiplier = 2;
+  document.body.classList.add('glitch-ui');
+
+  setTimeout(() => {
+    glitchActive = false;
+    globalMultiplier = 1;
+    document.body.classList.remove('glitch-ui');
+  }, duration);
+}
+
+// DISCO event function
+function startDiscoEvent(duration){
+  let discoEnd = Date.now() + duration;
+  let discoColors = ['red','orange','yellow','lime','cyan','magenta'];
+
+  function discoLoop(){
+    if(Date.now() > discoEnd) return; // end event
+
+    // Flash background color
+    canvas.style.background = discoColors[Math.floor(Math.random()*discoColors.length)];
+
+    // Spawn random fireworks everywhere
+    for(let i=0;i<5;i++){
+      fireworks.push(new Firework(
+        Math.random()*canvas.width, 
+        Math.random()*canvas.height, 
+        { color: discoColors[Math.floor(Math.random()*discoColors.length)], value: 5 }
+      ));
+    }
+
+    setTimeout(discoLoop, 150); // 6-7 flashes per second
+  }
+
+  discoLoop();
+}
+
+/* SAVE & LOAD PROGRESS */
+async function saveProgressOnline(){
+  if(!currentUser) return;
+  await db.ref('progress/'+currentUser).set({
+    money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed, colorPrice, delayPrice, rebirthPrice
+  });
+}
+async function loadProgressOnline(uid){
+  const snap=await db.ref('progress/'+uid).once('value');
+  if(snap.exists()){ const p=snap.val();
+    money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
+    rebirthCount=p.rebirthCount||0; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
+    colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100; rebirthPrice=p.rebirthPrice||500;
+    colors=[...baseColors,...getRebirthColors(rebirthCount)];
+    Buttons(); document.getElementById('money').textContent = formatMoney(money);
+    startAutoLaunch();
+  }
+}
+
+async function loadTagsUI() {
+  const invDiv = document.getElementById('tagInventory');
+  const invList = document.getElementById('tagInventoryList');
+  invList.innerHTML = '';
+
+  invDiv.style.display = 'block'; // always show the inventory
+
+  try {
+    // get user's owned tags
+    const snap = await db.ref('tags/' + currentUser).once('value');
+    const owned = snap.val() || {};
+
+    // get currently active tag
+    let activeTag = null;
+    try {
+      const activeSnap = await db.ref('activeTag/' + currentUser).once('value');
+      activeTag = activeSnap.val();
+    } catch(e){ /* ignore */ }
+
+    // iterate over all tag types
+    for (const key in TAGS_INFO) {
+      const info = TAGS_INFO[key];
+      const row = document.createElement('div');
+
+      // ADD CLASS FOR CSS COLOR
+      row.className = 'tagRow tag-' + key; // e.g., tag-owner, tag-vip, etc.
+
+      // tag name
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'tagName';
+      nameSpan.textContent = info.name;
+      row.appendChild(nameSpan);
+
+      // status
+      const status = document.createElement('span');
+      status.style.marginRight = '8px';
+
+      // button
+      const btn = document.createElement('button');
+      btn.style.marginLeft = '8px';
+      btn.style.padding = '2px 6px';
+      btn.style.borderRadius = '4px';
+      btn.style.cursor = 'pointer';
+
+      if (owned[key]) {
+        status.textContent = 'Owned';
+        status.style.color = 'lightgreen';
+
+        if (activeTag === key) {
+          btn.textContent = 'Unequip';
+          btn.onclick = async () => {
+            await db.ref(`activeTag/${currentUser}`).remove();
+            showNotification(`Unequipped ${info.name}`);
+            loadTagsUI(); // refresh UI
+          };
+        } else {
+          btn.textContent = 'Equip';
+          btn.onclick = async () => {
+            await db.ref(`activeTag/${currentUser}`).set(key);
+            showNotification(`Equipped ${info.name}`);
+            loadTagsUI(); // refresh UI
+          };
+        }
+      } else {
+        status.textContent = 'Locked';
+        status.style.color = 'lightcoral';
+        btn.textContent = 'Locked';
+        btn.disabled = true;
+      }
+
+      row.appendChild(status);
+      row.appendChild(btn);
+
+      // description
+      const desc = document.createElement('div');
+      desc.className = 'tagDesc';
+      desc.textContent = info.description;
+      row.appendChild(desc);
+
+      invList.appendChild(row);
+    }
+  } catch (e) {
+    console.error('loadTagsUI error', e);
+    const invErr = document.createElement('div');
+    invErr.textContent = 'Could not load tags (DB rules?)';
+    invErr.style.color = 'red';
+    invList.appendChild(invErr);
+  }
+}
+
+
+/* LOGIN & AUTH */
+loginBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; auth.signInWithEmailAndPassword(email,pw).then(res=>{ currentUser=res.user.uid; currentUsername=res.user.displayName||res.user.email; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
+signupBtn.addEventListener('click',()=>{
+  const email = document.getElementById('email').value;
+  const pw = document.getElementById('password').value;
+  let username = document.getElementById('username').value || 'Player';
+
+  // Apply censor here
+  username = censorUsername(username);
+
+  auth.createUserWithEmailAndPassword(email, pw).then(res=>{
+    res.user.updateProfile({displayName: username});
+    currentUser = res.user.uid;
+    currentUsername = username;
+    afterLogin();
+  }).catch(e => loginMsg.textContent = e.message);
+});
+
+forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
+
+//logout button code
+logoutBtn.addEventListener('click',()=>{  
+  if (!confirm('Are you sure you want to logout?')) return;
+  auth.signOut().then(()=>{ location.reload(); }); });
+
+function afterLogin(){
+  // Censor username after login
+  currentUsername = censorUsername(currentUsername);
+
+  loginBox.style.display='none'; 
+  ui.style.display='block'; 
+  resetBtn.style.display='block'; 
+  logoutBtn.style.display='block';
+  muteBtn.style.display='block';
+  goGoogleForm.style.display='block';
+
+  if(ADMIN_FALLBACK[currentUser]) ownerCommands.style.display='block';
+
+  loadProgressOnline(currentUser).catch(()=>{});
+  loadTagsUI();
+}
+
+
+// --- AUTO-LOGIN & LOAD PROGRESS ---
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user.uid;
+    currentUsername = user.displayName || user.email;
+    afterLogin(); // show UI, load progress, tags, owner commands
+  } else {
+    loginBox.style.display = 'block';
+    ui.style.display = 'none';
+  }
+});
+
+async function loadProgressOnline(uid){
+  const snap = await db.ref('progress/' + uid).once('value');
+  if(snap.exists()){
+    const p = snap.val();
+    money = p.money || 0;
+    unlockedColors = p.unlockedColors || 1;
+    clickDelay = p.clickDelay || 1200;
+    rebirthCount = p.rebirthCount || 0;
+    autoAmount = p.autoAmount || 0;
+    autoSpeed = p.autoSpeed || 2.5;
+    colorPrice = p.colorPrice || 50;
+    delayPrice = p.delayPrice || 100;
+    rebirthPrice = p.rebirthPrice || 500;
+
+    // Rebuild color array based on rebirths
+    colors = [...baseColors, ...getRebirthColors(rebirthCount)];
+
+    // Update UI elements
+    document.getElementById('money').textContent = money;
+    updateButtons();
+
+    // Start auto-launch if purchased
+    startAutoLaunch();
+  } else {
+    // No saved progress, initialize defaults
+    money = 0; unlockedColors = 1; clickDelay = 1200;
+    rebirthCount = 0; autoAmount = 0; autoSpeed = 2.5;
+    colorPrice = 50; delayPrice = 100; rebirthPrice = 500;
+    colors = [...baseColors];
+    updateButtons();
+    startAutoLaunch();
+  }
+}
+
 </script>
 </body>
 </html>
-
