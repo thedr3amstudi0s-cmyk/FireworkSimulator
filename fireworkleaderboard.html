@@ -77,6 +77,13 @@ const loading = document.getElementById('loading');
 // --- Data storage ---
 let progress = {}, usernames = {}, users = {}, admins = {}, activeTags = {};
 
+function formatMoney(num) {
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return num;
+}
+  
 // --- Build leaderboard ---
 function buildLeaderboard() {
   body.innerHTML = '';
@@ -109,8 +116,8 @@ function buildLeaderboard() {
       <td>${i+1}</td>
       <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
       <td>${u.uname}</td>
-      <td>${u.money}</td>
-    `;
+      <td>${formatMoney(u.money)}</td>
+      `;
     body.appendChild(tr);
   });
 
@@ -166,6 +173,7 @@ db.ref('activeTag').on('value', snap => {
 </script>
 </body>
 </html>
+
 
 
 
