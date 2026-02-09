@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,7 +54,7 @@
 }
 
 .glitch-ui {
-  animation: glitch 0.15s infinite;
+  animation: glitch 0.15s infinite !important;
 }
 
 
@@ -98,7 +99,7 @@
     <button id="adminFireworkBtn">Mega Firework</button>
     <button id="adminFireworkBtnNuke">NUKE</button>
     <button id="adminFireworkBtnGalaxy">Galaxy</button>
-    <button id="EventBtn"> Event</button>
+    <button id="glitchEventBtn">Glitch Event</button>
     <button id="adminMessageBtn">Send Message</button>
   </div>
 
@@ -182,7 +183,7 @@ const TAGS_INFO = {
 };
 
 let globalMultiplier = 1;
-let Active = false;
+let glitchActive = false;
 
 let galaxyEventActive = false;
 let galaxyEventEnd = 0;
@@ -831,9 +832,6 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
-
-
-
 
 
 
