@@ -762,7 +762,9 @@ signupBtn.addEventListener('click',()=>{
 forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
 
 //logout button code
-logoutBtn.addEventListener('click',()=>{ auth.signOut().then(()=>{ location.reload(); }); });
+logoutBtn.addEventListener('click',()=>{  
+  if (!confirm('Are you sure you want to logout?')) return;
+  auth.signOut().then(()=>{ location.reload(); }); });
 
 function afterLogin(){
   // Censor username after login
@@ -831,6 +833,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
