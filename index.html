@@ -495,7 +495,7 @@ document.getElementById('reduceDelay').addEventListener('click',()=>{
   }
 });
 document.getElementById('buyAuto').addEventListener('click',()=>{
-  if(money>=autoPrice && autoAmount<3){
+  if(money>=autoPrice && autoAmount<10){
     money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7);
     document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); startAutoLaunch(); showNotification('Auto-launch purchased!');
   }
@@ -833,6 +833,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
