@@ -107,6 +107,7 @@ body {
     <button id="adminFireworkBtnGalaxy">Galaxy</button>
     <button id="glitchEventBtn">Glitch Event</button>
     <button id="adminMessageBtn">Send Message</button>
+    <button id="discoEventBtn">Disco Event</button>
   </div>
 
   <div id="tagInventory" style="display:none;">
@@ -574,6 +575,56 @@ async function sendAdminEvent(type, message = '', duration = 3000){
   }
 }
 
+document.getElementById('discoEventBtn').addEventListener('click', () => {
+  sendAdminEvent('DISCO', '🕺 DISCO TIME!', 20000); // 20 seconds
+});
+
+// Handle DISCO event from Firebase
+async function initAdminEventsListener() {
+  // existing code...
+  db.ref('adminEvents/latest').on('value', snap => {
+    const val = snap.val(); 
+    if(!val) return; 
+    if(val.timestamp > lastAdminTimestamp){
+      lastAdminTimestamp = val.timestamp;
+
+      if(val.type === 'DISCO'){
+        showNotification(val.message || 'DISCO EVENT!', val.duration || 20000);
+        startDiscoEvent(val.duration || 20000);
+      }
+
+      // ...existing handlers for MESSAGE, GLITCH, etc.
+    }
+  });
+}
+
+// DISCO event function
+function startDiscoEvent(duration){
+  let discoEnd = Date.now() + duration;
+  let discoColors = ['red','orange','yellow','lime','cyan','magenta'];
+
+  function discoLoop(){
+    if(Date.now() > discoEnd) return; // end event
+
+    // Flash background color
+    canvas.style.background = discoColors[Math.floor(Math.random()*discoColors.length)];
+
+    // Spawn random fireworks everywhere
+    for(let i=0;i<5;i++){
+      fireworks.push(new Firework(
+        Math.random()*canvas.width, 
+        Math.random()*canvas.height, 
+        { color: discoColors[Math.floor(Math.random()*discoColors.length)], value: 5 }
+      ));
+    }
+
+    setTimeout(discoLoop, 150); // 6-7 flashes per second
+  }
+
+  discoLoop();
+}
+
+
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
 document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
@@ -844,6 +895,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
