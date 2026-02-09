@@ -407,10 +407,10 @@ function getRebirthColors(rc){
 }
 
 function updateButtons(){
-  document.getElementById('buyColor').textContent=unlockedColors>=colors.length?'MAX':`Buy Color ($${colorPrice})`;
-  document.getElementById('reduceDelay').textContent=clickDelay<=100?'MAX':`Reduce Delay ($${delayPrice})`;
-  document.getElementById('buyAuto').textContent=autoAmount>=4?'MAX':`Buy Auto-Launch ($${autoPrice})`;
-  document.getElementById('rebirth').textContent=`Rebirth ($${rebirthPrice})`;
+  document.getElementById('buyColor').textContent=unlockedColors>=colors.length?'MAX':`Buy Color ($${formatMoney(colorPrice)})`;
+  document.getElementById('reduceDelay').textContent=clickDelay<=100?'MAX':`Reduce Delay ($${formatMoney(delayPrice)})`;
+  document.getElementById('buyAuto').textContent=autoAmount>=4?'MAX':`Buy Auto-Launch ($${formatMoney(autoPrice)})`;
+  document.getElementById('rebirth').textContent=`Rebirth ($${formatMoney(rebirthPrice)})`;
   document.getElementById('delayDisplay').textContent=clickDelay;
   document.getElementById('autoSpeedDisplay').textContent=autoSpeed.toFixed(2);
   document.getElementById('unlockedColors').textContent=unlockedColors;
@@ -844,6 +844,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
