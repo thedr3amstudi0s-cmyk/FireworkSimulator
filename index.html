@@ -398,7 +398,7 @@ function getRebirthColors(rc){
 function updateButtons(){
   document.getElementById('buyColor').textContent=unlockedColors>=colors.length?'MAX':`Buy Color ($${colorPrice})`;
   document.getElementById('reduceDelay').textContent=clickDelay<=100?'MAX':`Reduce Delay ($${delayPrice})`;
-  document.getElementById('buyAuto').textContent=autoAmount>=10?'MAX':`Buy Auto-Launch ($${autoPrice})`;
+  document.getElementById('buyAuto').textContent=autoAmount>=4?'MAX':`Buy Auto-Launch ($${autoPrice})`;
   document.getElementById('rebirth').textContent=`Rebirth ($${rebirthPrice})`;
   document.getElementById('delayDisplay').textContent=clickDelay;
   document.getElementById('autoSpeedDisplay').textContent=autoSpeed.toFixed(2);
@@ -495,7 +495,7 @@ document.getElementById('reduceDelay').addEventListener('click',()=>{
   }
 });
 document.getElementById('buyAuto').addEventListener('click',()=>{
-  if(money>=autoPrice && autoAmount<10){
+  if(money>=autoPrice && autoAmount<4){
     money-=autoPrice; autoAmount++; autoSpeed/=1.2; autoPrice=Math.floor(autoPrice*1.7);
     document.getElementById('money').textContent=money; updateButtons(); saveProgressOnline().catch(()=>{}); startAutoLaunch(); showNotification('Auto-launch purchased!');
   }
@@ -833,6 +833,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
