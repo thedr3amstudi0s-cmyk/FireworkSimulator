@@ -52,9 +52,11 @@
   100% { transform: translate(0,0); }
 }
 
-.glitch-ui button {
+.glitch-ui {
   animation: glitch 0.15s infinite !important;
+  display: inline-block !important;
 }
+
 
 </style>
 </head>
@@ -146,7 +148,6 @@ const notifications = document.getElementById('notifications');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const fireworkSound = document.getElementById('fireworkSound');
-const form = document.getElementById('goGoogleForm');
 
 function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
@@ -831,4 +832,5 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
