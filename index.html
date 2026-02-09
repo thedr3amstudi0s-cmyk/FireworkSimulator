@@ -245,6 +245,11 @@ function censorUsername(username){
   return username;
 }
 
+function formatMoney(num) {
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return num;
+}
   
 function showNotification(text,time=2500){
   notifications.textContent=text;
@@ -346,7 +351,7 @@ function explode(x,y,colorObj){
 
   for(let i=0;i<80;i++) particles.push(new Particle(x,y,colorObj));
   money += colorObj.value * (rebirthCount + 1) * globalMultiplier;
-  document.getElementById('money').textContent=money;
+  document.getElementById('money').textContent = formatMoney(money);
   saveProgressOnline().catch(()=>{});
 }
 
@@ -838,6 +843,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
