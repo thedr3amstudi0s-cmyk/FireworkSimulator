@@ -398,7 +398,7 @@ function getRebirthColors(rc){
 function updateButtons(){
   document.getElementById('buyColor').textContent=unlockedColors>=colors.length?'MAX':`Buy Color ($${colorPrice})`;
   document.getElementById('reduceDelay').textContent=clickDelay<=100?'MAX':`Reduce Delay ($${delayPrice})`;
-  document.getElementById('buyAuto').textContent=autoAmount>=3?'MAX':`Buy Auto-Launch ($${autoPrice})`;
+  document.getElementById('buyAuto').textContent=autoAmount>=10?'MAX':`Buy Auto-Launch ($${autoPrice})`;
   document.getElementById('rebirth').textContent=`Rebirth ($${rebirthPrice})`;
   document.getElementById('delayDisplay').textContent=clickDelay;
   document.getElementById('autoSpeedDisplay').textContent=autoSpeed.toFixed(2);
@@ -833,6 +833,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
