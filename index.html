@@ -98,7 +98,7 @@
     <button id="adminFireworkBtn">Mega Firework</button>
     <button id="adminFireworkBtnNuke">NUKE</button>
     <button id="adminFireworkBtnGalaxy">Galaxy</button>
-    <button id="glitchEventBtn">Glitch Event</button>
+    <button id="EventBtn"> Event</button>
     <button id="adminMessageBtn">Send Message</button>
   </div>
 
@@ -182,7 +182,7 @@ const TAGS_INFO = {
 };
 
 let globalMultiplier = 1;
-let glitchActive = false;
+let Active = false;
 
 let galaxyEventActive = false;
 let galaxyEventEnd = 0;
@@ -259,8 +259,8 @@ class Firework {
   update() {
     // glitch shake
     if (glitchActive) {
-      this.x += (Math.random() - 0.5) * 6;
-      this.y += (Math.random() - 0.5) * 6;
+      this.x += (Math.random() - 0.5) * 3;
+      this.y += (Math.random() - 0.5) * 3;
     }
 
     this.y -= this.speed;
@@ -831,6 +831,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
