@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -194,9 +195,6 @@ let glitchActive = false;
 
 let galaxyEventActive = false;
 let galaxyEventEnd = 0;
-
-let discoEventActive = false;
-let discoEventEnd = 0;
   
 let lastAdminTimestamp=0;
 
@@ -372,24 +370,23 @@ function launchFirework(x,y){
 document.addEventListener('click',(e)=>{ if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY); });
 
 function animate(){
-  // DISCO BACKGROUND
-  if(discoEventActive){
-    // flash random bright color each frame
-    const discoColors = ['#ff0000','#ff9900','#ffff00','#00ff00','#00ffff','#ff00ff'];
-    ctx.fillStyle = discoColors[Math.floor(Math.random() * discoColors.length)];
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-    // End event
-    if(Date.now() > discoEventEnd) discoEventActive = false;
-  } else if (galaxyEventActive) {
-    ctx.fillStyle = "rgba(20, 0, 40, 0.12)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  } else {
-    ctx.fillStyle="rgba(0,0,0,0.2)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-  }
+  ctx.fillStyle="rgba(0,0,0,0.2)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // Fireworks and particles (existing code)
+    if (galaxyEventActive) {
+    if (Math.random() < 0.008) { // 0.8% chance per frame
+      spawnGalaxySpiral();
+    }
+  
+    if (Date.now() > galaxyEventEnd) {
+      galaxyEventActive = false;
+    }
+  }
+  if (galaxyEventActive) {
+  ctx.fillStyle = "rgba(20, 0, 40, 0.12)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  
   for(let i=fireworks.length-1;i>=0;i--){ if(fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw(); }
   for(let i=particles.length-1;i>=0;i--){ particles[i].update(); particles[i].draw(); if(particles[i].life<=0) particles.splice(i,1); }
 
@@ -605,15 +602,6 @@ async function initAdminEventsListener() {
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdminEvent('megaFirework','Admin launched a mega firework!'));
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE','Admin launched a NUKE!'));
 document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy','Admin launched everyone into the galaxy'));
-document.getElementById('discoEventBtn').addEventListener('click', () => {sendAdminEvent('DISCO', '🕺 DISCO TIME!', 20000); // 20 sec 
-});
-
-// In your admin listener:
-if(val.type === 'DISCO'){
-  showNotification(val.message || 'DISCO EVENT!', val.duration || 20000);
-  startDiscoEvent(val.duration || 20000);
-}
-
 
 async function initAdminEventsListener(){
   try{ const snap=await db.ref('adminEvents/latest').once('value'); lastAdminTimestamp=(snap.val()?.timestamp)||0; }catch(e){}
@@ -679,27 +667,31 @@ function startAutoLaunch(){
   }, duration);
 }
 
+// DISCO event function
 function startDiscoEvent(duration){
-  discoEventActive = true;
-  discoEventEnd = Date.now() + duration;
+  let discoEnd = Date.now() + duration;
+  let discoColors = ['red','orange','yellow','lime','cyan','magenta'];
 
-  // spawn extra fireworks rapidly during disco
-  const discoInterval = setInterval(() => {
-    if(!discoEventActive){
-      clearInterval(discoInterval);
-      return;
-    }
-    const discoColors = ['#ff0000','#ff9900','#ffff00','#00ff00','#00ffff','#ff00ff'];
+  function discoLoop(){
+    if(Date.now() > discoEnd) return; // end event
+
+    // Flash background color
+    canvas.style.background = discoColors[Math.floor(Math.random()*discoColors.length)];
+
+    // Spawn random fireworks everywhere
     for(let i=0;i<5;i++){
       fireworks.push(new Firework(
-        Math.random()*canvas.width,
-        Math.random()*canvas.height,
+        Math.random()*canvas.width, 
+        Math.random()*canvas.height, 
         { color: discoColors[Math.floor(Math.random()*discoColors.length)], value: 5 }
       ));
     }
-  }, 150); // every 150ms
-}
 
+    setTimeout(discoLoop, 150); // 6-7 flashes per second
+  }
+
+  discoLoop();
+}
 
 /* SAVE & LOAD PROGRESS */
 async function saveProgressOnline(){
@@ -903,13 +895,3 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
