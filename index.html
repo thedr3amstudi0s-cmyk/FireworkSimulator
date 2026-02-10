@@ -359,7 +359,7 @@ function explode(x,y,colorObj){
     } catch(e){}
   }
 
-  for(let i=0;i<50;i++) particles.push(new Particle(x,y,colorObj));
+  for(let i=0;i<100;i++) particles.push(new Particle(x,y,colorObj));
   money += colorObj.value * (rebirthCount + 1) * globalMultiplier;
   document.getElementById('money').textContent = formatMoney(money);
   saveProgressOnline().catch(()=>{});
@@ -902,6 +902,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
