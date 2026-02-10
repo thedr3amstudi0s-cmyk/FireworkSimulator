@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,15 +9,7 @@
 <title>Firework Simulator</title>
 <style>
   html,body { margin:0; padding:0; height:100%; background:#000; font-family:Arial, sans-serif; }
-  canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: transparent; /* important: so backgroundLayer shows */
-  position: fixed;
-  top: 0;
-  left: 0;
-}
+  canvas { display:block; width:100%; height:100%; background: radial-gradient(circle at bottom,#0a0a0a,#000); }
 
   #loginBox { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
      background:#222; padding:28px; border-radius:10px; color:white; z-index:200; width:280px; }
@@ -78,17 +71,7 @@ body {
 </head>
 <body>
 
-<!-- Background layer -->
-<div id="backgroundLayer" style="
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  z-index:0;
-"></div>
-
-<canvas id="fireworkCanvas"></canvas>
+<canvas id="canvas"></canvas>
 
 <div id="loginBox">
   <input id="username" placeholder="Username (3-16 chars, optional on login)"/>
@@ -173,27 +156,13 @@ const ownerCommands = document.getElementById('ownerCommands');
 const resetBtn = document.getElementById('resetBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const notifications = document.getElementById('notifications');
-const canvas = document.getElementById('fireworkCanvas');
+const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const fireworkSound = document.getElementById('fireworkSound');
 
-const BACKGROUNDS = {
-  galaxy: { style: 'radial-gradient(circle at center, #000020, #000)' },
-  sunrise: { style: 'linear-gradient(to top, #ff9a9e, #fad0c4)' },
-  forest: { style: 'linear-gradient(to top, #0b6623, #a8e6cf)' },
-  neon: { style: 'linear-gradient(to top, #ff00ff, #00ffff)' }
-};
-
-let activeBackground = 'galaxy'; // default
-
-  
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
-resizeCanvas(); // initial sizing
-
+resizeCanvas();
 
 /* GAME STATE */
 let currentUser="", currentUsername="";
@@ -355,18 +324,12 @@ this.vy = Math.sin(angle) * speed;
   }
 
   draw() {
-    ctx.shadowBlur = 10;                      
-    ctx.shadowColor = glitchActive
-      ? `hsl(${Math.random() * 360},100%,60%)`
-      : this.color;                  // <-- changed here
-    ctx.globalCompositeOperation = "lighter";
     ctx.beginPath();
     ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
     ctx.fillStyle = glitchActive
       ? `hsl(${Math.random() * 360},100%,60%)`
-      : this.color;                  // <-- and here
+      : this.color;
     ctx.fill();
-    ctx.globalCompositeOperation = "source-over";
   }
 }
 
@@ -758,15 +721,6 @@ async function loadProgressOnline(uid){
   }
 }
 
-function setBackground(bgKey) {
-  const bg = BACKGROUNDS[bgKey]; // from the lucky block table
-  document.getElementById("backgroundLayer").style.background = bg.style;
-}
-
-window.onload = () => {
-  setBackground(activeBackground);
-};
-
 async function loadTagsUI() {
   const invDiv = document.getElementById('tagInventory');
   const invList = document.getElementById('tagInventoryList');
@@ -950,7 +904,6 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
-
 
 
 
