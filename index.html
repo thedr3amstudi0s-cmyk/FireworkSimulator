@@ -292,6 +292,9 @@ class Firework {
   }
 
   draw() {
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = color;
+    ctx.globalCompositeOperation = "lighter";
     ctx.beginPath();
     ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
     ctx.fillStyle = glitchActive
@@ -903,6 +906,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
