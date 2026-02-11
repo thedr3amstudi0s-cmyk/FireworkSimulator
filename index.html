@@ -138,6 +138,11 @@ body {
   <button id="closeSettingsBtn">Close</button>
 </div>
 
+<button id="soundBtn" style="position:fixed; top:170px; right:10px; padding:6px 8px; background:#444; color:white; border:none; border-radius:6px; z-index:150; cursor:pointer;">
+  Sound: ON
+</button>
+
+  
 <!-- Settings Toggle Button -->
 <button id="openSettingsBtn" style="position:fixed; bottom:10px; right:10px; z-index:200; padding:6px 10px; border:none; border-radius:6px; background:#444; color:white; cursor:pointer;">
   Settings
@@ -292,6 +297,32 @@ document.addEventListener('click', function initMusic() {
 function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+
+const soundBtn = document.getElementById('soundBtn');
+let soundMuted = false;
+
+soundBtn.addEventListener('click', () => {
+  soundMuted = !soundMuted;
+
+  // Mute/unmute all audio
+  bgMusic.muted = soundMuted;
+  fireworkSound.muted = soundMuted;
+
+  // Play music if unmuted (mobile browsers require a tap)
+  if (!soundMuted) {
+    bgMusic.play().catch(() => {
+      console.log('Mobile play prevented, tap again.');
+    });
+  } else {
+    bgMusic.pause(); // optional: pause instead of just mute
+  }
+
+  // Update button text and style
+  soundBtn.textContent = soundMuted ? 'Sound: OFF' : 'Sound: ON';
+  soundBtn.style.background = soundMuted ? '#c0392b' : '#444';
+
+  showNotification(soundMuted ? 'Game sound muted' : 'Game sound on');
+});
 
   
 /* GAME STATE */
@@ -1029,6 +1060,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
