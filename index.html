@@ -261,6 +261,28 @@ musicVolume.addEventListener('input', () => {
   updateAudioState(); // <-- check Spotify-friendly state
 });
 
+musicVolume.addEventListener('input', () => {
+  if (musicVolume.value == 0) {
+    musicEnabled = false;
+    bgMusic.pause();
+  } else {
+    musicEnabled = true;
+    bgMusic.muted = false;
+    bgMusic.play().catch(() => {});
+  }
+});
+
+gameVolume.addEventListener('input', () => {
+  if (gameVolume.value == 0) {
+    sfxEnabled = false;
+    fireworkSound.muted = true;
+  } else {
+    sfxEnabled = true;
+    fireworkSound.muted = false;
+  }
+});
+
+
 gameVolume.addEventListener('input', () => {
   const vol = gameVolume.value / 100;
   fireworkSound.volume = vol;
@@ -1040,6 +1062,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
