@@ -470,22 +470,10 @@ let soundMuted = false;
 const muteBtn = document.getElementById('muteBtn');
 
 muteBtn.addEventListener('click', () => {
-  soundMuted = !soundMuted;
-
-  fireworkSound.muted = soundMuted;
-  bgMusic.muted = soundMuted;
-
-  if (!soundMuted) {
-    bgMusic.play().catch(()=>{});
-  } else {
-    bgMusic.pause();
-  }
-
-  muteBtn.textContent = soundMuted ? 'Sound: OFF' : 'Sound: ON';
-  muteBtn.classList.toggle('muted', soundMuted);
-
-  showNotification(soundMuted ? 'Game sound muted' : 'Game sound on');
+  // Open settings panel
+  settingsPanel.style.display = 'block';
 });
+
 
 
 /* CORE FUNCTIONS */
@@ -1042,6 +1030,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
