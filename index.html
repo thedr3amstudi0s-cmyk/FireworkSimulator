@@ -164,6 +164,44 @@ function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = windo
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+const bgMusic = document.getElementById('bgMusic');
+
+// Play music automatically on login (user interaction required by browsers)
+function playMusic() {
+  if (!soundMuted) {
+    try {
+      bgMusic.currentTime = 0;
+      bgMusic.play();
+    } catch(e) { console.warn("Music play blocked by browser:", e); }
+  }
+}
+
+// Stop music
+function pauseMusic() {
+  bgMusic.pause();
+}
+
+// Integrate with mute button
+muteBtn.addEventListener('click', () => {
+  soundMuted = !soundMuted;
+
+  // Mute/unmute all game sounds
+  fireworkSound.muted = soundMuted;
+  bgMusic.muted = soundMuted;
+
+  // UI feedback
+  muteBtn.textContent = soundMuted ? 'Sound: OFF' : 'Sound: ON';
+  muteBtn.classList.toggle('muted', soundMuted);
+  showNotification(soundMuted ? 'Game sound muted' : 'Game sound on');
+});
+
+// Start music after login
+function afterLogin() {
+  // existing code...
+  playMusic();
+}
+
+  
 /* GAME STATE */
 let currentUser="", currentUsername="";
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now();
@@ -904,6 +942,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
