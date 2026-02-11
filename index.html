@@ -45,6 +45,7 @@
   #muteBtn {position:fixed; top:90px; right:10px; padding:6px 8px; background:#444444; color:white; border:none; border-radius:6px; display:none; z-index:150;}
   
   #goGoogleForm {position:fixed; top:130px; right:10px; padding:6px 8px; background:#444444; color:white; border:none; border-radius:6px; display:none; z-index:150;}
+  #soundBtn {position:fixed; top:170px; right:10px; padding:6px 8px; background:#444444; color:white; border:none; border-radius:6px; display:none; z-index:150;}
 
 #settingsPanel {
   position:fixed;
@@ -137,17 +138,6 @@ body {
 
   <button id="closeSettingsBtn">Close</button>
 </div>
-
-<button id="soundBtn" style="position:fixed; top:170px; right:10px; padding:6px 8px; background:#444; color:white; border:none; border-radius:6px; z-index:150; cursor:pointer;">
-  Sound: ON
-</button>
-
-  
-<!-- Settings Toggle Button -->
-<button id="openSettingsBtn" style="position:fixed; bottom:10px; right:10px; z-index:200; padding:6px 10px; border:none; border-radius:6px; background:#444; color:white; cursor:pointer;">
-  Settings
-</button>
-
   
 <div id="loginBox">
   <input id="username" placeholder="Username (3-16 chars, optional on login)"/>
@@ -205,6 +195,9 @@ body {
 <div id="notifications"></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 <audio id="bgMusic" src="assets/Heading Home.mp3" loop></audio>
+<button id="soundBtn" style="position:fixed; top:170px; right:10px; padding:6px 8px; background:#444; color:white; border:none; border-radius:6px; z-index:150; cursor:pointer;">
+  Sound: ON
+</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -1060,6 +1053,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
