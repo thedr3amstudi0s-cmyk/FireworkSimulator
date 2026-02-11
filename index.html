@@ -262,22 +262,27 @@ musicVolume.addEventListener('input', () => {
 });
 
 musicVolume.addEventListener('input', () => {
-  if (musicVolume.value == 0) {
-    musicEnabled = false;
-    bgMusic.pause();
-  } else {
-    musicEnabled = true;
+  if (musicVolume.value == 0 && gameVolume.value == 0) {
+    fullyReleaseAudio(); 
+    return;
+  }
+
+  if (musicVolume.value > 0) {
+    if (!bgMusic.src) bgMusic.src = "Heading Home.mp3";
     bgMusic.muted = false;
     bgMusic.play().catch(() => {});
   }
 });
 
+
 gameVolume.addEventListener('input', () => {
-  if (gameVolume.value == 0) {
-    sfxEnabled = false;
-    fireworkSound.muted = true;
-  } else {
-    sfxEnabled = true;
+  if (musicVolume.value == 0 && gameVolume.value == 0) {
+    fullyReleaseAudio();
+    return;
+  }
+
+  if (gameVolume.value > 0) {
+    if (!fireworkSound.src) fireworkSound.src = "firework.mp3";
     fireworkSound.muted = false;
   }
 });
@@ -290,6 +295,21 @@ gameVolume.addEventListener('input', () => {
   updateAudioState(); // <-- check Spotify-friendly state
 });
 
+function fullyReleaseAudio() {
+  // Background music
+  bgMusic.pause();
+  bgMusic.muted = true;
+  bgMusic.src = "";
+  bgMusic.load();
+
+  // Firework sound
+  fireworkSound.pause();
+  fireworkSound.muted = true;
+  fireworkSound.src = "";
+  fireworkSound.load();
+}
+
+  
 // Initialize volumes
 bgMusic.volume = musicVolume.value / 100;
 fireworkSound.volume = gameVolume.value / 100;
@@ -1062,6 +1082,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
