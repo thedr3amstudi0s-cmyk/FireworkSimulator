@@ -254,18 +254,18 @@ creditsBtn.addEventListener('click', () => {
   alert('Firework Simulator\nCreated by Dr3am Studi0s\nAll rights reserved 2026');
 });
 
-// Music volume
 musicVolume.addEventListener('input', () => {
   const vol = musicVolume.value / 100;
   bgMusic.volume = vol;
   musicVolDisplay.textContent = musicVolume.value + '%';
+  updateAudioState(); // <-- check Spotify-friendly state
 });
 
-// Game volume (firework sound)
 gameVolume.addEventListener('input', () => {
   const vol = gameVolume.value / 100;
   fireworkSound.volume = vol;
   gameVolDisplay.textContent = gameVolume.value + '%';
+  updateAudioState(); // <-- check Spotify-friendly state
 });
 
 // Initialize volumes
@@ -292,6 +292,17 @@ document.addEventListener('click', function initMusic() {
 function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+
+  function updateAudioState() {
+  // If both volumes are zero OR muted
+  if ((musicVolume.value == 0 && gameVolume.value == 0) || soundMuted) {
+    bgMusic.pause();       
+    fireworkSound.muted = true;
+  } else {
+    fireworkSound.muted = soundMuted; 
+    if (!soundMuted) bgMusic.play().catch(() => {});
+  }
+}
 
   
 /* GAME STATE */
@@ -1029,6 +1040,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
