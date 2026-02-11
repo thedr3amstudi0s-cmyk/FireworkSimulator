@@ -47,6 +47,48 @@
   
   #goGoogleForm {position:fixed; top:130px; right:10px; padding:6px 8px; background:#444444; color:white; border:none; border-radius:6px; display:none; z-index:150;}
 
+#settingsPanel {
+  position:fixed;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  background:#222;
+  padding:20px;
+  border-radius:12px;
+  color:white;
+  z-index:250;
+  width:250px;
+  display:none;
+  box-shadow:0 0 12px rgba(0,255,255,0.4);
+}
+
+#settingsPanel h3 {
+  margin-top:0;
+  text-align:center;
+}
+
+#settingsPanel input[type=range] {
+  width:100%;
+  margin:6px 0 12px 0;
+}
+
+#settingsPanel button {
+  display:block;
+  margin:8px 0;
+  padding:8px;
+  width:100%;
+  border:none;
+  border-radius:6px;
+  background:cyan;
+  color:#000;
+  cursor:pointer;
+  font-weight:700;
+}
+
+#settingsPanel button:hover {
+  filter:brightness(1.1);
+}
+
+  
   @keyframes glitch {
   0% { transform: translate(0,0); filter: hue-rotate(0deg); }
   20% { transform: translate(-2px,2px); }
@@ -73,6 +115,32 @@ body {
 
 <canvas id="canvas"></canvas>
 
+<!-- Settings Panel -->
+<div id="settingsPanel">
+  <h3>Settings</h3>
+  <label>Music Volume: <span id="musicVolDisplay">35%</span></label>
+  <input type="range" id="musicVolume" min="0" max="100" value="35">
+
+  <label>Game Volume: <span id="gameVolDisplay">100%</span></label>
+  <input type="range" id="gameVolume" min="0" max="100" value="100">
+
+  <button id="creditsBtn">Credits</button>
+
+  <p style="margin-top:16px; font-size:13px;">
+    <a href="https://thedr3amstudi0s-cmyk.github.io/dr3am-studi0s/" target="_blank" style="color:#0ff; text-decoration:none;">
+      Visit Our Website
+    </a>
+  </p>
+
+  <button id="closeSettingsBtn">Close</button>
+</div>
+
+<!-- Settings Toggle Button -->
+<button id="openSettingsBtn" style="position:fixed; bottom:10px; right:10px; z-index:200; padding:6px 10px; border:none; border-radius:6px; background:#444; color:white; cursor:pointer;">
+  Settings
+</button>
+
+  
 <div id="loginBox">
   <input id="username" placeholder="Username (3-16 chars, optional on login)"/>
   <input id="email" type="email" placeholder="Email"/>
@@ -119,6 +187,8 @@ body {
   </div>
 </div>
 
+
+  
 <button id="resetBtn">Reset Progress</button>
 <button id="logoutBtn">Logout</button>
 <button id="muteBtn">Sound: ON</button>
@@ -161,6 +231,46 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const fireworkSound = document.getElementById('fireworkSound');
 const bgMusic = document.getElementById('bgMusic');
+
+// Elements
+const settingsPanel = document.getElementById('settingsPanel');
+const openSettingsBtn = document.getElementById('openSettingsBtn');
+const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+const musicVolume = document.getElementById('musicVolume');
+const gameVolume = document.getElementById('gameVolume');
+const musicVolDisplay = document.getElementById('musicVolDisplay');
+const gameVolDisplay = document.getElementById('gameVolDisplay');
+const creditsBtn = document.getElementById('creditsBtn');
+
+// Open/Close Settings
+openSettingsBtn.addEventListener('click', () => { settingsPanel.style.display = 'block'; });
+closeSettingsBtn.addEventListener('click', () => { settingsPanel.style.display = 'none'; });
+
+// Credits button
+creditsBtn.addEventListener('click', () => {
+  alert('Firework Simulator\nCreated by Dr3am Studi0s\nAll rights reserved 2026');
+});
+
+// Music volume
+musicVolume.addEventListener('input', () => {
+  const vol = musicVolume.value / 100;
+  bgMusic.volume = vol;
+  musicVolDisplay.textContent = musicVolume.value + '%';
+});
+
+// Game volume (firework sound)
+gameVolume.addEventListener('input', () => {
+  const vol = gameVolume.value / 100;
+  fireworkSound.volume = vol;
+  gameVolDisplay.textContent = gameVolume.value + '%';
+});
+
+// Initialize volumes
+bgMusic.volume = musicVolume.value / 100;
+fireworkSound.volume = gameVolume.value / 100;
+musicVolDisplay.textContent = musicVolume.value + '%';
+gameVolDisplay.textContent = gameVolume.value + '%';
+
 
 // Required for browsers (starts music on first user interaction)
 function startMusic() {
@@ -926,6 +1036,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
