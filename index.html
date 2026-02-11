@@ -126,6 +126,7 @@ body {
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 <div id="notifications"></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
+<audio id="bgMusic" src="assets/Heading Home.mp3" loop></audio>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -159,6 +160,21 @@ const notifications = document.getElementById('notifications');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const fireworkSound = document.getElementById('fireworkSound');
+const bgMusic = document.getElementById('bgMusic');
+
+// Required for browsers (starts music on first user interaction)
+function startMusic() {
+  if (!soundMuted) {
+    bgMusic.volume = 0.35; // adjust volume (0.0 – 1.0)
+    bgMusic.play().catch(()=>{});
+  }
+}
+
+// Start music on first click/tap
+document.addEventListener('click', function initMusic() {
+  startMusic();
+  document.removeEventListener('click', initMusic);
+});
 
 function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
@@ -342,10 +358,15 @@ const muteBtn = document.getElementById('muteBtn');
 muteBtn.addEventListener('click', () => {
   soundMuted = !soundMuted;
 
-  // Mute/unmute all game sounds
   fireworkSound.muted = soundMuted;
+  bgMusic.muted = soundMuted;
 
-  // UI feedback
+  if (!soundMuted) {
+    bgMusic.play().catch(()=>{});
+  } else {
+    bgMusic.pause();
+  }
+
   muteBtn.textContent = soundMuted ? 'Sound: OFF' : 'Sound: ON';
   muteBtn.classList.toggle('muted', soundMuted);
 
@@ -905,6 +926,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
