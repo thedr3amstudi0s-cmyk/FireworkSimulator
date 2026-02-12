@@ -2,284 +2,206 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Firework Simulator - Seasonal Leaderboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<title>Seasonal Leaderboard</title>
 <style>
   body {
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(to bottom, #0a0a0a, #111);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-  }
-
-  header {
-    padding: 20px;
-    text-align: center;
+    font-family: Arial, sans-serif;
     background: #111;
-    width: 100%;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-  }
-
-  header h1 {
+    color: #fff;
     margin: 0;
-    font-size: 28px;
-    color: #0ff;
-    text-shadow: 0 0 6px #0ff;
-  }
-
-  main {
-    width: 90%;
-    max-width: 900px;
-    margin-top: 20px;
-    flex: 1;
     display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
   }
 
-  .panel {
-    background: rgba(20, 20, 20, 0.95);
-    border-radius: 12px;
-    padding: 20px;
-    flex: 1 1 400px;
+  /* Sidebar leaderboard */
+  #leaderboardContainer {
+    width: 300px;
     min-width: 300px;
-    box-shadow: 0 0 12px rgba(0,255,255,0.3);
+    background: #1a1a1a;
+    padding: 20px;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
   }
 
-  h2 {
-    font-size: 22px;
-    margin-top: 0;
+  #leaderboardContainer h2 {
+    text-align: center;
+    margin-bottom: 15px;
     color: #0ff;
-    text-shadow: 0 0 4px #0ff;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 12px;
   }
 
-  table th, table td {
-    padding: 8px 12px;
+  th, td {
+    padding: 8px;
     text-align: left;
+    border-bottom: 1px solid #333;
+    font-size: 14px;
   }
 
-  table th {
-    color: #0ff;
-    border-bottom: 1px solid #0ff;
+  th {
+    background: #222;
   }
 
-  table tr:nth-child(even) {
-    background: rgba(0,255,255,0.05);
+  tr:nth-child(even) {
+    background: #1c1c1c;
   }
 
-  table tr:hover {
-    background: rgba(0,255,255,0.1);
-  }
+  .tag.owner { color: orange; font-weight: bold; }
+  .tag.vip { color: gold; font-weight: bold; }
+  .tag.streamer { color: #981ab6; font-weight: bold; }
+  .tag.fart { color: #FF4DEE; font-weight: bold; }
+  .tag.donator { color: #0BBF06; font-weight: bold; }
+  .tag.youtuber { color: #F00000; font-weight: bold; }
+  .tag.regular { color: #0ff; }
 
-  .quest {
-    background: rgba(0,255,255,0.05);
-    margin-bottom: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .quest.completed {
-    background: rgba(0,255,0,0.1);
-    color: #0f0;
-    text-decoration: line-through;
-  }
-
-  .quest button {
-    background: #0ff;
-    border: none;
-    border-radius: 6px;
-    color: #000;
-    font-weight: 700;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: filter 0.2s;
-  }
-
-  .quest button:hover {
-    filter: brightness(1.2);
-  }
-
-  footer {
-    padding: 12px 0;
-    color: #aaa;
-    font-size: 12px;
+  #loading {
     text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #0ff;
   }
 
-  #backBtn {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    background: #0ff;
-    color: #000;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-weight: 700;
-    box-shadow: 0 0 6px rgba(0,255,255,0.5);
-    transition: filter 0.2s;
-  }
-
-  #backBtn:hover {
-    filter: brightness(1.2);
+  /* Main content area */
+  #mainContent {
+    flex: 1;
+    padding: 20px;
   }
 </style>
 </head>
 <body>
 
-<button id="backBtn">⬅ Back to Game</button>
+<div id="leaderboardContainer">
+  <h2>Leaderboard</h2>
+  <div id="loading">Loading leaderboard...</div>
+  <table id="leaderboard" style="display:none;">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Tag</th>
+        <th>Username</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboardBody"></tbody>
+  </table>
+</div>
 
-<header>
-  <h1>🎆 Firework Simulator - Seasonal Leaderboard 🎆</h1>
-</header>
+<div id="mainContent">
+  <!-- Your seasonal content goes here -->
+</div>
 
-<main>
-  <div class="panel">
-    <h2>Top Players</h2>
-    <table id="leaderboardTable">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Username</th>
-          <th>Fireworks Launched</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td colspan="3">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="panel">
-    <h2>Seasonal Pass / Quests</h2>
-    <div id="questsContainer">
-      <p>Loading quests...</p>
-    </div>
-  </div>
-</main>
-
-<footer>
-  &copy; 2026 DR3AM STUDI0S. All rights reserved.
-</footer>
-
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
-  authDomain: "fireworkleaderboard.firebaseapp.com",
-  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com",
-  projectId: "fireworkleaderboard",
-  storageBucket: "fireworkleaderboard.firebasestorage.app",
-  messagingSenderId: "243474267364",
-  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
-  measurementId: "G-H07BZY385S"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DB_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
-
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const db = firebase.database();
 
-const leaderboardTable = document.getElementById('leaderboardTable').querySelector('tbody');
-const questsContainer = document.getElementById('questsContainer');
-const backBtn = document.getElementById('backBtn');
+// Fallback for owner UIDs
+const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
 
-backBtn.addEventListener('click', () => window.close());
+// Tag definitions
+const TAGS = {
+  owner: { name: "Owner", class: "owner" },
+  vip: { name: "VIP", class: "vip" },
+  streamer: { name: "STREAMER", class: "streamer" },
+  fart: { name: "Fart", class: "fart" },
+  donator: { name: "DONATOR", class: "donator" },
+  youtuber: { name: "YOUTUBER", class: "youtuber" },
+  regular: { name: "Regular", class: "regular" },
+};
 
-async function loadLeaderboard() {
-  const snap = await db.ref('progress').orderByChild('fireworksLaunched').limitToLast(10).once('value');
+const body = document.getElementById('leaderboardBody');
+const loading = document.getElementById('loading');
+
+let progress = {}, usernames = {}, users = {}, admins = {}, activeTags = {};
+
+function formatScore(num) {
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return num;
+}
+
+function buildLeaderboard() {
+  body.innerHTML = '';
+  const uids = new Set([
+    ...Object.keys(progress || {}),
+    ...Object.keys(usernames || {}),
+    ...Object.keys(users || {})
+  ]);
+
   const data = [];
-  snap.forEach(s => data.push({ uid: s.key, ...s.val() }));
-  data.sort((a,b) => (b.fireworksLaunched||0) - (a.fireworksLaunched||0));
+  uids.forEach(uid => {
+    const score = progress[uid]?.score || 0;
+    const uname = usernames[uid] || users[uid]?.username || 'Unknown';
 
-  leaderboardTable.innerHTML = '';
-  data.forEach((p,i) => {
+    let tag = 'regular';
+    if (admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
+    else if (activeTags[uid]) tag = activeTags[uid];
+
+    data.push({ uid, score, uname, tag });
+  });
+
+  data.sort((a,b) => b.score - a.score);
+
+  data.forEach((u,i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${p.username||p.uid}</td><td>${p.fireworksLaunched||0}</td>`;
-    leaderboardTable.appendChild(tr);
+    tr.dataset.uid = u.uid;
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
+      <td>${u.uname}</td>
+      <td>${formatScore(u.score)}</td>
+    `;
+    body.appendChild(tr);
   });
+
+  loading.style.display = 'none';
+  document.getElementById('leaderboard').style.display = 'table';
 }
 
-const quests = [
-  { id: 'q1', description: 'Launch 10 fireworks', requirement: 10, reward: 'Unlock Blue Firework', type: 'firework' },
-  { id: 'q2', description: 'Launch 50 fireworks', requirement: 50, reward: 'Unlock Green Firework', type: 'firework' },
-  { id: 'q3', description: 'Launch 200 fireworks', requirement: 200, reward: 'Unlock Purple Firework', type: 'firework' },
-];
-
-async function loadQuests() {
-  const user = auth.currentUser;
-  if (!user) {
-    questsContainer.innerHTML = '<p>Please log in to see your quests.</p>';
-    return;
-  }
-
-  const snap = await db.ref('quests/' + user.uid).once('value');
-  const completed = snap.val() || {};
-
-  questsContainer.innerHTML = '';
-  quests.forEach(q => {
-    const div = document.createElement('div');
-    div.className = 'quest' + (completed[q.id] ? ' completed' : '');
-    div.innerHTML = `<span>${q.description} → ${q.reward}</span>`;
-    if (!completed[q.id]) {
-      const btn = document.createElement('button');
-      btn.textContent = 'Claim';
-      btn.addEventListener('click', async () => {
-        await db.ref(`quests/${user.uid}/${q.id}`).set(true);
-        showNotification('Quest reward claimed: ' + q.reward);
-        loadQuests();
-      });
-      div.appendChild(btn);
-    }
-    questsContainer.appendChild(div);
-  });
-}
-
-function showNotification(msg, time=2000) {
-  const n = document.createElement('div');
-  n.textContent = msg;
-  n.style.position = 'fixed';
-  n.style.bottom = '20px';
-  n.style.left = '50%';
-  n.style.transform = 'translateX(-50%)';
-  n.style.background = '#0ff';
-  n.style.color = '#000';
-  n.style.padding = '10px 16px';
-  n.style.borderRadius = '8px';
-  n.style.fontWeight = '700';
-  n.style.boxShadow = '0 0 12px rgba(0,255,255,0.5)';
-  document.body.appendChild(n);
-  setTimeout(() => n.remove(), time);
-}
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    loadLeaderboard();
-    loadQuests();
-  } else {
-    questsContainer.innerHTML = '<p>Please log in to view your quests.</p>';
-  }
+// Load initial data
+Promise.all([
+  db.ref('progress').once('value'),
+  db.ref('usernames').once('value'),
+  db.ref('users').once('value'),
+  db.ref('admins').once('value'),
+  db.ref('activeTag').once('value')
+]).then(([pSnap, uSnap, usSnap, aSnap, tSnap])=>{
+  progress = pSnap.val() || {};
+  usernames = uSnap.val() || {};
+  users = usSnap.val() || {};
+  admins = aSnap.val() || {};
+  activeTags = tSnap.val() || {};
+  buildLeaderboard();
 });
 
-setInterval(loadLeaderboard, 30000);
+// Listen for changes
+['progress','usernames','users','admins','activeTag'].forEach(path => {
+  db.ref(path).on('value', snap => {
+    if(path==='progress') progress = snap.val()||{};
+    if(path==='usernames') usernames = snap.val()||{};
+    if(path==='users') users = snap.val()||{};
+    if(path==='admins') admins = snap.val()||{};
+    if(path==='activeTag') activeTags = snap.val()||{};
+    buildLeaderboard();
+  });
+});
 </script>
 </body>
 </html>
