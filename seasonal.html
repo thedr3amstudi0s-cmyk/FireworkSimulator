@@ -11,8 +11,6 @@
     margin: 0;
     display: flex;
   }
-
-  /* Sidebar leaderboard */
   #leaderboardContainer {
     width: 300px;
     min-width: 300px;
@@ -22,33 +20,15 @@
     overflow-y: auto;
     box-shadow: 2px 0 10px rgba(0,0,0,0.5);
   }
-
   #leaderboardContainer h2 {
     text-align: center;
     margin-bottom: 15px;
     color: #0ff;
   }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th, td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #333;
-    font-size: 14px;
-  }
-
-  th {
-    background: #222;
-  }
-
-  tr:nth-child(even) {
-    background: #1c1c1c;
-  }
-
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px; text-align: left; border-bottom: 1px solid #333; font-size: 14px; }
+  th { background: #222; }
+  tr:nth-child(even) { background: #1c1c1c; }
   .tag.owner { color: orange; font-weight: bold; }
   .tag.vip { color: gold; font-weight: bold; }
   .tag.streamer { color: #981ab6; font-weight: bold; }
@@ -56,19 +36,8 @@
   .tag.donator { color: #0BBF06; font-weight: bold; }
   .tag.youtuber { color: #F00000; font-weight: bold; }
   .tag.regular { color: #0ff; }
-
-  #loading {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 14px;
-    color: #0ff;
-  }
-
-  /* Main content area */
-  #mainContent {
-    flex: 1;
-    padding: 20px;
-  }
+  #loading { text-align: center; margin-top: 20px; font-size: 14px; color: #0ff; }
+  #mainContent { flex: 1; padding: 20px; }
 </style>
 </head>
 <body>
@@ -93,7 +62,6 @@
   <!-- Your seasonal content goes here -->
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -129,8 +97,9 @@ const TAGS = {
 const body = document.getElementById('leaderboardBody');
 const loading = document.getElementById('loading');
 
-let progress = {}, usernames = {}, users = {}, admins = {}, activeTags = {};
+let scores = {}, usernames = {}, users = {}, admins = {}, activeTags = {};
 
+// Helper to format large numbers
 function formatScore(num) {
   if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -138,17 +107,19 @@ function formatScore(num) {
   return num;
 }
 
+// Build leaderboard table
 function buildLeaderboard() {
   body.innerHTML = '';
+
   const uids = new Set([
-    ...Object.keys(progress || {}),
+    ...Object.keys(scores || {}),
     ...Object.keys(usernames || {}),
     ...Object.keys(users || {})
   ]);
 
   const data = [];
   uids.forEach(uid => {
-    const score = progress[uid]?.score || 0;
+    const score = scores[uid]?.score || 0;
     const uname = usernames[uid] || users[uid]?.username || 'Unknown';
 
     let tag = 'regular';
@@ -178,13 +149,13 @@ function buildLeaderboard() {
 
 // Load initial data
 Promise.all([
-  db.ref('progress').once('value'),
+  db.ref('scores').once('value'),
   db.ref('usernames').once('value'),
   db.ref('users').once('value'),
   db.ref('admins').once('value'),
   db.ref('activeTag').once('value')
-]).then(([pSnap, uSnap, usSnap, aSnap, tSnap])=>{
-  progress = pSnap.val() || {};
+]).then(([sSnap, uSnap, usSnap, aSnap, tSnap])=>{
+  scores = sSnap.val() || {};
   usernames = uSnap.val() || {};
   users = usSnap.val() || {};
   admins = aSnap.val() || {};
@@ -192,10 +163,10 @@ Promise.all([
   buildLeaderboard();
 });
 
-// Listen for changes
-['progress','usernames','users','admins','activeTag'].forEach(path => {
+// Listen for realtime changes
+['scores','usernames','users','admins','activeTag'].forEach(path => {
   db.ref(path).on('value', snap => {
-    if(path==='progress') progress = snap.val()||{};
+    if(path==='scores') scores = snap.val()||{};
     if(path==='usernames') usernames = snap.val()||{};
     if(path==='users') users = snap.val()||{};
     if(path==='admins') admins = snap.val()||{};
