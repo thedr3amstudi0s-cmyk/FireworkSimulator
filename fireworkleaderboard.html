@@ -97,7 +97,17 @@ function buildLeaderboard() {
   const data = [];
   uids.forEach(uid => {
     const money = progress[uid]?.money ?? 0;
-    let uname = usernames[uid] || (users[uid]?.username) || 'Unknown';
+    let uname = 'Player';
+
+const uVal = usernames[uid];
+if (typeof uVal === 'string') {
+  uname = uVal;
+} else if (typeof uVal === 'object' && typeof uVal.username === 'string') {
+  uname = uVal.username;
+} else if (typeof users[uid]?.username === 'string') {
+  uname = users[uid].username;
+}
+
 
     // Tag priority: admin > owner fallback > active tag > regular
     let tag = 'regular';
@@ -174,6 +184,7 @@ db.ref('activeTag').on('value', snap => {
 </script>
 </body>
 </html>
+
 
 
 
