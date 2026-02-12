@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firework Simulator - Seasonal Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(to bottom, #0a0a0a, #111);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 20px;
+    text-align: center;
+    background: #111;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #0ff;
+    text-shadow: 0 0 6px #0ff;
+  }
+
+  main {
+    width: 90%;
+    max-width: 900px;
+    margin-top: 20px;
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .panel {
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1 1 400px;
+    min-width: 300px;
+    box-shadow: 0 0 12px rgba(0,255,255,0.3);
+  }
+
+  h2 {
+    font-size: 22px;
+    margin-top: 0;
+    color: #0ff;
+    text-shadow: 0 0 4px #0ff;
+  }
+
+  /* Leaderboard Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+
+  table th, table td {
+    padding: 8px 12px;
+    text-align: left;
+  }
+
+  table th {
+    color: #0ff;
+    border-bottom: 1px solid #0ff;
+  }
+
+  table tr:nth-child(even) {
+    background: rgba(0,255,255,0.05);
+  }
+
+  table tr:hover {
+    background: rgba(0,255,255,0.1);
+  }
+
+  /* Quests */
+  .quest {
+    background: rgba(0,255,255,0.05);
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .quest.completed {
+    background: rgba(0,255,0,0.1);
+    color: #0f0;
+    text-decoration: line-through;
+  }
+
+  .quest button {
+    background: #0ff;
+    border: none;
+    border-radius: 6px;
+    color: #000;
+    font-weight: 700;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: filter 0.2s;
+  }
+
+  .quest button:hover {
+    filter: brightness(1.2);
+  }
+
+  footer {
+    padding: 12px 0;
+    color: #aaa;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  #backBtn {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    background: #0ff;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 0 6px rgba(0,255,255,0.5);
+    transition: filter 0.2s;
+  }
+
+  #backBtn:hover {
+    filter: brightness(1.2);
+  }
+</style>
+</head>
+<body>
+
+<button id="backBtn">⬅ Back to Game</button>
+
+<header>
+  <h1>🎆 Firework Simulator - Seasonal Leaderboard 🎆</h1>
+</header>
+
+<main>
+  <!-- Leaderboard Panel -->
+  <div class="panel">
+    <h2>Top Players</h2>
+    <table id="leaderboardTable">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Username</th>
+          <th>Fireworks Launched</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="3">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Quests / Seasonal Pass -->
+  <div class="panel">
+    <h2>Seasonal Pass / Quests</h2>
+    <div id="questsContainer">
+      <p>Loading quests...</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 DR3AM STUDI0S. All rights reserved.
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
+  authDomain: "fireworkleaderboard.firebaseapp.com",
+  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com",
+  projectId: "fireworkleaderboard",
+  storageBucket: "fireworkleaderboard.firebasestorage.app",
+  messagingSenderId: "243474267364",
+  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
+  measurementId: "G-H07BZY385S"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+const leaderboardTable = document.getElementById('leaderboardTable').querySelector('tbody');
+const questsContainer = document.getElementById('questsContainer');
+const backBtn = document.getElementById('backBtn');
+
+backBtn.addEventListener('click', () => window.close()); // close leaderboard window
+
+// --- Leaderboard ---
+async function loadLeaderboard() {
+  const snap = await db.ref('progress').orderByChild('fireworksLaunched').limitToLast(10).once('value');
+  const data = [];
+  snap.forEach(s => data.push({ uid: s.key, ...s.val() }));
+  // Sort descending
+  data.sort((a,b) => (b.fireworksLaunched||0) - (a.fireworksLaunched||0));
+
+  leaderboardTable.innerHTML = '';
+  data.forEach((p,i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${p.username||p.uid}</td><td>${p.fireworksLaunched||0}</td>`;
+    leaderboardTable.appendChild(tr);
+  });
+}
+
+// --- Quests / Seasonal Pass ---
+const quests = [
+  { id: 'q1', description: 'Launch 10 fireworks', requirement: 10, reward: 'Unlock Blue Firework', type: 'firework' },
+  { id: 'q2', description: 'Launch 50 fireworks', requirement: 50, reward: 'Unlock Green Firework', type: 'firework' },
+  { id: 'q3', description: 'Launch 200 fireworks', requirement: 200, reward: 'Unlock Purple Firework', type: 'firework' },
+];
+
+async function loadQuests() {
+  const user = auth.currentUser;
+  if (!user) {
+    questsContainer.innerHTML = '<p>Please log in to see your quests.</p>';
+    return;
+  }
+
+  const snap = await db.ref('quests/' + user.uid).once('value');
+  const completed = snap.val() || {};
+
+  questsContainer.innerHTML = '';
+  quests.forEach(q => {
+    const div = document.createElement('div');
+    div.className = 'quest' + (completed[q.id] ? ' completed' : '');
+    div.innerHTML = `<span>${q.description} → ${q.reward}</span>`;
+    if (!completed[q.id]) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Claim';
+      btn.addEventListener('click', async () => {
+        await db.ref(`quests/${user.uid}/${q.id}`).set(true);
+        showNotification('Quest reward claimed: ' + q.reward);
+        loadQuests(); // refresh UI
+      });
+      div.appendChild(btn);
+    }
+    questsContainer.appendChild(div);
+  });
+}
+
+// Simple notification system
+function showNotification(msg, time=2000) {
+  const n = document.createElement('div');
+  n.textContent = msg;
+  n.style.position = 'fixed';
+  n.style.bottom = '20px';
+  n.style.left = '50%';
+  n.style.transform = 'translateX(-50%)';
+  n.style.background = '#0ff';
+  n.style.color = '#000';
+  n.style.padding = '10px 16px';
+  n.style.borderRadius = '8px';
+  n.style.fontWeight = '700';
+  n.style.boxShadow = '0 0 12px rgba(0,255,255,0.5)';
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), time);
+}
+
+// --- Firebase Auth listener ---
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loadLeaderboard();
+    loadQuests();
+  } else {
+    questsContainer.innerHTML = '<p>Please log in to view your quests.</p>';
+  }
+});
+
+// Refresh leaderboard every 30 seconds
+setInterval(loadLeaderboard, 30000);
+</script>
+</body>
+</html>
