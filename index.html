@@ -1102,9 +1102,21 @@ auth.onAuthStateChanged(async user => {
     currentUser = user.uid;
 
     const nameSnap = await db.ref('usernames/' + currentUser).once('value');
-    currentUsername = nameSnap.exists()
-      ? nameSnap.val()
-      : (user.email || "Player");
+
+    if (nameSnap.exists()) {
+      const val = nameSnap.val();
+
+      // ✅ Handle BOTH old + new formats
+      if (typeof val === "string") {
+        currentUsername = val;
+      } else if (typeof val === "object" && typeof val.username === "string") {
+        currentUsername = val.username;
+      } else {
+        currentUsername = "Player";
+      }
+    } else {
+      currentUsername = "Player";
+    }
 
     afterLogin();
   } else {
@@ -1112,6 +1124,7 @@ auth.onAuthStateChanged(async user => {
     ui.style.display = 'none';
   }
 });
+
 
 
 async function loadProgressOnline(uid){
@@ -1151,6 +1164,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
