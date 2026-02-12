@@ -1020,7 +1020,6 @@ loginBtn.addEventListener('click', async () => {
 });
 
 
-// --- Signup (safe) ---
 signupBtn.addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
@@ -1031,46 +1030,47 @@ signupBtn.addEventListener('click', async () => {
     return;
   }
 
-  if (username.length < 3) username = ""; // optional username
+  // Optional: censor the username if provided
+  if (!username) username = 'Player'; // fallback
+  username = censorUsername(username);
 
-  loginMsg.textContent = 'Signing up...';
+  loginMsg.textContent = 'Creating account...';
 
   try {
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    const user = userCredential.user;
-    currentUser = user.uid;
+    const uid = userCredential.user.uid;
 
-    // Save username safely
-    if (username) {
-      username = censorUsername(username);
-      try {
-        await db.ref('usernames/' + currentUser).set(username);
-      } catch (err) {
-        console.warn('Could not save username:', err.message);
-      }
-    }
+    // Save to Firebase Realtime Database with auto-generated key like your example
+    const newRef = db.ref('usernames').push(); // generates 20-char key
+    await newRef.set({
+      username: username,
+      uid: uid
+    });
+
+    currentUser = uid;
+    currentUsername = username;
 
     loginMsg.textContent = 'Signup successful!';
     loginBox.style.display = 'none';
     ui.style.display = 'block';
-    resetBtn.style.display = 'block';
-    logoutBtn.style.display = 'block';
-    muteBtn.style.display = 'block';
-    goGoogleForm.style.display = 'block';
 
-    // Load progress and tags safely
-    try { await loadProgressOnline(currentUser); } catch (err) { console.warn(err); }
-    try { await loadTagsUI(); } catch (err) { console.warn(err); }
+    await db.ref('progress/' + currentUser).set({
+      money: 0,
+      unlockedColors: 1,
+      clickDelay: 1200,
+      rebirthCount: 0,
+      autoAmount: 0,
+      autoSpeed: 2.5,
+      colorPrice: 50,
+      delayPrice: 100,
+      rebirthPrice: 500
+    });
 
-    startAutoLaunch();
-    startMusic();
   } catch (err) {
-    console.error('Signup failed:', err);
-    loginMsg.textContent = 'Signup failed: ' + err.message;
+    console.error(err);
+    loginMsg.textContent = err.message;
   }
 });
-
-
 
 forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
 
@@ -1164,6 +1164,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
