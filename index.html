@@ -549,6 +549,15 @@ this.vy = Math.sin(angle) * speed;
   }
 }
 
+async function incrementFireworks() {
+  if (!currentUser) return;
+  await db.ref('progress/' + currentUser).transaction(current => {
+    if (!current) current = {};
+    current.fireworksLaunched = (current.fireworksLaunched || 0) + 1;
+    return current;
+  });
+}
+
 
 let soundMuted = false;
 
@@ -898,17 +907,6 @@ async function saveProgressOnline(){
     money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed, colorPrice, delayPrice, rebirthPrice
   });
 }
-async function loadProgressOnline(uid){
-  const snap=await db.ref('progress/'+uid).once('value');
-  if(snap.exists()){ const p=snap.val();
-    money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
-    rebirthCount=p.rebirthCount||0; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
-    colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100; rebirthPrice=p.rebirthPrice||500;
-    colors=[...baseColors,...getRebirthColors(rebirthCount)];
-    Buttons(); document.getElementById('money').textContent = formatMoney(money);
-    startAutoLaunch();
-  }
-}
 
 async function loadTagsUI() {
   const invDiv = document.getElementById('tagInventory');
@@ -1001,7 +999,6 @@ async function loadTagsUI() {
 }
 
 
-// --- Login Flow ---
 loginBtn.addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
@@ -1014,61 +1011,14 @@ loginBtn.addEventListener('click', async () => {
   loginMsg.textContent = 'Logging in...';
 
   try {
-    // Sign in with Firebase Auth
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    const user = userCredential.user;
-    currentUser = user.uid;
-
+    await auth.signInWithEmailAndPassword(email, password);
     loginMsg.textContent = 'Login successful!';
-    
-    // Hide login box, show UI
-    loginBox.style.display = 'none';
-    ui.style.display = 'block';
-    resetBtn.style.display = 'block';
-    logoutBtn.style.display = 'block';
-    muteBtn.style.display = 'block';
-    goGoogleForm.style.display = 'block';
-
-    // Load progress safely
-    try {
-      await loadProgressOnline(currentUser);
-    } catch (err) {
-      console.warn('Could not load progress:', err.message);
-      showNotification('Could not load progress (DB rules?).');
-    }
-
-    // Load tags safely
-    try {
-      await loadTagsUI();
-    } catch (err) {
-      console.warn('Could not load tags:', err.message);
-      showNotification('Could not load tags (DB rules?).');
-    }
-
-    // Check if user is admin to show owner commands
-    try {
-      const adminSnap = await db.ref('admins/' + currentUser).once('value');
-      if (adminSnap.exists() && adminSnap.val() === true) {
-        ownerCommands.style.display = 'block';
-      } else if (ADMIN_FALLBACK[currentUser]) {
-        ownerCommands.style.display = 'block';
-      } else {
-        ownerCommands.style.display = 'none';
-      }
-    } catch (err) {
-      console.warn('Could not verify admin:', err.message);
-      ownerCommands.style.display = 'none';
-    }
-
-    // Initialize auto-launch and music
-    startAutoLaunch();
-    startMusic();
-
+    // DO NOT touch UI here
   } catch (err) {
-    console.error('Login failed:', err);
-    loginMsg.textContent = 'Login failed: ' + err.message;
+    loginMsg.textContent = err.message;
   }
 });
+
 
 // --- Signup (safe) ---
 signupBtn.addEventListener('click', async () => {
@@ -1196,6 +1146,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
