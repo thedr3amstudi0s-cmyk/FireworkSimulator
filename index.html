@@ -262,7 +262,10 @@ creditsBtn.addEventListener('click', () => {
   alert('Firework Simulator\nCreated by DR3AM STUDI0S\nCoder: Dreamcrusher\nMusic producer: Ayost4rr\n\nSongs:\nHeading Home');
 });
 
-
+db.ref('progress/' + currentUser).transaction(current => {
+  if (current) current.fireworksLaunched = (current.fireworksLaunched || 0) + 1;
+  return current;
+});
   
 musicVolume.addEventListener('input', () => {
   const vol = musicVolume.value / 100;
@@ -1198,6 +1201,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
