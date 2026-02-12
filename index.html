@@ -1042,23 +1042,43 @@ async function loadTagsUI() {
 }
 
 
-/* LOGIN & AUTH */
-loginBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; const pw=document.getElementById('password').value; auth.signInWithEmailAndPassword(email,pw).then(res=>{ currentUser=res.user.uid; currentUsername=res.user.displayName||res.user.email; afterLogin(); }).catch(e=>loginMsg.textContent=e.message); });
-signupBtn.addEventListener('click',()=>{
+async function loadUsername(uid){
+  const snap = await db.ref('users/' + uid + '/username').once('value');
+  currentUsername = snap.exists() ? snap.val() : "unknown";
+}
+
+signupBtn.addEventListener('click', async () => {
   const email = document.getElementById('email').value;
-  const pw = document.getElementById('password').value;
-  let username = document.getElementById('username').value || 'Player';
+  const password = document.getElementById('password').value;
+  const username = document.getElementById('username').value || "unknown";
 
-  // Apply censor here
-  username = censorUsername(username);
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = userCredential.user.uid;
 
-  auth.createUserWithEmailAndPassword(email, pw).then(res=>{
-    res.user.updateProfile({displayName: username});
-    currentUser = res.user.uid;
+    // Save username in Firebase
+    await db.ref('users/' + uid).set({
+      username: username,
+      createdAt: Date.now()
+    });
+
+    currentUser = uid;
     currentUsername = username;
-    afterLogin();
-  }).catch(e => loginMsg.textContent = e.message);
+
+    // Optionally save initial progress
+    await db.ref('progress/' + uid).set({
+      money: 0, unlockedColors: 1, clickDelay: 1200, rebirthCount: 0,
+      autoAmount: 0, autoSpeed: 2.5, colorPrice: 50, delayPrice: 100, rebirthPrice: 500
+    });
+
+    loginBox.style.display = 'none';
+    ui.style.display = 'block';
+    showNotification(`Welcome ${username}!`);
+  } catch (err) {
+    loginMsg.textContent = err.message;
+  }
 });
+
 
 forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
 
@@ -1134,6 +1154,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
