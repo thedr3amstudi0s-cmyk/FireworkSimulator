@@ -1044,7 +1044,7 @@ signupBtn.addEventListener('click', async () => {
     if (username) {
       username = censorUsername(username);
       try {
-        await db.ref('usernames/' + currentUser).set({ username });
+        await db.ref('usernames/' + currentUser).set(username);
       } catch (err) {
         console.warn('Could not save username:', err.message);
       }
@@ -1146,6 +1146,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
