@@ -245,6 +245,15 @@ const musicVolDisplay = document.getElementById('musicVolDisplay');
 const gameVolDisplay = document.getElementById('gameVolDisplay');
 const creditsBtn = document.getElementById('creditsBtn');
 
+// 🎉 Valentine’s Day check (Feb 14)
+function isValentinesDay() {
+  const now = new Date();
+  return now.getMonth() === 1 && now.getDate() === 14;
+}
+
+const VALENTINES_ACTIVE = true; // FORCE ON (remove later)
+
+  
 // Open/Close Settings
 openSettingsBtn.addEventListener('click', () => { settingsPanel.style.display = 'block'; });
 closeSettingsBtn.addEventListener('click', () => { settingsPanel.style.display = 'none'; });
@@ -254,6 +263,8 @@ creditsBtn.addEventListener('click', () => {
   alert('Firework Simulator\nCreated by DR3AM STUDI0S\nCoder: Dreamcrusher\nMusic producer: Ayost4rr\n\nSongs:\nHeading Home');
 });
 
+
+  
 musicVolume.addEventListener('input', () => {
   const vol = musicVolume.value / 100;
   bgMusic.volume = vol;
@@ -343,6 +354,28 @@ resizeCanvas();
   } else {
     fireworkSound.muted = soundMuted; 
     if (!soundMuted) bgMusic.play().catch(() => {});
+  }
+}
+
+function explodeHeart(x, y, colorObj) {
+  const count = 160;
+  const scale = 0.23;
+
+  for (let i = 0; i < count; i++) {
+    const t = Math.random() * Math.PI * 2;
+
+    const hx = 16 * Math.pow(Math.sin(t), 3);
+    const hy =
+      13 * Math.cos(t) -
+      5 * Math.cos(2 * t) -
+      2 * Math.cos(3 * t) -
+      Math.cos(4 * t);
+
+    const p = new Particle(x, y, colorObj);
+    p.vx = hx * scale;
+    p.vy = -hy * scale;
+
+    particles.push(p);
   }
 }
 
@@ -528,8 +561,7 @@ muteBtn.addEventListener('click', () => {
 
 
 
-/* CORE FUNCTIONS */
-function explode(x,y,colorObj){
+function explode(x, y, colorObj) {
   if (!soundMuted) {
     try {
       fireworkSound.currentTime = 0;
@@ -537,20 +569,37 @@ function explode(x,y,colorObj){
     } catch(e){}
   }
 
-  for(let i=0;i<100;i++) particles.push(new Particle(x,y,colorObj));
+  // ❤️ Valentine-only hearts
+  if (VALENTINES_ACTIVE) {
+    explodeHeart(x, y, colorObj);
+  } else {
+    // 🎆 Normal explosion
+    for (let i = 0; i < 100; i++) {
+      particles.push(new Particle(x, y, colorObj));
+    }
+  }
+
   money += colorObj.value * (rebirthCount + 1) * globalMultiplier;
   document.getElementById('money').textContent = formatMoney(money);
   saveProgressOnline().catch(()=>{});
 }
 
-function launchFirework(x,y){
-  if(colors.length===0) colors=[...baseColors];
-  const max=Math.min(unlockedColors,colors.length);
-  const colorIndex=Math.floor(Math.random()*Math.max(1,max));
-  const colorObj=colors[colorIndex];
-  fireworks.push(new Firework(x,y,colorObj));
-  lastClick=Date.now();
+
+function launchFirework(x, y) {
+  if (colors.length === 0) colors = [...baseColors];
+  const max = Math.min(unlockedColors, colors.length);
+  const colorIndex = Math.floor(Math.random() * Math.max(1, max));
+
+  const baseColor = colors[colorIndex];
+
+  const colorObj = VALENTINES_ACTIVE
+    ? { color: "hotpink", value: baseColor.value }
+    : baseColor;
+
+  fireworks.push(new Firework(x, y, colorObj));
+  lastClick = Date.now();
 }
+
 
 document.addEventListener('click',(e)=>{ if(Date.now()-lastClick>=clickDelay) launchFirework(e.clientX,e.clientY); });
 
@@ -1082,5 +1131,6 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
