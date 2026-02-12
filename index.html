@@ -1097,17 +1097,22 @@ function afterLogin(){
 }
 
 
-// --- AUTO-LOGIN & LOAD PROGRESS ---
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async user => {
   if (user) {
     currentUser = user.uid;
-    currentUsername = user.displayName || user.email;
-    afterLogin(); // show UI, load progress, tags, owner commands
+
+    const nameSnap = await db.ref('usernames/' + currentUser).once('value');
+    currentUsername = nameSnap.exists()
+      ? nameSnap.val()
+      : (user.email || "Player");
+
+    afterLogin();
   } else {
     loginBox.style.display = 'block';
     ui.style.display = 'none';
   }
 });
+
 
 async function loadProgressOnline(uid){
   const snap = await db.ref('progress/' + uid).once('value');
@@ -1146,6 +1151,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
