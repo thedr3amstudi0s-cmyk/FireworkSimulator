@@ -574,7 +574,7 @@ function explode(x, y, colorObj) {
 
   // ❤️ Valentine-only hearts
   if (VALENTINES_ACTIVE) {
-    explodeHeart(x, y, colorObj);
+    explodeHeart(x, y);
   } else {
     // 🎆 Normal explosion
     for (let i = 0; i < 100; i++) {
@@ -1134,6 +1134,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
