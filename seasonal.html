@@ -59,7 +59,6 @@
     text-shadow: 0 0 4px #0ff;
   }
 
-  /* Leaderboard Table */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -84,7 +83,6 @@
     background: rgba(0,255,255,0.1);
   }
 
-  /* Quests */
   .quest {
     background: rgba(0,255,255,0.05);
     margin-bottom: 12px;
@@ -152,7 +150,6 @@
 </header>
 
 <main>
-  <!-- Leaderboard Panel -->
   <div class="panel">
     <h2>Top Players</h2>
     <table id="leaderboardTable">
@@ -169,7 +166,6 @@
     </table>
   </div>
 
-  <!-- Quests / Seasonal Pass -->
   <div class="panel">
     <h2>Seasonal Pass / Quests</h2>
     <div id="questsContainer">
@@ -206,14 +202,12 @@ const leaderboardTable = document.getElementById('leaderboardTable').querySelect
 const questsContainer = document.getElementById('questsContainer');
 const backBtn = document.getElementById('backBtn');
 
-backBtn.addEventListener('click', () => window.close()); // close leaderboard window
+backBtn.addEventListener('click', () => window.close());
 
-// --- Leaderboard ---
 async function loadLeaderboard() {
   const snap = await db.ref('progress').orderByChild('fireworksLaunched').limitToLast(10).once('value');
   const data = [];
   snap.forEach(s => data.push({ uid: s.key, ...s.val() }));
-  // Sort descending
   data.sort((a,b) => (b.fireworksLaunched||0) - (a.fireworksLaunched||0));
 
   leaderboardTable.innerHTML = '';
@@ -224,7 +218,6 @@ async function loadLeaderboard() {
   });
 }
 
-// --- Quests / Seasonal Pass ---
 const quests = [
   { id: 'q1', description: 'Launch 10 fireworks', requirement: 10, reward: 'Unlock Blue Firework', type: 'firework' },
   { id: 'q2', description: 'Launch 50 fireworks', requirement: 50, reward: 'Unlock Green Firework', type: 'firework' },
@@ -252,7 +245,7 @@ async function loadQuests() {
       btn.addEventListener('click', async () => {
         await db.ref(`quests/${user.uid}/${q.id}`).set(true);
         showNotification('Quest reward claimed: ' + q.reward);
-        loadQuests(); // refresh UI
+        loadQuests();
       });
       div.appendChild(btn);
     }
@@ -260,7 +253,6 @@ async function loadQuests() {
   });
 }
 
-// Simple notification system
 function showNotification(msg, time=2000) {
   const n = document.createElement('div');
   n.textContent = msg;
@@ -278,7 +270,6 @@ function showNotification(msg, time=2000) {
   setTimeout(() => n.remove(), time);
 }
 
-// --- Firebase Auth listener ---
 auth.onAuthStateChanged(user => {
   if (user) {
     loadLeaderboard();
@@ -288,7 +279,6 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// Refresh leaderboard every 30 seconds
 setInterval(loadLeaderboard, 30000);
 </script>
 </body>
