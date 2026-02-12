@@ -1,3 +1,8 @@
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -246,7 +251,7 @@ function isValentinesDay() {
   return now.getMonth() === 1 && now.getDate() === 14;
 }
 
-const VALENTINES_ACTIVE = true; // REMOVE BEFORE PUBLISH
+const VALENTINES_ACTIVE = isValentinesDay();
   
 // Open/Close Settings
 openSettingsBtn.addEventListener('click', () => { settingsPanel.style.display = 'block'; });
@@ -1196,5 +1201,12 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
