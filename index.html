@@ -361,11 +361,6 @@ function explodeHeart(x, y) {
   const count = 160;
   const scale = 0.23;
 
-  // Pick a random color from unlocked colors
-  const maxColors = Math.min(unlockedColors, colors.length);
-  const colorIndex = Math.floor(Math.random() * maxColors);
-  const chosenColor = colors[colorIndex];
-
   for (let i = 0; i < count; i++) {
     const t = Math.random() * Math.PI * 2;
 
@@ -376,13 +371,19 @@ function explodeHeart(x, y) {
       2 * Math.cos(3 * t) -
       Math.cos(4 * t);
 
-    const p = new Particle(x, y, chosenColor);
+    // Pick random unlocked color
+    const maxColors = Math.min(unlockedColors, colors.length);
+    const colorIndex = Math.floor(Math.random() * maxColors);
+    const colorObj = colors[colorIndex];
+
+    const p = new Particle(x, y, colorObj);
     p.vx = hx * scale;
     p.vy = -hy * scale;
 
     particles.push(p);
   }
 }
+
 
 let currentUser="", currentUsername="";
 let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now();
@@ -455,11 +456,8 @@ function censorUsername(username){
 
   bannedWords.forEach(word => {
     const regex = new RegExp(word, "gi");
-
-    // If normalized username contains banned word
+    
     if(normalized.includes(word)){
-      // Replace the matched part in original username with asterisks
-      // This uses a loose regex to catch variations like S41T, $h1t, etc.
       const replaceRegex = new RegExp(
         word.split('').map(c => `[${c}${Object.keys(leetMap).join('')}]`).join(''),
         "gi"
@@ -1134,6 +1132,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
