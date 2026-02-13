@@ -1066,7 +1066,7 @@ signupBtn.addEventListener('click', async () => {
     loginBox.style.display = 'none';
     ui.style.display = 'block';
 
-    await db.ref('progress/' + currentUser).set({
+    await db.ref('progress/' + currentUser).update({
       money: 0,
       unlockedColors: 1,
       clickDelay: 1200,
@@ -1209,6 +1209,7 @@ function saveSettings() {
 </script>
 </body>
 </html>
+
 
 
 
