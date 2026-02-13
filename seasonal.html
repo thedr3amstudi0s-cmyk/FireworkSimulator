@@ -109,6 +109,7 @@ tr:nth-child(even){background:#1c1c1c;}
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
   const firebaseConfig={
     apiKey:"AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
     authDomain:"fireworkleaderboard.firebaseapp.com",
@@ -198,25 +199,19 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSeasonPass();
   }
 
-  function setupAutomaticMilestones(user){
-    if(!user) return;
-    const uid=user.uid;
-    db.ref(`progress/${uid}`).once('value').then(snap=>{
-      questProgress[uid]=snap.val()||{};
-      updatePlayerPoints(uid);
-      renderQuests(uid);
-    });
+  function setupAutomaticMilestones(uid){
+    db.ref(`progress/${uid}/money`).on('value', snap => {
+      const money = snap.val() || 0;
 
-    db.ref(`scores/${uid}/score`).on('value',snap=>{
-      const score=snap.val()||0;
-      if(score>=100000 && !(questProgress[uid]?.['spend100k'])){
+      if(money >= 100000 && !(questProgress[uid]?.['spend100k'])){
         playerPoints += 200;
         db.ref(`progress/${uid}/spend100k`).set(100000);
         questProgress[uid]['spend100k'] = 100000;
         renderQuests(uid);
         renderSeasonPass();
       }
-      if(score>=1000000 && !(questProgress[uid]?.['earn1M'])){
+
+      if(money >= 1000000 && !(questProgress[uid]?.['earn1M'])){
         playerPoints += 500;
         db.ref(`progress/${uid}/earn1M`).set(1000000);
         questProgress[uid]['earn1M'] = 1000000;
@@ -226,7 +221,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Load initial data
+  firebase.auth().onAuthStateChanged(user=>{
+    if(!user) return;
+    const uid = user.uid;
+
+    db.ref(`progress/${uid}`).once('value').then(snap=>{
+      questProgress[uid] = snap.val() || {};
+      updatePlayerPoints(uid);
+      renderQuests(uid);
+      setupAutomaticMilestones(uid);
+    });
+  });
+
   Promise.all([
     db.ref('scores').once('value'),
     db.ref('usernames').once('value'),
@@ -242,13 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
     activeTags=tSnap.val()||{};
     questProgress=pSnap.val()||{};
     buildLeaderboard();
-    firebase.auth().onAuthStateChanged(user=>{
-      renderQuests(user?user.uid:'guest');
-      setupAutomaticMilestones(user);
-    });
   });
 
-  // Realtime updates
   ['scores','usernames','users','admins','activeTag','progress'].forEach(path=>{
     db.ref(path).on('value',snap=>{
       if(path==='scores') scores=snap.val()||{};
@@ -259,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(path==='progress') questProgress=snap.val()||{};
       buildLeaderboard();
       const user=firebase.auth().currentUser;
-      renderQuests(user?user.uid:'guest');
+      if(user) renderQuests(user.uid);
     });
   });
 
