@@ -1186,9 +1186,15 @@ function loadSettings() {
   // Apply volumes immediately
   bgMusic.volume = musicVolume.value / 100;
   fireworkSound.volume = gameVolume.value / 100;
+
+  // Start muted like your slider logic
+  bgMusic.muted = true;
+  fireworkSound.muted = true;
+
   musicVolDisplay.textContent = musicVolume.value + '%';
   gameVolDisplay.textContent = gameVolume.value + '%';
 }
+
 
   
 function saveSettings() {
@@ -1203,6 +1209,7 @@ function saveSettings() {
 </script>
 </body>
 </html>
+
 
 
 
