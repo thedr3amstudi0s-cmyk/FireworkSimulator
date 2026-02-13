@@ -196,6 +196,7 @@ body {
 <button id="logoutBtn">Logout</button>
 <button id="muteBtn">Settings</button>
 <button id="goGoogleForm">Forms</button>
+<button id="seasonalLeaderboard">Seasonal Leaderboard</button>
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 <div id="notifications"></div>
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
@@ -767,6 +768,9 @@ document.getElementById('rebirth').addEventListener('click', async ()=>{
 document.getElementById('goLeaderboardBtn').addEventListener('click', () => {
   window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html', '_blank');
 });
+document.getElementById('seasonalLeaderboard').addEventListener('click', () => {
+  window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/seasonal.html', '_blank');
+});
 document.getElementById('goGoogleForm').addEventListener('click', () => {
   window.open('https://docs.google.com/forms/d/e/1FAIpQLScUs9xr7EYuAUnPg5OaYuzzbI8Ti8xnKtM-daPskoHrKG5OBw/viewform?usp=header', '_blank');
 });
@@ -1164,6 +1168,7 @@ async function loadProgressOnline(uid){
 </script>
 </body>
 </html>
+
 
 
 
