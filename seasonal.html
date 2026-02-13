@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Leaderboard, Quests & Season Pass (Debug)</title>
+<title>Leaderboard, Quests & Season Pass</title>
 <style>
 *{box-sizing:border-box;}
 body{
@@ -86,7 +86,7 @@ tr:nth-child(even){background:#1c1c1c;}
 <div id="loading">Loading leaderboard...</div>
 <table id="leaderboard" style="display:none;">
 <thead>
-<tr><th>#</th><th>Tag</th><th>Username</th><th>Score</th></tr>
+<tr><th>#</th><th>Tag</th><th>Username</th><th>Money</th></tr>
 </thead>
 <tbody id="leaderboardBody"></tbody>
 </table>
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const OWNER_UIDS={"FaZgGtIHzVcnSS6c8JAoir9RG8J2":true};
   const TAGS={owner:{name:"Owner",class:"owner"},vip:{name:"VIP",class:"vip"},streamer:{name:"STREAMER",class:"streamer"},fart:{name:"Fart",class:"fart"},donator:{name:"DONATOR",class:"donator"},youtuber:{name:"YOUTUBER",class:"youtuber"},regular:{name:"Regular",class:"regular"}};
   
-  let scores={},usernames={},users={},admins={},activeTags={},questProgress={};
+  let progress={},usernames={},users={},admins={},activeTags={},questProgress={};
   let playerPoints = 0;
 
   const quests=[
@@ -145,21 +145,28 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Building leaderboard...");
     const bodyEl=document.getElementById('leaderboardBody');
     bodyEl.innerHTML='';
-    const uids=new Set([...Object.keys(scores||{}),...Object.keys(usernames||{}),...Object.keys(users||{})]);
+    const uids=new Set([...Object.keys(progress||{}), ...Object.keys(usernames||{}), ...Object.keys(users||{})]);
     const data=[];
+  
     uids.forEach(uid=>{
-      const score=scores[uid]?.score||0;
-      const uname=usernames[uid]||users[uid]?.username||'Unknown';
+      const money = progress[uid]?.money || 0;   // <-- show money
+      const uname=usernames[uid] || users[uid]?.username || 'Unknown';
       let tag='regular';
-      if(admins[uid]||OWNER_UIDS[uid]) tag='owner';
+      if(admins[uid] || OWNER_UIDS[uid]) tag='owner';
       else if(activeTags[uid]) tag=activeTags[uid];
-      data.push({uid,score,uname,tag});
+      data.push({uid, score: money, uname, tag});
     });
-    data.sort((a,b)=>b.score-a.score);
+
+    data.sort((a,b)=>b.score - a.score);
     data.forEach((u,i)=>{
       const tr=document.createElement('tr');
       tr.dataset.uid=u.uid;
-      tr.innerHTML=`<td>${i+1}</td><td class="tag ${TAGS[u.tag]?.class||'regular'}">${TAGS[u.tag]?.name||'Regular'}</td><td>${u.uname}</td><td>${formatScore(u.score)}</td>`;
+      tr.innerHTML=`
+        <td>${i+1}</td>
+        <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
+        <td>${u.uname}</td>
+        <td>${formatScore(u.score)}</td>
+      `;
       bodyEl.appendChild(tr);
     });
     document.getElementById('loading').style.display='none';
@@ -172,11 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const container=document.getElementById('questsList');
     container.innerHTML='';
     quests.forEach(q=>{
-      const progress=questProgress[uid]?.[q.id]||0;
-      const completed=progress>=q.goal;
+      const prog=questProgress[uid]?.[q.id]||0;
+      const completed=prog>=q.goal;
       const div=document.createElement('div');
       div.className='quest';
-      div.innerHTML=`<strong>${q.description}</strong><br>Progress: ${progress}/${q.goal} ${completed?'✅ Completed':''}`;
+      div.innerHTML=`<strong>${q.description}</strong><br>Progress: ${prog}/${q.goal} ${completed?'✅ Completed':''}`;
       container.appendChild(div);
     });
     renderSeasonPass();
@@ -222,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
       db.ref(`progress/${uid}/money`).on('value', snap => {
         const money = snap.val() || 0;
         console.log("Money changed:", money);
+        progress[uid] = progress[uid] || {};
+        progress[uid].money = money;
 
         if(money >= 100000 && !(questProgress[uid]?.['spend100k'])){
           console.log("Triggering spend100k quest");
@@ -244,6 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(()=> console.log("earn1M written to Firebase"))
             .catch(err => console.error("Error writing earn1M:", err));
         }
+
+        buildLeaderboard(); // update leaderboard live
       });
     }).catch(err => console.error("Error loading progress:", err));
   });
@@ -262,25 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
     users=usSnap.val()||{};
     admins=aSnap.val()||{};
     activeTags=tSnap.val()||{};
+    progress=pSnap.val()||{};
     questProgress=pSnap.val()||{};
-    console.log("Leaderboard & progress loaded:", {scores,usernames,users,admins,activeTags,questProgress});
+    console.log("Leaderboard & progress loaded:", {scores,usernames,users,admins,activeTags,progress,questProgress});
     buildLeaderboard();
   }).catch(err=>console.error("Error loading leaderboard data:", err));
-
-  ['scores','usernames','users','admins','activeTag','progress'].forEach(path=>{
-    db.ref(path).on('value',snap=>{
-      console.log(`Realtime update for ${path}`, snap.val());
-      if(path==='scores') scores=snap.val()||{};
-      if(path==='usernames') usernames=snap.val()||{};
-      if(path==='users') users=snap.val()||{};
-      if(path==='admins') admins=snap.val()||{};
-      if(path==='activeTag') activeTags=snap.val()||{};
-      if(path==='progress') questProgress=snap.val()||{};
-      buildLeaderboard();
-      const user=firebase.auth().currentUser;
-      if(user) renderQuests(user.uid);
-    });
-  });
 
 });
 </script>
