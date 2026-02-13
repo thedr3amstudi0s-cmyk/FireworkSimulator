@@ -122,7 +122,7 @@ const TAGS={owner:{name:"Owner",class:"owner"},vip:{name:"VIP",class:"vip"},stre
 let scores={},usernames={},users={},admins={},activeTags={},questProgress={};
 let playerPoints = 0; // season points
 
-// Sample Quests
+// Quests (milestones)
 const quests=[
 {id:"spend100k",description:"Spend 100k to get 200 points",goal:100000,reward:200},
 {id:"earn1M",description:"Earn 1,000,000 to get 500 points",goal:1000000,reward:500}
@@ -131,7 +131,7 @@ const quests=[
 // Format scores
 function formatScore(n){if(n>=1_000_000_000)return(n/1_000_000_000).toFixed(1).replace(/\.0$/,'')+'B';if(n>=1_000_000)return(n/1_000_000).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1_000)return(n/1_000).toFixed(1).replace(/\.0$/,'')+'k';return n;}
 
-// Leaderboard builder
+// Build leaderboard
 function buildLeaderboard(){
 const bodyEl=document.getElementById('leaderboardBody'); bodyEl.innerHTML='';
 const uids=new Set([...Object.keys(scores||{}),...Object.keys(usernames||{}),...Object.keys(users||{})]);
@@ -155,32 +155,22 @@ document.getElementById('loading').style.display='none';
 document.getElementById('leaderboard').style.display='table';
 }
 
-// Quests
+// Render quests
 function renderQuests(uid){
 const container=document.getElementById('questsList');
 container.innerHTML='';
 quests.forEach(q=>{
 const progress=questProgress[uid]?.[q.id]||0;
 const completed=progress>=q.goal;
-const user=firebase.auth().currentUser;
-const showButton=user?!completed:false;
 const div=document.createElement('div');
 div.className='quest';
-div.innerHTML=`<strong>${q.description}</strong><br>Progress: ${progress}/${q.goal} ${completed?'✅ Completed':''} ${showButton?`<button onclick="completeQuest('${uid}','${q.id}')">Complete Now</button>`:''}`;
+div.innerHTML=`<strong>${q.description}</strong><br>Progress: ${progress}/${q.goal} ${completed?'✅ Completed':''}`;
 container.appendChild(div);
 });
 renderSeasonPass();
-};
-
-// Complete Quest & add points
-function completeQuest(uid,questId){
-const quest=quests.find(q=>q.id===questId); if(!quest) return;
-db.ref(`questProgress/${uid}/${questId}`).set(quest.goal);
-playerPoints += quest.reward; // add points
-renderSeasonPass();
 }
 
-// Season Pass rendering
+// Season Pass
 function renderSeasonPass(){
 const container=document.getElementById('passTiers');
 container.innerHTML='';
@@ -194,7 +184,7 @@ container.appendChild(div);
 }
 }
 
-// Initial Firebase load
+// Firebase load
 Promise.all([
 db.ref('scores').once('value'),
 db.ref('usernames').once('value'),
@@ -212,10 +202,11 @@ questProgress=qSnap.val()||{};
 buildLeaderboard();
 firebase.auth().onAuthStateChanged(user=>{
 renderQuests(user?user.uid:'guest');
+setupAutomaticMilestones(user);
 });
 });
 
-// Realtime updates
+// Realtime leaderboard updates
 ['scores','usernames','users','admins','activeTag','questProgress'].forEach(path=>{
 db.ref(path).on('value',snap=>{
 if(path==='scores') scores=snap.val()||{};
@@ -229,6 +220,27 @@ const user=firebase.auth().currentUser;
 renderQuests(user?user.uid:'guest');
 });
 });
+
+// Automatic milestones
+function setupAutomaticMilestones(user){
+if(!user) return;
+const uid=user.uid;
+db.ref(`scores/${uid}/score`).on('value',snap=>{
+const score=snap.val()||0;
+// Earn 1M
+if(score>=1000000 && !(questProgress[uid]?.['earn1M'])){
+playerPoints+=500;
+db.ref(`questProgress/${uid}/earn1M`).set(1000000);
+renderQuests(uid);
+}
+// Spend 100k
+if(score>=100000 && !(questProgress[uid]?.['spend100k'])){
+playerPoints+=200;
+db.ref(`questProgress/${uid}/spend100k`).set(100000);
+renderQuests(uid);
+}
+});
+}
 </script>
 </body>
 </html>
