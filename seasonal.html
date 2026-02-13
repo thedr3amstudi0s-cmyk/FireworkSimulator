@@ -2,266 +2,232 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Seasonal Leaderboard & Quests</title>
+<title>Leaderboard, Quests & Season Pass</title>
 <style>
-  /* --- Reset & Body --- */
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    margin: 0;
-    background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
-    color: #fff;
-    display: flex;
-    justify-content: center; /* center main container */
-    padding: 20px;
-  }
+*{box-sizing:border-box;}
+body{
+  font-family:'Segoe UI',Arial,sans-serif;
+  margin:0;
+  background: linear-gradient(180deg,#0a0a0a 0%,#111 100%);
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  padding:20px;
+}
+#mainContainer{display:flex;width:100%;max-width:1200px;gap:20px;}
+#leaderboardContainer{
+  width:320px;
+  background:#1a1a1a;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:3px 0 15px rgba(0,255,255,0.2);
+  display:flex;
+  flex-direction:column;
+  height:80vh;
+  overflow-y:auto;
+}
+#leaderboardContainer h2{text-align:center;color:#0ff;margin-bottom:15px;font-size:24px;letter-spacing:1px;text-shadow:0 0 8px #0ff;}
+table{width:100%;border-collapse:collapse;}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #333;font-size:14px;}
+th{background:#222;font-size:15px;}
+tr:nth-child(even){background:#1c1c1c;}
+.tag{font-weight:bold;}
+.tag.owner{color:orange;}
+.tag.vip{color:gold;}
+.tag.streamer{color:#981ab6;}
+.tag.fart{color:#FF4DEE;}
+.tag.donator{color:#0BBF06;}
+.tag.youtuber{color:#F00000;}
+.tag.regular{color:#0ff;}
+#loading{text-align:center;margin-top:20px;color:#0ff;}
 
-  /* --- Main container --- */
-  #mainContainer {
-    display: flex;
-    width: 100%;
-    max-width: 1200px;
-    gap: 20px;
-  }
+/* Quests */
+#questsContainer{
+  flex:1;
+  background:#1a1a1a;
+  border-radius:12px;
+  padding:25px;
+  box-shadow:0 0 25px rgba(0,255,255,0.2);
+  max-height:80vh;
+  overflow-y:auto;
+}
+#questsContainer h2{text-align:center;font-size:24px;color:#0ff;margin-bottom:20px;text-shadow:0 0 8px #0ff;}
+#questsList .quest{
+  background:#222;
+  padding:15px;
+  margin-bottom:15px;
+  border-radius:8px;
+  box-shadow:0 0 8px rgba(0,255,255,0.2);
+  transition:transform 0.2s;
+}
+#questsList .quest:hover{transform:scale(1.02);}
+#questsList .quest button{
+  margin-top:8px;background:#0ff;color:#111;border:none;padding:7px 14px;font-weight:bold;border-radius:5px;cursor:pointer;transition:background 0.2s;
+}
+#questsList .quest button:hover{background:#0aa;}
 
-  /* --- Leaderboard Sidebar --- */
-  #leaderboardContainer {
-    width: 320px;
-    background: #1a1a1a;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 3px 0 15px rgba(0,255,255,0.2);
-    display: flex;
-    flex-direction: column;
-    height: 80vh;
-    overflow-y: auto;
-  }
-  #leaderboardContainer h2 {
-    text-align: center;
-    color: #0ff;
-    margin-bottom: 15px;
-    font-size: 24px;
-    letter-spacing: 1px;
-    text-shadow: 0 0 8px #0ff;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  th, td {
-    padding: 10px 8px;
-    text-align: left;
-    border-bottom: 1px solid #333;
-    font-size: 14px;
-  }
-  th { background: #222; font-size: 15px; }
-  tr:nth-child(even) { background: #1c1c1c; }
-  .tag { font-weight: bold; }
-  .tag.owner { color: orange; }
-  .tag.vip { color: gold; }
-  .tag.streamer { color: #981ab6; }
-  .tag.fart { color: #FF4DEE; }
-  .tag.donator { color: #0BBF06; }
-  .tag.youtuber { color: #F00000; }
-  .tag.regular { color: #0ff; }
-  #loading { text-align: center; margin-top: 20px; color: #0ff; }
+/* Season Pass */
+#seasonPassContainer{
+  margin-top:20px;background:#1a1a1a;border-radius:12px;padding:20px;box-shadow:0 0 20px rgba(0,255,255,0.2);
+}
+#seasonPassContainer h2{text-align:center;color:#0ff;margin-bottom:15px;text-shadow:0 0 8px #0ff;}
+#passTiers{display:flex;flex-wrap:wrap;gap:10px;}
+.passTier{background:#222;padding:10px;border-radius:8px;flex:1 0 80px;text-align:center;box-shadow:0 0 6px rgba(0,255,255,0.2);}
+.passTier.unlocked{background:#0ff;color:#111;font-weight:bold;}
 
-  /* --- Quests Panel --- */
-  #questsContainer {
-    flex: 1;
-    background: #1a1a1a;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 0 25px rgba(0,255,255,0.2);
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-  #questsContainer h2 {
-    text-align: center;
-    font-size: 24px;
-    color: #0ff;
-    margin-bottom: 20px;
-    text-shadow: 0 0 8px #0ff;
-  }
-  #questsList .quest {
-    background: #222;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    box-shadow: 0 0 8px rgba(0,255,255,0.2);
-    transition: transform 0.2s;
-  }
-  #questsList .quest:hover { transform: scale(1.02); }
-  #questsList .quest button {
-    margin-top: 8px;
-    background: #0ff;
-    color: #111;
-    border: none;
-    padding: 7px 14px;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  #questsList .quest button:hover { background: #0aa; }
-
-  /* --- Responsive --- */
-  @media(max-width: 950px) {
-    #mainContainer { flex-direction: column; align-items: center; }
-    #leaderboardContainer, #questsContainer { width: 100%; max-width: 400px; height: auto; }
-  }
+@media(max-width:950px){
+  #mainContainer{flex-direction:column;align-items:center;}
+  #leaderboardContainer,#questsContainer{width:100%;max-width:400px;height:auto;}
+}
 </style>
 </head>
 <body>
-
 <div id="mainContainer">
 
-  <!-- Leaderboard -->
-  <div id="leaderboardContainer">
-    <h2>Leaderboard</h2>
-    <div id="loading">Loading leaderboard...</div>
-    <table id="leaderboard" style="display:none;">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Tag</th>
-          <th>Username</th>
-          <th>Score</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboardBody"></tbody>
-    </table>
-  </div>
-
-  <!-- Quests -->
-  <div id="questsContainer">
-    <h2>Quests</h2>
-    <div id="questsList"></div>
-  </div>
-
+<!-- Leaderboard -->
+<div id="leaderboardContainer">
+<h2>Leaderboard</h2>
+<div id="loading">Loading leaderboard...</div>
+<table id="leaderboard" style="display:none;">
+<thead>
+<tr><th>#</th><th>Tag</th><th>Username</th><th>Score</th></tr>
+</thead>
+<tbody id="leaderboardBody"></tbody>
+</table>
 </div>
 
-<!-- Firebase Scripts -->
+<!-- Quests + Season Pass -->
+<div id="questsContainer">
+<h2>Quests</h2>
+<div id="questsList"></div>
+<div id="seasonPassContainer">
+<h2>Season Pass</h2>
+<div id="passTiers"></div>
+</div>
+</div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// --- Firebase Config ---
-const firebaseConfig = {
-  apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
-  authDomain: "fireworkleaderboard.firebaseapp.com",
-  databaseURL: "https://fireworkleaderboard-default-rtdb.firebaseio.com",
-  projectId: "fireworkleaderboard",
-  storageBucket: "fireworkleaderboard.firebasestorage.app",
-  messagingSenderId: "243474267364",
-  appId: "1:243474267364:web:8f0f2bedbbbca3c05f40f1",
-  measurementId: "G-H07BZY385S"
-};
+const firebaseConfig={apiKey:"AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",authDomain:"fireworkleaderboard.firebaseapp.com",databaseURL:"https://fireworkleaderboard-default-rtdb.firebaseio.com",projectId:"fireworkleaderboard",storageBucket:"fireworkleaderboard.firebasestorage.app",messagingSenderId:"243474267364",appId:"1:243474267364:web:8f0f2bedbbbca3c05f40f1",measurementId:"G-H07BZY385S"};
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
 
-// --- Leaderboard & Quests ---
-const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
-const TAGS = { owner:{name:"Owner",class:"owner"}, vip:{name:"VIP",class:"vip"}, streamer:{name:"STREAMER",class:"streamer"}, fart:{name:"Fart",class:"fart"}, donator:{name:"DONATOR",class:"donator"}, youtuber:{name:"YOUTUBER",class:"youtuber"}, regular:{name:"Regular",class:"regular"} };
+// Leaderboard
+const OWNER_UIDS={"FaZgGtIHzVcnSS6c8JAoir9RG8J2":true};
+const TAGS={owner:{name:"Owner",class:"owner"},vip:{name:"VIP",class:"vip"},streamer:{name:"STREAMER",class:"streamer"},fart:{name:"Fart",class:"fart"},donator:{name:"DONATOR",class:"donator"},youtuber:{name:"YOUTUBER",class:"youtuber"},regular:{name:"Regular",class:"regular"}};
+let scores={},usernames={},users={},admins={},activeTags={},questProgress={};
+let playerPoints = 0; // season points
 
-let scores = {}, usernames = {}, users = {}, admins = {}, activeTags = {}, questProgress = {};
-
-// --- Sample quests ---
+// Sample Quests
 const quests=[
-  {id:"launch100", description:"Launch 100 fireworks", goal:100, reward:50},
-  {id:"reachVIP", description:"Get VIP tag", goal:1, reward:100},
-  {id:"youtuberScore", description:"Reach 1,000 score as YOUTUBER", goal:1000, reward:75},
+{id:"spend100k",description:"Spend 100k to get 200 points",goal:100000,reward:200},
+{id:"earn1M",description:"Earn 1,000,000 to get 500 points",goal:1000000,reward:500}
 ];
 
-// --- Format Scores ---
-function formatScore(n){
-  if(n>=1_000_000_000) return (n/1_000_000_000).toFixed(1).replace(/\.0$/,'')+'B';
-  if(n>=1_000_000) return (n/1_000_000).toFixed(1).replace(/\.0$/,'')+'M';
-  if(n>=1_000) return (n/1_000).toFixed(1).replace(/\.0$/,'')+'k';
-  return n;
-}
+// Format scores
+function formatScore(n){if(n>=1_000_000_000)return(n/1_000_000_000).toFixed(1).replace(/\.0$/,'')+'B';if(n>=1_000_000)return(n/1_000_000).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1_000)return(n/1_000).toFixed(1).replace(/\.0$/,'')+'k';return n;}
 
-// --- Build Leaderboard ---
+// Leaderboard builder
 function buildLeaderboard(){
-  const bodyEl=document.getElementById('leaderboardBody'); bodyEl.innerHTML='';
-  const uids=new Set([...Object.keys(scores||{}),...Object.keys(usernames||{}),...Object.keys(users||{})]);
-  const data=[];
-  uids.forEach(uid=>{
-    const score=scores[uid]?.score||0;
-    const uname=usernames[uid]||users[uid]?.username||'Unknown';
-    let tag='regular';
-    if(admins[uid]||OWNER_UIDS[uid]) tag='owner';
-    else if(activeTags[uid]) tag=activeTags[uid];
-    data.push({uid, score, uname, tag});
-  });
-  data.sort((a,b)=>b.score-a.score);
-  data.forEach((u,i)=>{
-    const tr=document.createElement('tr');
-    tr.dataset.uid=u.uid;
-    tr.innerHTML=`<td>${i+1}</td><td class="tag ${TAGS[u.tag]?.class||'regular'}">${TAGS[u.tag]?.name||'Regular'}</td><td>${u.uname}</td><td>${formatScore(u.score)}</td>`;
-    bodyEl.appendChild(tr);
-  });
-  document.getElementById('loading').style.display='none';
-  document.getElementById('leaderboard').style.display='table';
+const bodyEl=document.getElementById('leaderboardBody'); bodyEl.innerHTML='';
+const uids=new Set([...Object.keys(scores||{}),...Object.keys(usernames||{}),...Object.keys(users||{})]);
+const data=[];
+uids.forEach(uid=>{
+const score=scores[uid]?.score||0;
+const uname=usernames[uid]||users[uid]?.username||'Unknown';
+let tag='regular';
+if(admins[uid]||OWNER_UIDS[uid]) tag='owner';
+else if(activeTags[uid]) tag=activeTags[uid];
+data.push({uid,score,uname,tag});
+});
+data.sort((a,b)=>b.score-a.score);
+data.forEach((u,i)=>{
+const tr=document.createElement('tr');
+tr.dataset.uid=u.uid;
+tr.innerHTML=`<td>${i+1}</td><td class="tag ${TAGS[u.tag]?.class||'regular'}">${TAGS[u.tag]?.name||'Regular'}</td><td>${u.uname}</td><td>${formatScore(u.score)}</td>`;
+bodyEl.appendChild(tr);
+});
+document.getElementById('loading').style.display='none';
+document.getElementById('leaderboard').style.display='table';
 }
 
-// --- Render Quests ---
+// Quests
 function renderQuests(uid){
-  const container = document.getElementById('questsList');
-  container.innerHTML='';
-  quests.forEach(q=>{
-    const progress = (questProgress[uid]?.[q.id] || 0);
-    const completed = progress >= q.goal;
-    const user = firebase.auth().currentUser;
-    const showButton = user ? !completed : false;
-    const div = document.createElement('div');
-    div.className = 'quest';
-    div.innerHTML=`<strong>${q.description}</strong><br>Progress: ${progress}/${q.goal} ${completed?'✅ Completed':''} ${showButton?`<button onclick="completeQuest('${uid}','${q.id}')">Complete Now</button>`:''}`;
-    container.appendChild(div);
-  });
-}
-
-// --- Complete Quest ---
-function completeQuest(uid, questId){
-  const quest = quests.find(q=>q.id===questId); if(!quest) return;
-  db.ref(`questProgress/${uid}/${questId}`).set(quest.goal);
-  const currentScore = scores[uid]?.score||0;
-  db.ref(`scores/${uid}/score`).set(currentScore + quest.reward);
-}
-
-// --- Load Initial Data ---
-Promise.all([
-  db.ref('scores').once('value'),
-  db.ref('usernames').once('value'),
-  db.ref('users').once('value'),
-  db.ref('admins').once('value'),
-  db.ref('activeTag').once('value'),
-  db.ref('questProgress').once('value')
-]).then(([sSnap,uSnap,usSnap,aSnap,tSnap,qSnap])=>{
-  scores = sSnap.val()||{};
-  usernames = uSnap.val()||{};
-  users = usSnap.val()||{};
-  admins = aSnap.val()||{};
-  activeTags = tSnap.val()||{};
-  questProgress = qSnap.val()||{};
-  buildLeaderboard();
-  // always render quests for guest
-  firebase.auth().onAuthStateChanged(user=>{
-    renderQuests(user ? user.uid : 'guest');
-  });
+const container=document.getElementById('questsList');
+container.innerHTML='';
+quests.forEach(q=>{
+const progress=questProgress[uid]?.[q.id]||0;
+const completed=progress>=q.goal;
+const user=firebase.auth().currentUser;
+const showButton=user?!completed:false;
+const div=document.createElement('div');
+div.className='quest';
+div.innerHTML=`<strong>${q.description}</strong><br>Progress: ${progress}/${q.goal} ${completed?'✅ Completed':''} ${showButton?`<button onclick="completeQuest('${uid}','${q.id}')">Complete Now</button>`:''}`;
+container.appendChild(div);
+});
+renderSeasonPass();
 });
 
-// --- Real-time updates ---
+// Complete Quest & add points
+function completeQuest(uid,questId){
+const quest=quests.find(q=>q.id===questId); if(!quest) return;
+db.ref(`questProgress/${uid}/${questId}`).set(quest.goal);
+playerPoints += quest.reward; // add points
+renderSeasonPass();
+}
+
+// Season Pass rendering
+function renderSeasonPass(){
+const container=document.getElementById('passTiers');
+container.innerHTML='';
+const totalTiers=10;
+for(let i=1;i<=totalTiers;i++){
+const div=document.createElement('div');
+div.className='passTier';
+div.textContent=`Tier ${i}\n100 pts`;
+if(playerPoints>=i*100) div.classList.add('unlocked');
+container.appendChild(div);
+}
+}
+
+// Initial Firebase load
+Promise.all([
+db.ref('scores').once('value'),
+db.ref('usernames').once('value'),
+db.ref('users').once('value'),
+db.ref('admins').once('value'),
+db.ref('activeTag').once('value'),
+db.ref('questProgress').once('value')
+]).then(([sSnap,uSnap,usSnap,aSnap,tSnap,qSnap])=>{
+scores=sSnap.val()||{};
+usernames=uSnap.val()||{};
+users=usSnap.val()||{};
+admins=aSnap.val()||{};
+activeTags=tSnap.val()||{};
+questProgress=qSnap.val()||{};
+buildLeaderboard();
+firebase.auth().onAuthStateChanged(user=>{
+renderQuests(user?user.uid:'guest');
+});
+});
+
+// Realtime updates
 ['scores','usernames','users','admins','activeTag','questProgress'].forEach(path=>{
-  db.ref(path).on('value',snap=>{
-    if(path==='scores') scores=snap.val()||{};
-    if(path==='usernames') usernames=snap.val()||{};
-    if(path==='users') users=snap.val()||{};
-    if(path==='admins') admins=snap.val()||{};
-    if(path==='activeTag') activeTags=snap.val()||{};
-    if(path==='questProgress') questProgress=snap.val()||{};
-    buildLeaderboard();
-    const user = firebase.auth().currentUser;
-    renderQuests(user ? user.uid : 'guest');
-  });
+db.ref(path).on('value',snap=>{
+if(path==='scores') scores=snap.val()||{};
+if(path==='usernames') usernames=snap.val()||{};
+if(path==='users') users=snap.val()||{};
+if(path==='admins') admins=snap.val()||{};
+if(path==='activeTag') activeTags=snap.val()||{};
+if(path==='questProgress') questProgress=snap.val()||{};
+buildLeaderboard();
+const user=firebase.auth().currentUser;
+renderQuests(user?user.uid:'guest');
+});
 });
 </script>
 </body>
