@@ -12,7 +12,16 @@
     background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
     color: #fff;
     display: flex;
-    min-height: 100vh;
+    justify-content: center; /* center everything horizontally */
+    padding: 20px;
+  }
+
+  /* --- Main container --- */
+  #mainContainer {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    gap: 20px;
   }
 
   /* --- Leaderboard Sidebar --- */
@@ -20,10 +29,12 @@
     width: 320px;
     background: #1a1a1a;
     padding: 20px;
-    overflow-y: auto;
-    box-shadow: 3px 0 15px rgba(0,0,0,0.7);
+    border-radius: 12px;
+    box-shadow: 3px 0 15px rgba(0,255,255,0.2);
     display: flex;
     flex-direction: column;
+    height: 80vh;
+    overflow-y: auto;
   }
   #leaderboardContainer h2 {
     text-align: center;
@@ -31,7 +42,7 @@
     margin-bottom: 15px;
     font-size: 24px;
     letter-spacing: 1px;
-    text-shadow: 0 0 5px #0ff;
+    text-shadow: 0 0 8px #0ff;
   }
   table { width: 100%; border-collapse: collapse; }
   th, td {
@@ -52,85 +63,81 @@
   .tag.regular { color: #0ff; }
   #loading { text-align: center; margin-top: 20px; color: #0ff; }
 
-  /* --- Main Content (Quests) --- */
-  #mainContent {
-    flex: 1;
-    padding: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-  }
+  /* --- Quests Panel --- */
   #questsContainer {
-    width: 100%;
-    max-width: 400px;
+    flex: 1;
     background: #1a1a1a;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 0 25px rgba(0,255,255,0.2);
+    max-height: 80vh;
+    overflow-y: auto;
   }
   #questsContainer h2 {
     text-align: center;
     font-size: 24px;
     color: #0ff;
-    margin-bottom: 15px;
-    text-shadow: 0 0 5px #0ff;
+    margin-bottom: 20px;
+    text-shadow: 0 0 8px #0ff;
   }
-  #questsList { max-height: 80vh; overflow-y: auto; }
-  .quest {
+  #questsList .quest {
     background: #222;
     padding: 15px;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     border-radius: 8px;
     box-shadow: 0 0 8px rgba(0,255,255,0.2);
     transition: transform 0.2s;
   }
-  .quest:hover { transform: scale(1.02); }
-  .quest button {
+  #questsList .quest:hover { transform: scale(1.02); }
+  #questsList .quest button {
     margin-top: 8px;
     background: #0ff;
     color: #111;
     border: none;
-    padding: 6px 12px;
+    padding: 7px 14px;
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
     transition: background 0.2s;
   }
-  .quest button:hover { background: #0aa; }
+  #questsList .quest button:hover { background: #0aa; }
 
   /* --- Responsive --- */
-  @media(max-width: 850px) {
-    body { flex-direction: column; }
-    #leaderboardContainer { width: 100%; height: auto; box-shadow: none; }
-    #mainContent { padding: 20px; }
+  @media(max-width: 950px) {
+    #mainContainer { flex-direction: column; align-items: center; }
+    #leaderboardContainer, #questsContainer { width: 100%; max-width: 400px; height: auto; }
   }
 </style>
 </head>
 <body>
 
-<!-- Leaderboard Sidebar -->
-<div id="leaderboardContainer">
-  <h2>Leaderboard</h2>
-  <div id="loading">Loading leaderboard...</div>
-  <table id="leaderboard" style="display:none;">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Tag</th>
-        <th>Username</th>
-        <th>Score</th>
-      </tr>
-    </thead>
-    <tbody id="leaderboardBody"></tbody>
-  </table>
-</div>
+<div id="mainContainer">
 
-<!-- Quests Main Content -->
-<div id="mainContent">
+  <!-- Leaderboard -->
+  <div id="leaderboardContainer">
+    <h2>Leaderboard</h2>
+    <div id="loading">Loading leaderboard...</div>
+    <table id="leaderboard" style="display:none;">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Tag</th>
+          <th>Username</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboardBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Quests -->
   <div id="questsContainer">
     <h2>Quests</h2>
-    <div id="questsList"></div>
+    <div id="questsList">
+      <!-- Quests appear here -->
+    </div>
   </div>
+
 </div>
 
 <!-- Firebase Scripts -->
@@ -153,125 +160,61 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- Leaderboard Variables ---
+// --- Leaderboard & Quests ---
 const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
-const TAGS = {
-  owner: { name: "Owner", class: "owner" },
-  vip: { name: "VIP", class: "vip" },
-  streamer: { name: "STREAMER", class: "streamer" },
-  fart: { name: "Fart", class: "fart" },
-  donator: { name: "DONATOR", class: "donator" },
-  youtuber: { name: "YOUTUBER", class: "youtuber" },
-  regular: { name: "Regular", class: "regular" },
-};
-
-const body = document.getElementById('leaderboardBody');
-const loading = document.getElementById('loading');
+const TAGS = { owner:{name:"Owner",class:"owner"}, vip:{name:"VIP",class:"vip"}, streamer:{name:"STREAMER",class:"streamer"}, fart:{name:"Fart",class:"fart"}, donator:{name:"DONATOR",class:"donator"}, youtuber:{name:"YOUTUBER",class:"youtuber"}, regular:{name:"Regular",class:"regular"} };
 
 let scores = {}, usernames = {}, users = {}, admins = {}, activeTags = {}, questProgress = {};
 
-// --- Format Scores ---
-function formatScore(num) {
-  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
-  return num;
-}
+function formatScore(n){if(n>=1_000_000_000)return(n/1_000_000_000).toFixed(1).replace(/\.0$/,'')+'B';if(n>=1_000_000)return(n/1_000_000).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1_000)return(n/1_000).toFixed(1).replace(/\.0$/,'')+'k';return n;}
 
-// --- Build Leaderboard ---
-function buildLeaderboard() {
-  body.innerHTML = '';
-  const uids = new Set([...Object.keys(scores||{}), ...Object.keys(usernames||{}), ...Object.keys(users||{})]);
-  const data = [];
-  uids.forEach(uid => {
-    const score = scores[uid]?.score || 0;
-    const uname = usernames[uid] || users[uid]?.username || 'Unknown';
-    let tag = 'regular';
-    if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
-    else if(activeTags[uid]) tag = activeTags[uid];
-    data.push({ uid, score, uname, tag });
-  });
-  data.sort((a,b) => b.score - a.score);
-  data.forEach((u,i) => {
-    const tr = document.createElement('tr');
-    tr.dataset.uid = u.uid;
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
-      <td>${u.uname}</td>
-      <td>${formatScore(u.score)}</td>
-    `;
-    body.appendChild(tr);
-  });
-  loading.style.display = 'none';
-  document.getElementById('leaderboard').style.display = 'table';
+function buildLeaderboard(){
+  const bodyEl=document.getElementById('leaderboardBody'); bodyEl.innerHTML='';
+  const uids=new Set([...Object.keys(scores||{}),...Object.keys(usernames||{}),...Object.keys(users||{})]);
+  const data=[]; uids.forEach(uid=>{ const score=scores[uid]?.score||0; const uname=usernames[uid]||users[uid]?.username||'Unknown'; let tag='regular'; if(admins[uid]||OWNER_UIDS[uid])tag='owner'; else if(activeTags[uid])tag=activeTags[uid]; data.push({uid,score,uname,tag}); });
+  data.sort((a,b)=>b.score-a.score);
+  data.forEach((u,i)=>{ const tr=document.createElement('tr'); tr.dataset.uid=u.uid; tr.innerHTML=`<td>${i+1}</td><td class="tag ${TAGS[u.tag]?.class||'regular'}">${TAGS[u.tag]?.name||'Regular'}</td><td>${u.uname}</td><td>${formatScore(u.score)}</td>`; bodyEl.appendChild(tr); });
+  document.getElementById('loading').style.display='none';
+  document.getElementById('leaderboard').style.display='table';
 }
 
 // --- Active Quests ---
-const quests = [
-  { id: "launch100", description: "Launch 100 fireworks", goal: 100, reward: 50 },
-  { id: "reachVIP", description: "Get VIP tag", goal: 1, reward: 100 },
-  { id: "youtuberScore", description: "Reach 1,000 score as YOUTUBER", goal: 1000, reward: 75 },
-];
+const quests=[{id:"launch100",description:"Launch 100 fireworks",goal:100,reward:50},{id:"reachVIP",description:"Get VIP tag",goal:1,reward:100},{id:"youtuberScore",description:"Reach 1,000 score as YOUTUBER",goal:1000,reward:75}];
 
-function renderQuests(uid) {
-  const container = document.getElementById('questsList');
-  container.innerHTML = '';
-  quests.forEach(q => {
-    const progress = (questProgress[uid]?.[q.id] || 0);
-    const completed = progress >= q.goal;
-    const div = document.createElement('div');
-    div.className = 'quest';
-    div.innerHTML = `
-      <strong>${q.description}</strong><br>
-      Progress: ${progress}/${q.goal} ${completed ? '✅ Completed' : ''}
-      ${!completed ? `<button onclick="completeQuest('${uid}','${q.id}')">Complete Now</button>` : ''}
-    `;
+function renderQuests(uid){
+  const container=document.getElementById('questsList'); container.innerHTML='';
+  quests.forEach(q=>{
+    const progress=(questProgress[uid]?.[q.id]||0); const completed=progress>=q.goal;
+    const div=document.createElement('div'); div.className='quest';
+    div.innerHTML=`<strong>${q.description}</strong><br>Progress: ${progress}/${q.goal} ${completed?'✅ Completed':''} ${!completed?`<button onclick="completeQuest('${uid}','${q.id}')">Complete Now</button>`:''}`;
     container.appendChild(div);
   });
 }
 
-function completeQuest(uid, questId) {
-  const quest = quests.find(q => q.id === questId);
-  if(!quest) return;
+function completeQuest(uid,questId){
+  const quest=quests.find(q=>q.id===questId); if(!quest)return;
   db.ref(`questProgress/${uid}/${questId}`).set(quest.goal);
-  const currentScore = scores[uid]?.score || 0;
-  db.ref(`scores/${uid}/score`).set(currentScore + quest.reward);
+  const currentScore=scores[uid]?.score||0; db.ref(`scores/${uid}/score`).set(currentScore+quest.reward);
 }
 
-// --- Load Initial Data ---
-Promise.all([
-  db.ref('scores').once('value'),
-  db.ref('usernames').once('value'),
-  db.ref('users').once('value'),
-  db.ref('admins').once('value'),
-  db.ref('activeTag').once('value'),
-  db.ref('questProgress').once('value')
-]).then(([sSnap,uSnap,usSnap,aSnap,tSnap,qSnap])=>{
-  scores = sSnap.val()||{};
-  usernames = uSnap.val()||{};
-  users = usSnap.val()||{};
-  admins = aSnap.val()||{};
-  activeTags = tSnap.val()||{};
-  questProgress = qSnap.val()||{};
+// --- Load Firebase Data ---
+Promise.all([db.ref('scores').once('value'),db.ref('usernames').once('value'),db.ref('users').once('value'),db.ref('admins').once('value'),db.ref('activeTag').once('value'),db.ref('questProgress').once('value')]).then(([sSnap,uSnap,usSnap,aSnap,tSnap,qSnap])=>{
+  scores=sSnap.val()||{}; usernames=uSnap.val()||{}; users=usSnap.val()||{}; admins=aSnap.val()||{}; activeTags=tSnap.val()||{}; questProgress=qSnap.val()||{};
   buildLeaderboard();
-  firebase.auth().onAuthStateChanged(user=>{
-    if(user) renderQuests(user.uid);
-  });
+  firebase.auth().onAuthStateChanged(user=>{if(user) renderQuests(user.uid);});
 });
 
-// --- Listen for Realtime Updates ---
+// --- Real-time Updates ---
 ['scores','usernames','users','admins','activeTag','questProgress'].forEach(path=>{
-  db.ref(path).on('value', snap=>{
-    if(path==='scores') scores = snap.val()||{};
-    if(path==='usernames') usernames = snap.val()||{};
-    if(path==='users') users = snap.val()||{};
-    if(path==='admins') admins = snap.val()||{};
-    if(path==='activeTag') activeTags = snap.val()||{};
-    if(path==='questProgress') questProgress = snap.val()||{};
+  db.ref(path).on('value',snap=>{
+    if(path==='scores')scores=snap.val()||{};
+    if(path==='usernames')usernames=snap.val()||{};
+    if(path==='users')users=snap.val()||{};
+    if(path==='admins')admins=snap.val()||{};
+    if(path==='activeTag')activeTags=snap.val()||{};
+    if(path==='questProgress')questProgress=snap.val()||{};
     buildLeaderboard();
-    const user = firebase.auth().currentUser;
-    if(user) renderQuests(user.uid);
+    const user=firebase.auth().currentUser; if(user) renderQuests(user.uid);
   });
 });
 </script>
