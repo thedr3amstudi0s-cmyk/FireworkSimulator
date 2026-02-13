@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Leaderboard, Quests & Season Pass</title>
+<title>Leaderboard, Quests & Season Pass (Debug)</title>
 <style>
 *{box-sizing:border-box;}
 body{
@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function buildLeaderboard(){
+    console.log("Building leaderboard...");
     const bodyEl=document.getElementById('leaderboardBody');
     bodyEl.innerHTML='';
     const uids=new Set([...Object.keys(scores||{}),...Object.keys(usernames||{}),...Object.keys(users||{})]);
@@ -163,9 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('loading').style.display='none';
     document.getElementById('leaderboard').style.display='table';
+    console.log("Leaderboard rendered");
   }
 
   function renderQuests(uid){
+    console.log("Rendering quests for UID:", uid);
     const container=document.getElementById('questsList');
     container.innerHTML='';
     quests.forEach(q=>{
@@ -180,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderSeasonPass(){
+    console.log("Rendering season pass. Player points:", playerPoints);
     const container=document.getElementById('passTiers');
     container.innerHTML='';
     const totalTiers=10;
@@ -193,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updatePlayerPoints(uid){
+    console.log("Updating player points for UID:", uid);
     playerPoints = 0;
     if(questProgress[uid]?.spend100k) playerPoints += 200;
     if(questProgress[uid]?.earn1M) playerPoints += 500;
@@ -200,36 +205,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   firebase.auth().onAuthStateChanged(user=>{
-    if(!user) return;
+    if(!user){
+      console.log("No user logged in");
+      return;
+    }
+
     const uid = user.uid;
+    console.log("User logged in UID:", uid);
 
     db.ref(`progress/${uid}`).once('value').then(snap=>{
       questProgress[uid] = snap.val() || {};
+      console.log("Initial progress loaded:", questProgress[uid]);
       updatePlayerPoints(uid);
       renderQuests(uid);
 
-      // Listen for money updates for this user only
       db.ref(`progress/${uid}/money`).on('value', snap => {
         const money = snap.val() || 0;
+        console.log("Money changed:", money);
 
         if(money >= 100000 && !(questProgress[uid]?.['spend100k'])){
+          console.log("Triggering spend100k quest");
           playerPoints += 200;
           questProgress[uid]['spend100k'] = 100000;
           renderQuests(uid);
           renderSeasonPass();
-          db.ref(`progress/${uid}/spend100k`).set(100000); // Allowed by rules
+          db.ref(`progress/${uid}/spend100k`).set(100000)
+            .then(()=> console.log("spend100k written to Firebase"))
+            .catch(err => console.error("Error writing spend100k:", err));
         }
 
         if(money >= 1000000 && !(questProgress[uid]?.['earn1M'])){
+          console.log("Triggering earn1M quest");
           playerPoints += 500;
           questProgress[uid]['earn1M'] = 1000000;
           renderQuests(uid);
           renderSeasonPass();
-          db.ref(`progress/${uid}/earn1M`).set(1000000); // Allowed by rules
+          db.ref(`progress/${uid}/earn1M`).set(1000000)
+            .then(()=> console.log("earn1M written to Firebase"))
+            .catch(err => console.error("Error writing earn1M:", err));
         }
       });
-
-    });
+    }).catch(err => console.error("Error loading progress:", err));
   });
 
   // Load leaderboard data
@@ -247,11 +263,13 @@ document.addEventListener('DOMContentLoaded', () => {
     admins=aSnap.val()||{};
     activeTags=tSnap.val()||{};
     questProgress=pSnap.val()||{};
+    console.log("Leaderboard & progress loaded:", {scores,usernames,users,admins,activeTags,questProgress});
     buildLeaderboard();
-  });
+  }).catch(err=>console.error("Error loading leaderboard data:", err));
 
   ['scores','usernames','users','admins','activeTag','progress'].forEach(path=>{
     db.ref(path).on('value',snap=>{
+      console.log(`Realtime update for ${path}`, snap.val());
       if(path==='scores') scores=snap.val()||{};
       if(path==='usernames') usernames=snap.val()||{};
       if(path==='users') users=snap.val()||{};
