@@ -255,7 +255,9 @@ function isValentinesDay() {
 }
 
 const VALENTINES_ACTIVE = isValentinesDay();
-  
+
+loadSettings();
+
 // Open/Close Settings
 openSettingsBtn.addEventListener('click', () => { settingsPanel.style.display = 'block'; });
 closeSettingsBtn.addEventListener('click', () => { settingsPanel.style.display = 'none'; });
@@ -270,11 +272,13 @@ musicVolume.addEventListener('input', () => {
   bgMusic.volume = vol;
   musicVolDisplay.textContent = musicVolume.value + '%';
   updateAudioState(); // <-- check Spotify-friendly state
+  saveSettings();
 });
 
 musicVolume.addEventListener('input', () => {
   if (musicVolume.value == 0 && gameVolume.value == 0) {
     fullyReleaseAudio(); 
+    saveSettings();
     return;
   }
 
@@ -289,6 +293,7 @@ musicVolume.addEventListener('input', () => {
 gameVolume.addEventListener('input', () => {
   if (musicVolume.value == 0 && gameVolume.value == 0) {
     fullyReleaseAudio();
+    saveSettings();
     return;
   }
 
@@ -303,7 +308,8 @@ gameVolume.addEventListener('input', () => {
   const vol = gameVolume.value / 100;
   fireworkSound.volume = vol;
   gameVolDisplay.textContent = gameVolume.value + '%';
-  updateAudioState(); // <-- check Spotify-friendly state
+  updateAudioState();
+  saveSettings();
 });
 
 function fullyReleaseAudio() {
@@ -1169,9 +1175,35 @@ async function loadProgressOnline(uid){
   }
 }
 
+function loadSettings() {
+  const saved = localStorage.getItem('fireworkSettings');
+  if (!saved) return;
+  const settings = JSON.parse(saved);
+
+  musicVolume.value = settings.musicVolume ?? 35;
+  gameVolume.value = settings.gameVolume ?? 100;
+
+  // Apply volumes immediately
+  bgMusic.volume = musicVolume.value / 100;
+  fireworkSound.volume = gameVolume.value / 100;
+  musicVolDisplay.textContent = musicVolume.value + '%';
+  gameVolDisplay.textContent = gameVolume.value + '%';
+}
+
+  
+function saveSettings() {
+  const settings = {
+    musicVolume: musicVolume.value,
+    gameVolume: gameVolume.value
+  };
+  localStorage.setItem('fireworkSettings', JSON.stringify(settings));
+}
+
+  
 </script>
 </body>
 </html>
+
 
 
 
