@@ -176,15 +176,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderQuests(uid){
     console.log("Rendering quests for UID:", uid);
-    const container=document.getElementById('questsList');
-    container.innerHTML='';
-    quests.forEach(q=>{
-      const prog=questProgress[uid]?.[q.id]||0;
-      const completed=prog>=q.goal;
-      const div=document.createElement('div');
-      div.className='quest';
-      div.innerHTML=`<strong>${q.description}</strong><br>Progress: ${prog}/${q.goal} ${completed?'✅ Completed':''}`;
-      container.appendChild(div);
+    const container = document.getElementById('questsList');
+    container.innerHTML = '';
+    quests.forEach(q => {
+        const money = progress[uid]?.money || 0;
+        let prog = Math.min(money, q.goal); // live progress
+        const completed = prog >= q.goal;
+        const div = document.createElement('div');
+        div.className = 'quest';
+        div.innerHTML = `<strong>${q.description}</strong><br>Progress: ${formatScore(prog)}/${formatScore(q.goal)} ${completed ? '✅ Completed' : ''}`;
+        container.appendChild(div);
     });
     renderSeasonPass();
   }
@@ -206,23 +207,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function updatePlayerPoints(uid){
     console.log("Updating player points for UID:", uid);
     playerPoints = 0;
-    if(questProgress[uid]?.spend100k) playerPoints += 200;
-    if(questProgress[uid]?.earn1M) playerPoints += 500;
+    if(progress[uid]?.spend100k) playerPoints += 200;
+    if(progress[uid]?.earn1M) playerPoints += 500;
     renderSeasonPass();
   }
 
   firebase.auth().onAuthStateChanged(user=>{
-    if(!user){
-      console.log("No user logged in");
-      return;
-    }
-
+    if(!user){ console.log("No user logged in"); return; }
     const uid = user.uid;
     console.log("User logged in UID:", uid);
 
     db.ref(`progress/${uid}`).once('value').then(snap=>{
-      questProgress[uid] = snap.val() || {};
-      console.log("Initial progress loaded:", questProgress[uid]);
+      progress[uid] = snap.val() || {};
+      console.log("Initial progress loaded:", progress[uid]);
       updatePlayerPoints(uid);
       renderQuests(uid);
 
@@ -232,28 +229,20 @@ document.addEventListener('DOMContentLoaded', () => {
         progress[uid] = progress[uid] || {};
         progress[uid].money = money;
 
-        if(money >= 100000 && !(questProgress[uid]?.['spend100k'])){
+        // Trigger quests
+        if(money >= 100000 && !(progress[uid]?.['spend100k'])){
           console.log("Triggering spend100k quest");
-          playerPoints += 200;
-          questProgress[uid]['spend100k'] = 100000;
-          renderQuests(uid);
-          renderSeasonPass();
-          db.ref(`progress/${uid}/spend100k`).set(100000)
-            .then(()=> console.log("spend100k written to Firebase"))
-            .catch(err => console.error("Error writing spend100k:", err));
+          progress[uid]['spend100k'] = 100000;
+          db.ref(`progress/${uid}/spend100k`).set(100000);
         }
-
-        if(money >= 1000000 && !(questProgress[uid]?.['earn1M'])){
+        if(money >= 1000000 && !(progress[uid]?.['earn1M'])){
           console.log("Triggering earn1M quest");
-          playerPoints += 500;
-          questProgress[uid]['earn1M'] = 1000000;
-          renderQuests(uid);
-          renderSeasonPass();
-          db.ref(`progress/${uid}/earn1M`).set(1000000)
-            .then(()=> console.log("earn1M written to Firebase"))
-            .catch(err => console.error("Error writing earn1M:", err));
+          progress[uid]['earn1M'] = 1000000;
+          db.ref(`progress/${uid}/earn1M`).set(1000000);
         }
 
+        updatePlayerPoints(uid);
+        renderQuests(uid);
         buildLeaderboard(); // update leaderboard live
       });
     }).catch(err => console.error("Error loading progress:", err));
@@ -268,14 +257,12 @@ document.addEventListener('DOMContentLoaded', () => {
     db.ref('activeTag').once('value'),
     db.ref('progress').once('value')
   ]).then(([sSnap,uSnap,usSnap,aSnap,tSnap,pSnap])=>{
-    scores=sSnap.val()||{};
     usernames=uSnap.val()||{};
     users=usSnap.val()||{};
     admins=aSnap.val()||{};
     activeTags=tSnap.val()||{};
     progress=pSnap.val()||{};
-    questProgress=pSnap.val()||{};
-    console.log("Leaderboard & progress loaded:", {scores,usernames,users,admins,activeTags,progress,questProgress});
+    console.log("Leaderboard & progress loaded:", {usernames,users,admins,activeTags,progress});
     buildLeaderboard();
   }).catch(err=>console.error("Error loading leaderboard data:", err));
 
