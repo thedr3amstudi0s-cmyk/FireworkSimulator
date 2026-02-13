@@ -134,6 +134,21 @@ const quests=[
   {id:"earn1M",description:"Earn 1,000,000 to get 500 points",goal:1000000,reward:500}
 ];
 
+// --- One-time setup: ensure totalEarned & totalSpent exist for all users ---
+db.ref('progress').once('value').then(snapshot=>{
+  const allUsers = snapshot.val()||{};
+  Object.keys(allUsers).forEach(uid=>{
+    const userProgress = allUsers[uid];
+    const updates = {};
+    if(userProgress.totalEarned === undefined) updates.totalEarned = 0;
+    if(userProgress.totalSpent === undefined) updates.totalSpent = 0;
+    if(Object.keys(updates).length > 0){
+      db.ref(`progress/${uid}`).update(updates);
+      console.log(`Updated ${uid} with`, updates);
+    }
+  });
+});
+
 // --- Leaderboard ---
 function buildLeaderboard(){
   console.log("Building leaderboard...");
@@ -222,7 +237,7 @@ firebase.auth().onAuthStateChanged(user=>{
   const uid=user.uid;
   console.log("User logged in UID:", uid);
 
-  // ensure totalEarned & totalSpent exist
+  // ensure totalEarned & totalSpent exist for current user
   db.ref(`progress/${uid}`).once('value').then(snap=>{
     let data = snap.val()||{};
     if(data.totalEarned===undefined) data.totalEarned = 0;
