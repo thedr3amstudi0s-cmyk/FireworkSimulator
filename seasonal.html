@@ -161,12 +161,10 @@ function buildLeaderboard(){
   data.forEach((u,i)=>{
     const tr=document.createElement('tr');
     tr.dataset.uid=u.uid;
-    tr.innerHTML=`
-      <td>${i+1}</td>
+    tr.innerHTML=`<td>${i+1}</td>
       <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
       <td>${u.uname}</td>
-      <td>${u.score}</td>
-    `;
+      <td>${u.score}</td>`;
     bodyEl.appendChild(tr);
   });
 
@@ -180,12 +178,12 @@ function renderQuests(uid){
   const container = document.getElementById('questsList');
   container.innerHTML='';
   quests.forEach(q=>{
-    const money = progress[uid]?.money || 0;
-    const spent = progress[uid]?.spent || 0;
+    const totalEarned = progress[uid]?.totalEarned || 0;
+    const totalSpent = progress[uid]?.totalSpent || 0;
 
     let prog = 0;
-    if(q.id==='spend100k') prog=Math.min(spent,q.goal);
-    if(q.id==='earn1M') prog=Math.min(money,q.goal);
+    if(q.id==='spend100k') prog=Math.min(totalSpent,q.goal);
+    if(q.id==='earn1M') prog=Math.min(totalEarned,q.goal);
 
     const completed = prog >= q.goal;
     const div=document.createElement('div');
@@ -224,8 +222,14 @@ firebase.auth().onAuthStateChanged(user=>{
   const uid=user.uid;
   console.log("User logged in UID:", uid);
 
+  // ensure totalEarned & totalSpent exist
   db.ref(`progress/${uid}`).once('value').then(snap=>{
-    progress[uid]=snap.val()||{};
+    let data = snap.val()||{};
+    if(data.totalEarned===undefined) data.totalEarned = 0;
+    if(data.totalSpent===undefined) data.totalSpent = 0;
+    progress[uid] = data;
+    db.ref(`progress/${uid}`).update({totalEarned:data.totalEarned,totalSpent:data.totalSpent});
+
     updatePlayerPoints(uid);
     renderQuests(uid);
 
@@ -233,11 +237,12 @@ firebase.auth().onAuthStateChanged(user=>{
       const data = snap.val()||{};
       progress[uid]={...progress[uid], ...data};
 
-      if((progress[uid].spent||0) >= 100000 && !progress[uid].spend100k){
+      // update quests based on cumulative totals
+      if((progress[uid].totalSpent || 0) >= 100000 && !progress[uid].spend100k){
         progress[uid].spend100k=100000;
         db.ref(`progress/${uid}/spend100k`).set(100000);
       }
-      if((progress[uid].money||0) >= 1000000 && !progress[uid].earn1M){
+      if((progress[uid].totalEarned || 0) >= 1000000 && !progress[uid].earn1M){
         progress[uid].earn1M=1000000;
         db.ref(`progress/${uid}/earn1M`).set(1000000);
       }
