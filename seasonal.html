@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Seasonal Leaderboard</title>
+<title>Seasonal Leaderboard & Quests</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -11,6 +11,8 @@
     margin: 0;
     display: flex;
   }
+
+  /* Leaderboard styling */
   #leaderboardContainer {
     width: 300px;
     min-width: 300px;
@@ -37,7 +39,35 @@
   .tag.youtuber { color: #F00000; font-weight: bold; }
   .tag.regular { color: #0ff; }
   #loading { text-align: center; margin-top: 20px; font-size: 14px; color: #0ff; }
-  #mainContent { flex: 1; padding: 20px; }
+
+  /* Main content (quests) */
+  #mainContent {
+    flex: 1;
+    padding: 20px;
+  }
+  #questsContainer h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #0ff;
+  }
+  .quest {
+    background: #1c1c1c;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+  }
+  .quest button {
+    margin-top: 5px;
+    background: #0ff;
+    border: none;
+    color: #111;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .quest button:hover {
+    background: #0aa;
+  }
 </style>
 </head>
 <body>
@@ -59,7 +89,10 @@
 </div>
 
 <div id="mainContent">
-  <!-- Your seasonal content goes here -->
+  <div id="questsContainer">
+    <h2>Quests</h2>
+    <div id="questsList"></div>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -67,6 +100,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
+// --- Firebase Config ---
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
   authDomain: "fireworkleaderboard.firebaseapp.com",
@@ -80,10 +114,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Fallback for owner UIDs
+// --- Leaderboard Variables ---
 const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
-
-// Tag definitions
 const TAGS = {
   owner: { name: "Owner", class: "owner" },
   vip: { name: "VIP", class: "vip" },
@@ -97,9 +129,9 @@ const TAGS = {
 const body = document.getElementById('leaderboardBody');
 const loading = document.getElementById('loading');
 
-let scores = {}, usernames = {}, users = {}, admins = {}, activeTags = {};
+let scores = {}, usernames = {}, users = {}, admins = {}, activeTags = {}, questProgress = {};
 
-// Helper to format large numbers
+// --- Format Scores ---
 function formatScore(num) {
   if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -107,25 +139,19 @@ function formatScore(num) {
   return num;
 }
 
-// Build leaderboard table
+// --- Build Leaderboard ---
 function buildLeaderboard() {
   body.innerHTML = '';
 
-  const uids = new Set([
-    ...Object.keys(scores || {}),
-    ...Object.keys(usernames || {}),
-    ...Object.keys(users || {})
-  ]);
-
+  const uids = new Set([...Object.keys(scores||{}), ...Object.keys(usernames||{}), ...Object.keys(users||{})]);
   const data = [];
+
   uids.forEach(uid => {
     const score = scores[uid]?.score || 0;
     const uname = usernames[uid] || users[uid]?.username || 'Unknown';
-
     let tag = 'regular';
-    if (admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
-    else if (activeTags[uid]) tag = activeTags[uid];
-
+    if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
+    else if(activeTags[uid]) tag = activeTags[uid];
     data.push({ uid, score, uname, tag });
   });
 
@@ -147,31 +173,80 @@ function buildLeaderboard() {
   document.getElementById('leaderboard').style.display = 'table';
 }
 
-// Load initial data
+// --- Active Quests Setup ---
+const quests = [
+  { id: "launch100", description: "Launch 100 fireworks", goal: 100, reward: 50 },
+  { id: "reachVIP", description: "Get VIP tag", goal: 1, reward: 100 },
+  { id: "youtuberScore", description: "Reach 1,000 score as YOUTUBER", goal: 1000, reward: 75 },
+];
+
+// Render quests for a specific player
+function renderQuests(uid) {
+  const container = document.getElementById('questsList');
+  container.innerHTML = '';
+
+  quests.forEach(q => {
+    const progress = (questProgress[uid]?.[q.id] || 0);
+    const completed = progress >= q.goal;
+    const div = document.createElement('div');
+    div.className = 'quest';
+    div.innerHTML = `
+      <strong>${q.description}</strong><br>
+      Progress: ${progress}/${q.goal} 
+      ${completed ? '✅ Completed' : ''}
+      ${!completed ? `<button onclick="completeQuest('${uid}','${q.id}')">Complete Now</button>` : ''}
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Complete a quest
+function completeQuest(uid, questId) {
+  const quest = quests.find(q => q.id === questId);
+  if(!quest) return;
+
+  db.ref(`questProgress/${uid}/${questId}`).set(quest.goal);
+
+  const currentScore = scores[uid]?.score || 0;
+  db.ref(`scores/${uid}/score`).set(currentScore + quest.reward);
+}
+
+// --- Load Initial Data ---
 Promise.all([
   db.ref('scores').once('value'),
   db.ref('usernames').once('value'),
   db.ref('users').once('value'),
   db.ref('admins').once('value'),
-  db.ref('activeTag').once('value')
-]).then(([sSnap, uSnap, usSnap, aSnap, tSnap])=>{
-  scores = sSnap.val() || {};
-  usernames = uSnap.val() || {};
-  users = usSnap.val() || {};
-  admins = aSnap.val() || {};
-  activeTags = tSnap.val() || {};
+  db.ref('activeTag').once('value'),
+  db.ref('questProgress').once('value')
+]).then(([sSnap,uSnap,usSnap,aSnap,tSnap,qSnap])=>{
+  scores = sSnap.val()||{};
+  usernames = uSnap.val()||{};
+  users = usSnap.val()||{};
+  admins = aSnap.val()||{};
+  activeTags = tSnap.val()||{};
+  questProgress = qSnap.val()||{};
   buildLeaderboard();
+
+  // Render quests for current player if logged in
+  firebase.auth().onAuthStateChanged(user=>{
+    if(user) renderQuests(user.uid);
+  });
 });
 
-// Listen for realtime changes
-['scores','usernames','users','admins','activeTag'].forEach(path => {
-  db.ref(path).on('value', snap => {
+// --- Listen for Realtime Updates ---
+['scores','usernames','users','admins','activeTag','questProgress'].forEach(path=>{
+  db.ref(path).on('value', snap=>{
     if(path==='scores') scores = snap.val()||{};
     if(path==='usernames') usernames = snap.val()||{};
     if(path==='users') users = snap.val()||{};
     if(path==='admins') admins = snap.val()||{};
     if(path==='activeTag') activeTags = snap.val()||{};
+    if(path==='questProgress') questProgress = snap.val()||{};
     buildLeaderboard();
+
+    const user = firebase.auth().currentUser;
+    if(user) renderQuests(user.uid);
   });
 });
 </script>
