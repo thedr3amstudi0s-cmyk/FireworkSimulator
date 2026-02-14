@@ -134,14 +134,13 @@ const quests=[
   {id:"earn1M",description:"Earn 1,000,000 to get 500 points",goal:1000000,reward:500}
 ];
 
-// --- One-time setup: ensure totalEarned & totalSpent exist for all users ---
 db.ref('progress').once('value').then(snapshot=>{
   const allUsers = snapshot.val()||{};
   Object.keys(allUsers).forEach(uid=>{
     const userProgress = allUsers[uid];
     const updates = {};
-    if(userProgress.totalEarned === undefined) updates.totalEarned = 0;
-    if(userProgress.totalSpent === undefined) updates.totalSpent = 0;
+    if(userProgress.totalEarned === undefined) updates.totalEarned = 1;
+    if(userProgress.totalSpent === undefined) updates.totalSpent = 1;
     if(Object.keys(updates).length > 0){
       db.ref(`progress/${uid}`).update(updates);
       console.log(`Updated ${uid} with`, updates);
@@ -149,7 +148,6 @@ db.ref('progress').once('value').then(snapshot=>{
   });
 });
 
-// --- Leaderboard ---
 function buildLeaderboard(){
   console.log("Building leaderboard...");
   const bodyEl=document.getElementById('leaderboardBody');
@@ -163,7 +161,6 @@ function buildLeaderboard(){
     if(admins[uid] || OWNER_UIDS[uid]) tag='owner';
     else if(activeTags[uid]) tag=activeTags[uid];
 
-    // Calculate points
     let points = 0;
     if(progress[uid]?.spend100k) points += 200;
     if(progress[uid]?.earn1M) points += 500;
