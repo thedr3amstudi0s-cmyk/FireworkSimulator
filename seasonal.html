@@ -139,8 +139,8 @@ db.ref('progress').once('value').then(snapshot=>{
   Object.keys(allUsers).forEach(uid=>{
     const userProgress = allUsers[uid];
     const updates = {};
-    if(userProgress.totalEarned === undefined) updates.totalEarned = 1;
-    if(userProgress.totalSpent === undefined) updates.totalSpent = 1;
+    if(userProgress.totalEarned === undefined) updates.totalEarned = "undefined";
+    if(userProgress.totalSpent === undefined) updates.totalSpent = "undefined";
     if(Object.keys(updates).length > 0){
       db.ref(`progress/${uid}`).update(updates);
       console.log(`Updated ${uid} with`, updates);
