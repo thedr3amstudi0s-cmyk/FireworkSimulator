@@ -175,7 +175,7 @@ body {
 
   <div id="ownerCommands">
     <strong>Owner</strong><br/>
-    <button id="giveMoneyBtn">Give $1000</button>
+    <button id="giveMoneyBtn">Give $10k</button>
     <button id="unlockColorsBtn">Unlock All Colors</button>
     <button id="maxAutoBtn">Max Auto-Launch</button>
     <button id="viewUsersBtn">View Users</button>
@@ -786,7 +786,7 @@ document.getElementById('goGoogleForm').addEventListener('click', () => {
 openSettingsBtn.addEventListener('click', () => { settingsPanel.style.display = 'block'; });
   
 /* ADMIN BUTTONS */
-document.getElementById('giveMoneyBtn').addEventListener('click',()=>{ money+=1000; document.getElementById('money').textContent = formatMoney(money); saveProgressOnline().catch(()=>{}); });
+document.getElementById('giveMoneyBtn').addEventListener('click',()=>{ money+=10000; document.getElementById('money').textContent = formatMoney(money); saveProgressOnline().catch(()=>{}); });
 document.getElementById('unlockColorsBtn').addEventListener('click',()=>{ unlockedColors=colors.length; updateButtons(); saveProgressOnline().catch(()=>{}); });
 document.getElementById('maxAutoBtn').addEventListener('click',()=>{ autoAmount=3; autoSpeed=0.1; updateButtons(); startAutoLaunch(); saveProgressOnline().catch(()=>{}); });
 document.getElementById('viewUsersBtn').addEventListener('click',()=>{ showNotification('Check Firebase console for users.'); });
@@ -1209,6 +1209,7 @@ function saveSettings() {
 </script>
 </body>
 </html>
+
 
 
 
