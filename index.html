@@ -1010,7 +1010,43 @@ async function loadTagsUI() {
   }
 }
 
+async function createNewPlayer(user, username){
+  const uid = user.uid;
 
+  username = (username || "Player").trim();
+  if(username.length < 3) username = "Player";
+  username = censorUsername(username);
+
+  const userRef = db.ref('users/' + uid);
+  const progressRef = db.ref('progress/' + uid);
+
+  // Prevent overwriting existing accounts
+  const snap = await userRef.once('value');
+  if(snap.exists()) return;
+
+  // Create profile
+  await userRef.set({
+    username: username,
+    created: Date.now(),
+    tags: { regular: true }
+  });
+
+  // Create save file (THIS IS WHAT YOUR GAME NEEDS)
+  await progressRef.set({
+    money: 0,
+    unlockedColors: 1,
+    clickDelay: 1200,
+    rebirthCount: 0,
+    autoAmount: 0,
+    autoSpeed: 2.5,
+    colorPrice: 50,
+    delayPrice: 100,
+    rebirthPrice: 500,
+    fireworksLaunched: 0
+  });
+}
+
+  
 loginBtn.addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
@@ -1032,57 +1068,32 @@ loginBtn.addEventListener('click', async () => {
 });
 
 
-signupBtn.addEventListener('click', async () => {
+signupBtn.onclick = async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   let username = document.getElementById('username').value.trim();
 
-  if (!email || !password) {
-    loginMsg.textContent = 'Please enter email and password.';
+  if(!email || !password){
+    loginMsg.textContent = "Enter email and password";
     return;
   }
 
-  // Optional: censor the username if provided
-  if (!username) username = 'Player'; // fallback
-  username = censorUsername(username);
+  try{
+    loginMsg.textContent = "Creating account...";
 
-  loginMsg.textContent = 'Creating account...';
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
 
-  try {
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    const uid = userCredential.user.uid;
+    // ⭐ THIS IS THE PART YOU WERE MISSING
+    await createNewPlayer(cred.user, username);
 
-    // Save to Firebase Realtime Database with auto-generated key like your example
-    const newRef = db.ref('usernames').push(); // generates 20-char key
-    await newRef.set({
-      username: username,
-      uid: uid
-    });
-
-    currentUser = uid;
-    currentUsername = username;
-
-    loginMsg.textContent = 'Signup successful!';
-    loginBox.style.display = 'none';
-    ui.style.display = 'block';
-
-    await db.ref('progress/' + currentUser).update({
-      money: 0,
-      unlockedColors: 1,
-      clickDelay: 1200,
-      rebirthCount: 0,
-      autoAmount: 0,
-      autoSpeed: 2.5,
-      colorPrice: 50,
-      delayPrice: 100,
-      rebirthPrice: 500
-    });
-
-  } catch (err) {
-    console.error(err);
-    loginMsg.textContent = err.message;
+    loginMsg.textContent = "Account created!";
   }
-});
+  catch(e){
+    console.error(e);
+    loginMsg.textContent = e.message;
+  }
+};
+
 
 forgotBtn.addEventListener('click',()=>{ const email=document.getElementById('email').value; auth.sendPasswordResetEmail(email).then(()=>{ loginMsg.textContent='Reset email sent!'; }).catch(e=>loginMsg.textContent=e.message); });
 
@@ -1115,29 +1126,35 @@ auth.onAuthStateChanged(async user => {
   if (user) {
     currentUser = user.uid;
 
-    const nameSnap = await db.ref('usernames/' + currentUser).once('value');
+    // 🔴 ENSURE DATABASE ACCOUNT EXISTS
+    const profileSnap = await db.ref('users/' + currentUser).once('value');
+    if (!profileSnap.exists()) {
+      // Use username input if available, otherwise default to "Player"
+      const inputUsername = document.getElementById('username')?.value || "Player";
+      await createNewPlayer(user, inputUsername);
+    }
 
-    if (nameSnap.exists()) {
-      const val = nameSnap.val();
-
-      // ✅ Handle BOTH old + new formats
-      if (typeof val === "string") {
-        currentUsername = val;
-      } else if (typeof val === "object" && typeof val.username === "string") {
-        currentUsername = val.username;
-      } else {
-        currentUsername = "Player";
-      }
+    // ✅ Load username safely from users/{uid}/username
+    const userSnap = await db.ref('users/' + currentUser).once('value');
+    if (userSnap.exists() && typeof userSnap.val().username === "string") {
+      currentUsername = userSnap.val().username;
     } else {
       currentUsername = "Player";
     }
 
+    // Censor username for display
+    currentUsername = censorUsername(currentUsername);
+
+    // After login, show the UI
     afterLogin();
+
   } else {
+    // Not logged in — show login box, hide game UI
     loginBox.style.display = 'block';
     ui.style.display = 'none';
   }
 });
+
 
 
 
@@ -1209,6 +1226,7 @@ function saveSettings() {
 </script>
 </body>
 </html>
+
 
 
 
