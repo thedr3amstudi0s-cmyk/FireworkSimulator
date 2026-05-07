@@ -723,7 +723,7 @@ resizeCanvas();
 let currentUser = "", currentUsername = "";
 let money = 0, unlockedColors = 1, clickDelay = 1200, lastClick = Date.now();
 let rebirthCount = 0, colorPrice = 50, delayPrice = 100, rebirthPrice = 500;
-let autoAmount = 0, autoSpeed = 2.5, autoInterval = null;
+let autoAmount = 0, autoSpeed = 2.5, autoInterval = null, autoPrice = 200;
 let fireworks = [], particles = [];
 const gravity = 0.04;
 
@@ -1413,7 +1413,6 @@ document.getElementById('reduceDelay').addEventListener('click', () => {
   }
 });
 
-let autoPrice = 200;
 document.getElementById('buyAuto').addEventListener('click', () => {
   if (money >= autoPrice && autoAmount < 4) {
     money -= autoPrice; autoAmount++; autoSpeed /= 1.2; autoPrice = Math.floor(autoPrice * 1.7);
