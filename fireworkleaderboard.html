@@ -1,49 +1,393 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Firework Simulator Leaderboard</title>
+<meta charset="UTF-8"/>
+<title>Firework Simulator — Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-  body { font-family: Arial, sans-serif; background: #111; color: #fff; margin:0; padding:20px; }
-  h1 { text-align:center; margin-bottom:20px; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; }
-  th { background: #222; }
-  tr:nth-child(even) { background: #1a1a1a; }
+:root {
+  --bg: #05050f;
+  --panel: rgba(12,12,28,0.92);
+  --border: rgba(80,200,255,0.18);
+  --accent: #00d4ff;
+  --accent2: #ff6b35;
+  --gold: #ffd700;
+  --green: #39ff14;
+  --text: #e0e8ff;
+  --muted: #8899aa;
+  --glow: 0 0 18px rgba(0,212,255,0.35);
+}
 
-  .tag.owner { color: orange; font-weight: bold; }
-  .tag.vip { color: gold; font-weight: bold; }
-  .tag.streamer { color: #981ab6; font-weight: bold; }
-  .tag.fart { color: #FF4DEE; font-weight: bold; }
-  .tag.donator { color: #0BBF06; font-weight: bold; }
-  .tag.youtuber { color: #F00000; font-weight: bold; }
-  .tag.regular { color: #0ff; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  #loading { text-align:center; margin-top:50px; font-size:18px; color:#0ff; }
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--text);
+}
+
+/* Starfield background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 15%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 60%, rgba(255,255,255,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 75%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 85%, rgba(255,255,255,0.25) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 35% 45%, rgba(0,212,255,0.3) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 60% 80%, rgba(255,107,53,0.25) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── WRAPPER ── */
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.header .eyebrow {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.header h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(24px, 5vw, 42px);
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 0 30px rgba(0,212,255,0.5), 0 0 60px rgba(0,212,255,0.2);
+  letter-spacing: 3px;
+  line-height: 1.1;
+}
+.header .subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 8px;
+  letter-spacing: 1px;
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  backdrop-filter: blur(14px);
+}
+.stat-card .sv {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.stat-card .sl {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* ── SEARCH & FILTERS ── */
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.search-box {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  outline: none;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.2s;
+}
+.search-box:focus { border-color: var(--accent); }
+.search-box::placeholder { color: var(--muted); }
+.filter-btn {
+  padding: 10px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.08); }
+
+/* ── TABLE ── */
+.table-wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  box-shadow: var(--glow), 0 20px 60px rgba(0,0,0,0.5);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+thead th {
+  padding: 14px 18px;
+  background: rgba(0,212,255,0.06);
+  border-bottom: 1px solid var(--border);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  text-align: left;
+}
+tbody tr {
+  border-bottom: 1px solid rgba(80,200,255,0.07);
+  transition: background 0.15s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(0,212,255,0.04); }
+tbody td {
+  padding: 13px 18px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Rank column */
+.rank-cell {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  width: 60px;
+}
+.rank-1 { color: var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.rank-2 { color: #c0c0c0; }
+.rank-3 { color: #cd7f32; }
+.rank-other { color: var(--muted); }
+
+/* Medal icons */
+.rank-icon { font-size: 18px; }
+
+/* Money column */
+.money-cell {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  color: var(--gold);
+}
+
+/* Rebirth badge */
+.rebirth-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(255,107,53,0.15);
+  border: 1px solid rgba(255,107,53,0.3);
+  color: var(--accent2);
+  font-size: 11px;
+  font-family: 'Orbitron', sans-serif;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
+  border: 1px solid transparent;
+}
+.tag.owner   { color: #ff9900; border-color: rgba(255,153,0,0.3); background: rgba(255,153,0,0.08); }
+.tag.vip     { color: var(--gold); border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.08); }
+.tag.streamer { color: #d44dff; border-color: rgba(212,77,255,0.3); background: rgba(212,77,255,0.08); }
+.tag.fart    { color: #ff4dee; border-color: rgba(255,77,238,0.3); background: rgba(255,77,238,0.08); }
+.tag.donator { color: var(--green); border-color: rgba(57,255,20,0.3); background: rgba(57,255,20,0.08); }
+.tag.youtuber{ color: #ff4444; border-color: rgba(255,68,68,0.3); background: rgba(255,68,68,0.08); }
+.tag.regular { color: var(--accent); border-color: rgba(0,212,255,0.2); background: rgba(0,212,255,0.05); }
+
+/* Loading & Empty */
+#loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4,end) infinite;
+}
+@keyframes dots {
+  0%,20%  { content: ''; }
+  40%     { content: '.'; }
+  60%     { content: '..'; }
+  80%,100%{ content: '...'; }
+}
+.empty-state {
+  text-align: center;
+  padding: 50px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Achievements column */
+.ach-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.ach-chip { font-size: 16px; }
+
+/* Live badge */
+.live-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  background: var(--green);
+  border-radius: 50%;
+  margin-right: 6px;
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 1.5s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.live-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Back link */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+  margin-bottom: 28px;
+  transition: color 0.2s;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.back-link:hover { color: var(--accent); }
+
+/* Firework sparkle decoration */
+.sparkle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  font-size: 20px;
+  opacity: 0.12;
+}
 </style>
 </head>
 <body>
 
-<h1>Leaderboard</h1>
-<div id="loading">Loading leaderboard...</div>
+<div class="sparkle" style="top:8%;left:5%">🎆</div>
+<div class="sparkle" style="top:15%;right:8%">🎇</div>
+<div class="sparkle" style="bottom:20%;left:3%">✨</div>
+<div class="sparkle" style="bottom:10%;right:5%">🎆</div>
 
-<table id="leaderboard" style="display:none;">
-  <thead>
-    <tr>
-      <th>Rank</th>
-      <th>Tag</th>
-      <th>Username</th>
-      <th>Money</th>
-    </tr>
-  </thead>
-  <tbody id="leaderboardBody"></tbody>
-</table>
+<div class="wrapper">
+
+  <a class="back-link" href="index.html">← Back to Game</a>
+
+  <div class="header">
+    <div class="eyebrow">DR3AM STUDI0S</div>
+    <h1>🎆 LEADERBOARD</h1>
+    <div class="subtitle">Top players ranked by total earnings</div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="sv" id="statPlayers">—</div>
+      <div class="sl">Players</div>
+    </div>
+    <div class="stat-card">
+      <div class="sv" id="statTop">—</div>
+      <div class="sl">Top Earnings</div>
+    </div>
+    <div class="stat-card">
+      <div class="sv" id="statTotal">—</div>
+      <div class="sl">Combined Wealth</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <input class="search-box" id="searchBox" placeholder="🔍  Search player..."/>
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="owner">Owner</button>
+    <button class="filter-btn" data-filter="vip">VIP</button>
+    <button class="filter-btn" data-filter="donator">Donator</button>
+  </div>
+
+  <div class="live-label"><span class="live-dot"></span>LIVE</div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <div id="loading"><span class="loading-dots">Loading leaderboard</span></div>
+    <table id="leaderboard" style="display:none;">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Tag</th>
+          <th>Player</th>
+          <th>Rebirths</th>
+          <th>Achievements</th>
+          <th>Money</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboardBody"></tbody>
+    </table>
+  </div>
+
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
@@ -58,138 +402,182 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Owner fallback UID
 const OWNER_UIDS = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true };
 
-// Tag definitions
 const TAGS = {
-  owner: { name: "Owner", class: "owner" },
-  vip: { name: "VIP", class: "vip" },
-  streamer: { name: "STREAMER", class: "streamer" },
-  fart: { name: "Fart", class: "fart" },
-  donator: { name: "DONATOR", class: "donator" },
-  youtuber: { name: "YOUTUBER", class: "youtuber" },
-  regular: { name: "Regular", class: "regular" },
+  owner:    { name: "OWNER",    cls: "owner" },
+  vip:      { name: "VIP",      cls: "vip" },
+  streamer: { name: "STREAMER", cls: "streamer" },
+  fart:     { name: "FART",     cls: "fart" },
+  donator:  { name: "DONATOR",  cls: "donator" },
+  youtuber: { name: "YOUTUBER", cls: "youtuber" },
+  regular:  { name: "REGULAR",  cls: "regular" },
 };
 
-const body = document.getElementById('leaderboardBody');
-const loading = document.getElementById('loading');
+const RANK_ICONS = ['🥇','🥈','🥉'];
 
-// --- Data storage ---
+// Achievement definitions (subset for display)
+const ACH_DISPLAY = [
+  { id:'millionaire', icon:'🤑' },
+  { id:'combo10',     icon:'⚡' },
+  { id:'rebirth5',    icon:'🌀' },
+  { id:'shapes',      icon:'🌟' },
+  { id:'weather',     icon:'🌩' },
+];
+
 let progress = {}, usernames = {}, users = {}, admins = {}, activeTags = {};
+let allData = [];
+let activeFilter = 'all';
+let searchQuery = '';
 
-function formatMoney(num) {
-  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
-  return num;
+function fmt(n) {
+  if (n >= 1e9) return (n/1e9).toFixed(1).replace(/\.0$/,'')+'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1).replace(/\.0$/,'')+'k';
+  return Math.floor(n);
 }
-  
-// --- Build leaderboard ---
-function buildLeaderboard() {
-  body.innerHTML = '';
+
+function buildData() {
   const uids = new Set([
-    ...Object.keys(progress || {}),
-    ...Object.keys(usernames || {}),
-    ...Object.keys(users || {})
+    ...Object.keys(progress),
+    ...Object.keys(usernames),
+    ...Object.keys(users)
   ]);
 
-  const data = [];
+  allData = [];
   uids.forEach(uid => {
-    const money = progress[uid]?.money ?? 0;
-    let uname = 'Player';
+    const p = progress[uid] || {};
+    const money = p.money ?? 0;
+    const rebirthCount = p.rebirthCount ?? 0;
+    const unlockedAchs = p.unlockedAchs || {};
 
-const uVal = usernames[uid];
-if (typeof uVal === 'string') {
-  uname = uVal;
-} else if (typeof uVal === 'object' && typeof uVal.username === 'string') {
-  uname = uVal.username;
-} else if (typeof users[uid]?.username === 'string') {
-  uname = users[uid].username;
+    let uname = 'Player';
+    const uVal = usernames[uid];
+    if (typeof uVal === 'string') uname = uVal;
+    else if (typeof uVal === 'object' && typeof uVal?.username === 'string') uname = uVal.username;
+    else if (typeof users[uid]?.username === 'string') uname = users[uid].username;
+
+    let tag = 'regular';
+    if (admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
+    else if (activeTags[uid]) tag = activeTags[uid];
+
+    allData.push({ uid, money, uname, tag, rebirthCount, unlockedAchs });
+  });
+
+  allData.sort((a, b) => b.money - a.money);
+  updateStats();
+  renderTable();
 }
 
+function updateStats() {
+  document.getElementById('statPlayers').textContent = allData.length;
+  document.getElementById('statTop').textContent = allData.length ? '$' + fmt(allData[0].money) : '$0';
+  const total = allData.reduce((s, u) => s + u.money, 0);
+  document.getElementById('statTotal').textContent = '$' + fmt(total);
+}
 
-    // Tag priority: admin > owner fallback > active tag > regular
-    let tag = 'regular';
-    if(admins[uid] || OWNER_UIDS[uid]) tag = 'owner';
-    else if(activeTags[uid]) tag = activeTags[uid];
+function renderTable() {
+  const tbody = document.getElementById('leaderboardBody');
+  tbody.innerHTML = '';
 
-    data.push({ uid, money, uname, tag });
-  });
+  let filtered = allData;
 
-  // Sort by money descending
-  data.sort((a,b) => b.money - a.money);
+  // Filter by tag
+  if (activeFilter !== 'all') {
+    filtered = filtered.filter(u => u.tag === activeFilter);
+  }
 
-  data.forEach((u, i) => {
+  // Search
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(u => u.uname.toLowerCase().includes(q));
+  }
+
+  if (filtered.length === 0) {
     const tr = document.createElement('tr');
-    tr.dataset.uid = u.uid; // for live updates
+    tr.innerHTML = `<td colspan="6" class="empty-state">No players found.</td>`;
+    tbody.appendChild(tr);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('leaderboard').style.display = 'table';
+    return;
+  }
+
+  filtered.forEach((u, i) => {
+    const globalRank = allData.indexOf(u) + 1;
+    const rankIcon = globalRank <= 3 ? RANK_ICONS[globalRank-1] : null;
+    const rankClass = globalRank <= 3 ? `rank-${globalRank}` : 'rank-other';
+
+    // Achievements earned (display select ones)
+    const achChips = ACH_DISPLAY
+      .filter(a => u.unlockedAchs?.[a.id])
+      .map(a => `<span class="ach-chip" title="${a.id}">${a.icon}</span>`)
+      .join('');
+
+    const tagInfo = TAGS[u.tag] || TAGS.regular;
+
+    const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${i+1}</td>
-      <td class="tag ${TAGS[u.tag]?.class || 'regular'}">${TAGS[u.tag]?.name || 'Regular'}</td>
-      <td>${u.uname}</td>
-      <td>${formatMoney(u.money)}</td>
-      `;
-    body.appendChild(tr);
+      <td class="rank-cell ${rankClass}">
+        ${rankIcon ? `<span class="rank-icon">${rankIcon}</span>` : `#${globalRank}`}
+      </td>
+      <td><span class="tag ${tagInfo.cls}">${tagInfo.name}</span></td>
+      <td>
+        ${u.uname}
+        ${u.rebirthCount > 0 ? `<span class="rebirth-badge">R${u.rebirthCount}</span>` : ''}
+      </td>
+      <td style="color:var(--accent2); font-family:'Orbitron',sans-serif; font-size:13px;">
+        ${u.rebirthCount > 0 ? u.rebirthCount : '—'}
+      </td>
+      <td>
+        <div class="ach-chips">${achChips || '<span style="color:var(--muted);font-size:12px;">—</span>'}</div>
+      </td>
+      <td class="money-cell">$${fmt(u.money)}</td>
+    `;
+    tbody.appendChild(tr);
   });
 
-  loading.style.display = 'none';
+  document.getElementById('loading').style.display = 'none';
   document.getElementById('leaderboard').style.display = 'table';
 }
 
-// --- Load static data once ---
+// ── Search ──
+document.getElementById('searchBox').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  renderTable();
+});
+
+// ── Filter buttons ──
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderTable();
+  });
+});
+
+// ── Load data ──
 Promise.all([
   db.ref('progress').once('value'),
   db.ref('usernames').once('value'),
   db.ref('users').once('value'),
   db.ref('admins').once('value'),
   db.ref('activeTag').once('value')
-]).then(([pSnap, uSnap, usSnap, aSnap, tSnap])=>{
-  progress = pSnap.val() || {};
-  usernames = uSnap.val() || {};
-  users = usSnap.val() || {};
-  admins = aSnap.val() || {};
-  activeTags = tSnap.val() || {};
-  buildLeaderboard();
+]).then(([pS, uS, usS, aS, tS]) => {
+  progress = pS.val() || {};
+  usernames = uS.val() || {};
+  users = usS.val() || {};
+  admins = aS.val() || {};
+  activeTags = tS.val() || {};
+  buildData();
 });
 
-// --- Listen for progress changes ---
-db.ref('progress').on('value', snap => {
-  progress = snap.val() || {};
-  buildLeaderboard();
-});
-
-// --- Listen for usernames changes ---
-db.ref('usernames').on('value', snap => {
-  usernames = snap.val() || {};
-  buildLeaderboard();
-});
-
-// --- Listen for users changes ---
-db.ref('users').on('value', snap => {
-  users = snap.val() || {};
-  buildLeaderboard();
-});
-
-// --- Listen for admin changes ---
-db.ref('admins').on('value', snap => {
-  admins = snap.val() || {};
-  buildLeaderboard();
-});
-
-// --- Listen for activeTag changes (equip/unequip) ---
-db.ref('activeTag').on('value', snap => {
-  activeTags = snap.val() || {};
-  buildLeaderboard();
-});
+// ── Live listeners ──
+db.ref('progress').on('value', s => { progress = s.val()||{}; buildData(); });
+db.ref('usernames').on('value', s => { usernames = s.val()||{}; buildData(); });
+db.ref('users').on('value', s => { users = s.val()||{}; buildData(); });
+db.ref('admins').on('value', s => { admins = s.val()||{}; buildData(); });
+db.ref('activeTag').on('value', s => { activeTags = s.val()||{}; buildData(); });
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
