@@ -39,12 +39,10 @@ canvas {
   height: 100%;
 }
 
-/* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-/* ── PANELS ── */
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -53,7 +51,7 @@ canvas {
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* ── LOGIN ── */
+/* LOGIN */
 #loginBox {
   position: fixed;
   top: 50%; left: 50%;
@@ -110,7 +108,7 @@ canvas {
 .btn-warn { background: var(--accent2); color: #fff; }
 #loginMsg { color: var(--gold); font-size: 13px; margin-top: 6px; text-align: center; min-height: 18px; }
 
-/* ── HUD ── */
+/* HUD */
 #hud {
   position: fixed;
   top: 12px; left: 12px;
@@ -146,7 +144,7 @@ canvas {
 .stat-chip .sv { font-family: 'Orbitron', sans-serif; font-size: 13px; color: var(--accent); }
 .stat-chip .sl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
 
-/* COMBO display */
+/* COMBO */
 #comboBanner {
   position: fixed;
   top: 50%;
@@ -216,7 +214,7 @@ canvas {
   transition: width 0.05s;
 }
 
-/* ── SHOP PANEL ── */
+/* SHOP PANEL */
 #shopPanel {
   position: fixed;
   top: 12px; right: 12px;
@@ -258,7 +256,7 @@ canvas {
 .shop-btn .price { color: var(--gold); font-family: 'Orbitron', sans-serif; font-size: 11px; }
 .shop-btn .max-tag { color: var(--green); font-size: 11px; }
 
-/* ── BOTTOM TOOLBAR ── */
+/* BOTTOM TOOLBAR */
 #toolbar {
   position: fixed;
   bottom: 38px;
@@ -285,7 +283,7 @@ canvas {
 }
 .tool-btn:hover { background: rgba(0,212,255,0.1); border-color: var(--accent); color: var(--accent); }
 
-/* ── MODALS ── */
+/* MODALS */
 .modal {
   position: fixed;
   inset: 0;
@@ -407,6 +405,9 @@ canvas {
 }
 .prestige-item .pi-btn:hover { filter: brightness(1.2); }
 .prestige-item .pi-btn:disabled { background: rgba(255,255,255,0.1); color: var(--muted); cursor: not-allowed; }
+/* Toggle button style for golden sparks */
+.prestige-item .pi-btn.toggle-on  { background: var(--gold); color: #000; }
+.prestige-item .pi-btn.toggle-off { background: rgba(255,255,255,0.1); color: var(--muted); border: 1px solid var(--border); }
 
 /* Tags */
 .tag-row { padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
@@ -514,13 +515,9 @@ canvas {
 
 <canvas id="canvas"></canvas>
 
-<!-- Weather Banner -->
 <div id="weatherBanner"></div>
-
-<!-- Notifications -->
 <div id="notifications"></div>
 
-<!-- Achievement Popup -->
 <div id="achPopup">
   <div class="ach-popup-icon" id="achPopupIcon">🏆</div>
   <div class="ach-popup-text">
@@ -529,19 +526,16 @@ canvas {
   </div>
 </div>
 
-<!-- Combo Banner -->
 <div id="comboBanner"></div>
 
-<!-- Streak Bar -->
 <div id="streakBar" class="panel">
   <div id="streakLabel">STREAK: 0x</div>
   <div id="streakTrack"><div id="streakFill"></div></div>
 </div>
 
-<!-- Cooldown Bar -->
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
 
-<!-- ─── LOGIN ─── -->
+<!-- LOGIN -->
 <div id="loginBox" class="panel">
   <h2>🎆 FIREWORKS</h2>
   <input id="username" placeholder="Username (signup only)"/>
@@ -553,7 +547,7 @@ canvas {
   <p id="loginMsg"></p>
 </div>
 
-<!-- ─── HUD ─── -->
+<!-- HUD -->
 <div id="hud">
   <div id="hudMoney" class="panel">
     <div class="label">Total Funds</div>
@@ -574,7 +568,6 @@ canvas {
       <div class="sl">Auto</div>
     </div>
   </div>
-  <!-- Shop buttons in HUD -->
   <div style="display:flex; flex-direction:column; gap:6px;">
     <button class="shop-btn panel" id="buyColor">
       <span>Buy Color</span>
@@ -595,7 +588,7 @@ canvas {
   </div>
 </div>
 
-<!-- ─── TOOLBAR ─── -->
+<!-- TOOLBAR -->
 <div id="toolbar">
   <button class="tool-btn" id="openAchBtn">🏆 Achievements</button>
   <button class="tool-btn" id="openShapeBtn">✨ Shapes</button>
@@ -607,7 +600,7 @@ canvas {
   <button class="tool-btn" id="resetBtn" style="color:#ff6b6b; border-color:rgba(255,100,100,0.3);">🗑 Reset</button>
 </div>
 
-<!-- ─── ACHIEVEMENTS MODAL ─── -->
+<!-- ACHIEVEMENTS MODAL -->
 <div class="modal" id="achModal">
   <div class="modal-box panel">
     <button class="modal-close" id="closeAch">✕</button>
@@ -616,7 +609,7 @@ canvas {
   </div>
 </div>
 
-<!-- ─── SHAPE SHOP MODAL ─── -->
+<!-- SHAPE SHOP MODAL -->
 <div class="modal" id="shapeModal">
   <div class="modal-box panel">
     <button class="modal-close" id="closeShape">✕</button>
@@ -626,7 +619,7 @@ canvas {
   </div>
 </div>
 
-<!-- ─── PRESTIGE SHOP MODAL ─── -->
+<!-- PRESTIGE SHOP MODAL -->
 <div class="modal" id="prestigeModal">
   <div class="modal-box panel">
     <button class="modal-close" id="closePrestige">✕</button>
@@ -637,7 +630,7 @@ canvas {
   </div>
 </div>
 
-<!-- ─── TAGS MODAL ─── -->
+<!-- TAGS MODAL -->
 <div class="modal" id="tagModal">
   <div class="modal-box panel">
     <button class="modal-close" id="closeTag">✕</button>
@@ -646,7 +639,7 @@ canvas {
   </div>
 </div>
 
-<!-- ─── SETTINGS MODAL ─── -->
+<!-- SETTINGS MODAL -->
 <div class="modal" id="settingsModal">
   <div class="modal-box panel" id="settingsPanel" style="width:300px;">
     <button class="modal-close" id="closeSettings">✕</button>
@@ -664,7 +657,7 @@ canvas {
   </div>
 </div>
 
-<!-- ─── OWNER PANEL ─── -->
+<!-- OWNER PANEL -->
 <div id="ownerPanel" class="panel" style="position:fixed; bottom:60px; left:12px; width:240px; display:none; z-index:150;">
   <div style="padding:12px 16px 0; font-family:'Orbitron',sans-serif; font-size:11px; color:var(--accent2); letter-spacing:2px;">OWNER TOOLS</div>
   <div style="padding:10px 12px 14px;" class="owner-grid">
@@ -681,18 +674,16 @@ canvas {
   </div>
 </div>
 
-<!-- Audio -->
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 <audio id="bgMusic" src="assets/Heading Home.mp3" loop></audio>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
 // ═══════════════════════════════════════════════════
-//  FIREBASE INIT
+//  FIREBASE
 // ═══════════════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",
@@ -729,7 +720,7 @@ const gravity = 0.04;
 
 // Combo system
 let comboStreak = 0, lastFireworkTime = 0;
-const COMBO_WINDOW = 1800; // ms between clicks to maintain streak
+const COMBO_WINDOW = 1800;
 const COMBO_MAX = 10;
 let comboTimeout = null;
 
@@ -748,53 +739,54 @@ let activeShape = 'circle';
 // Prestige system
 let prestigePoints = 0;
 const PRESTIGE_ITEMS = [
-  { id: 'rainbow_trail', name: 'Rainbow Trail', icon: '🌈', desc: 'Fireworks leave rainbow trails', cost: 2, owned: false },
-  { id: 'golden_sparks', name: 'Golden Sparks',  icon: '✨', desc: 'All particles shine gold',       cost: 3, owned: false },
-  { id: 'mega_burst',    name: 'Mega Burst',     icon: '💥', desc: '2× particles per explosion',     cost: 4, owned: false },
-  { id: 'auto_combo',    name: 'Auto-Combo',     icon: '⚡', desc: 'Auto-launches count for streak', cost: 5, owned: false },
-  { id: 'dark_matter',   name: 'Dark Matter',    icon: '🌑', desc: 'Black-hole vortex effect',       cost: 6, owned: false },
+  { id: 'rainbow_trail', name: 'Rainbow Trail',  icon: '🌈', desc: 'Fireworks leave rainbow trails',      cost: 2,  toggleable: false },
+  { id: 'golden_sparks', name: 'Golden Sparks',  icon: '✨', desc: 'All particles shine gold — toggle on/off anytime', cost: 3,  toggleable: true  },
+  { id: 'mega_burst',    name: 'Mega Burst',     icon: '💥', desc: '2× particles per explosion',          cost: 4,  toggleable: false },
+  { id: 'auto_combo',    name: 'Auto-Combo',     icon: '⚡', desc: 'Auto-launches count for streak',      cost: 5,  toggleable: false },
+  { id: 'dark_matter',   name: 'Dark Matter',    icon: '🌑', desc: 'Black-hole vortex effect',            cost: 6,  toggleable: false },
 ];
+
+// prestigeOwned tracks ownership; goldenSparksActive tracks whether the toggle is on
+let prestigeOwned = {};
+let goldenSparksActive = true; // default on when owned
 
 // Weather events
 const WEATHER_EVENTS = [
-  { id: 'storm',    name: '⛈ Thunderstorm',  color: '#7b68ee', bg: 'rgba(30,0,80,0.8)',  bonus: 3,  duration: 20000, desc: '3× money, heavy lightning' },
-  { id: 'aurora',   name: '🌌 Aurora',        color: '#00ff88', bg: 'rgba(0,40,30,0.8)',  bonus: 2,  duration: 25000, desc: '2× money, aurora borealis' },
-  { id: 'blizzard', name: '❄ Blizzard',       color: '#aaddff', bg: 'rgba(0,20,50,0.8)',  bonus: 1.5,duration: 18000, desc: '1.5× money, snow particles' },
-  { id: 'meteor',   name: '☄ Meteor Shower',  color: '#ff8844', bg: 'rgba(40,10,0,0.8)', bonus: 4,  duration: 15000, desc: '4× money, meteors rain down' },
+  { id: 'storm',    name: '⛈ Thunderstorm', color: '#7b68ee', bg: 'rgba(30,0,80,0.8)',  bonus: 3,  duration: 20000, desc: '3× money, heavy lightning' },
+  { id: 'aurora',   name: '🌌 Aurora',       color: '#00ff88', bg: 'rgba(0,40,30,0.8)', bonus: 2,  duration: 25000, desc: '2× money, aurora borealis' },
+  { id: 'blizzard', name: '❄ Blizzard',      color: '#aaddff', bg: 'rgba(0,20,50,0.8)', bonus: 1.5,duration: 18000, desc: '1.5× money, snow particles' },
+  { id: 'meteor',   name: '☄ Meteor Shower', color: '#ff8844', bg: 'rgba(40,10,0,0.8)', bonus: 4,  duration: 15000, desc: '4× money, meteors rain down' },
 ];
 let activeWeather = null;
 let weatherTimeout = null;
 
 // Achievements
 const ACHIEVEMENTS = [
-  { id: 'first',      name: 'First Launch',     icon: '🚀', desc: 'Launch your first firework',     target: 1,   stat: 'launched' },
-  { id: 'ten',        name: 'Getting Started',  icon: '🎇', desc: 'Launch 10 fireworks',            target: 10,  stat: 'launched' },
-  { id: 'hundred',    name: 'Pyro Apprentice',  icon: '🎆', desc: 'Launch 100 fireworks',           target: 100, stat: 'launched' },
-  { id: 'thousand',   name: 'Pyro Master',      icon: '🔥', desc: 'Launch 1,000 fireworks',         target: 1000,stat: 'launched' },
-  { id: 'rich',       name: 'Making Bank',      icon: '💰', desc: 'Earn $1,000 total',              target: 1000,stat: 'earned' },
-  { id: 'millionaire',name: 'Millionaire',      icon: '🤑', desc: 'Earn $1,000,000 total',          target: 1e6, stat: 'earned' },
-  { id: 'combo5',     name: 'Hot Streak',       icon: '🔥', desc: 'Reach a 5× combo streak',        target: 5,   stat: 'maxCombo' },
-  { id: 'combo10',    name: 'UNSTOPPABLE',      icon: '⚡', desc: 'Reach a 10× combo streak',       target: 10,  stat: 'maxCombo' },
-  { id: 'rebirth1',   name: 'Born Again',       icon: '♻️', desc: 'Complete your first rebirth',    target: 1,   stat: 'rebirths' },
-  { id: 'rebirth5',   name: 'Eternal',          icon: '🌀', desc: 'Complete 5 rebirths',            target: 5,   stat: 'rebirths' },
-  { id: 'shapes',     name: 'Shape Shifter',    icon: '🌟', desc: 'Own 3 firework shapes',          target: 3,   stat: 'shapes' },
-  { id: 'weather',    name: 'Storm Chaser',     icon: '🌩', desc: 'Survive a weather event',        target: 1,   stat: 'weatherEvents' },
+  { id: 'first',       name: 'First Launch',    icon: '🚀', desc: 'Launch your first firework',    target: 1,    stat: 'launched' },
+  { id: 'ten',         name: 'Getting Started', icon: '🎇', desc: 'Launch 10 fireworks',           target: 10,   stat: 'launched' },
+  { id: 'hundred',     name: 'Pyro Apprentice', icon: '🎆', desc: 'Launch 100 fireworks',          target: 100,  stat: 'launched' },
+  { id: 'thousand',    name: 'Pyro Master',     icon: '🔥', desc: 'Launch 1,000 fireworks',        target: 1000, stat: 'launched' },
+  { id: 'rich',        name: 'Making Bank',     icon: '💰', desc: 'Earn $1,000 total',             target: 1000, stat: 'earned' },
+  { id: 'millionaire', name: 'Millionaire',     icon: '🤑', desc: 'Earn $1,000,000 total',         target: 1e6,  stat: 'earned' },
+  { id: 'combo5',      name: 'Hot Streak',      icon: '🔥', desc: 'Reach a 5× combo streak',       target: 5,    stat: 'maxCombo' },
+  { id: 'combo10',     name: 'UNSTOPPABLE',     icon: '⚡', desc: 'Reach a 10× combo streak',      target: 10,   stat: 'maxCombo' },
+  { id: 'rebirth1',    name: 'Born Again',      icon: '♻️', desc: 'Complete your first rebirth',   target: 1,    stat: 'rebirths' },
+  { id: 'rebirth5',    name: 'Eternal',         icon: '🌀', desc: 'Complete 5 rebirths',           target: 5,    stat: 'rebirths' },
+  { id: 'shapes',      name: 'Shape Shifter',   icon: '🌟', desc: 'Own 3 firework shapes',         target: 3,    stat: 'shapes' },
+  { id: 'weather',     name: 'Storm Chaser',    icon: '🌩', desc: 'Survive a weather event',       target: 1,    stat: 'weatherEvents' },
 ];
 let achStats = { launched: 0, earned: 0, maxCombo: 0, rebirths: 0, shapes: 1, weatherEvents: 0 };
 let unlockedAchs = {};
 
-// Prestige state
-let prestigeOwned = {};
-
 const ADMIN_FALLBACK = { "FaZgGtIHzVcnSS6c8JAoir9RG8J2": true, "BxQ1aTqPndOfHzuX3OzlCcD4pbC3": true };
 const TAGS_INFO = {
-  owner: { name: "Owner", description: "Assigned to the owner" },
-  vip: { name: "VIP", description: "Give to some supporters" },
-  donator: { name: "Donator", description: "Thank-you for supporting DR3AM STUDI0S" },
-  streamer: { name: "Streamer", description: "Verified streamers" },
-  youtuber: { name: "Youtuber", description: "Verified youtubers" },
-  regular: { name: "Regular", description: "Default player tag" },
-  fart: { name: "Fart", description: "A tag for the fart" }
+  owner:    { name: "Owner",    description: "Assigned to the owner" },
+  vip:      { name: "VIP",     description: "Give to some supporters" },
+  donator:  { name: "Donator", description: "Thank-you for supporting DR3AM STUDI0S" },
+  streamer: { name: "Streamer",description: "Verified streamers" },
+  youtuber: { name: "Youtuber",description: "Verified youtubers" },
+  regular:  { name: "Regular", description: "Default player tag" },
+  fart:     { name: "Fart",    description: "A tag for the fart" }
 };
 
 let globalMultiplier = 1;
@@ -858,7 +850,6 @@ function addCombo(isAuto = false) {
     checkAchievements();
   }
 
-  // Update streak bar
   if (comboStreak > 1) {
     document.getElementById('streakBar').style.display = 'block';
     document.getElementById('streakLabel').textContent = `STREAK: ${comboStreak}×`;
@@ -866,7 +857,6 @@ function addCombo(isAuto = false) {
     showComboBanner();
   }
 
-  // Reset timer
   if (comboTimeout) clearTimeout(comboTimeout);
   comboTimeout = setTimeout(() => {
     comboStreak = 0;
@@ -933,7 +923,6 @@ function getShapeVelocities(shape) {
       break;
     }
     case 'smiley': {
-      // Eyes
       for (let e = 0; e < 2; e++) {
         const ex = (e === 0 ? -1.5 : 1.5);
         for (let i = 0; i < 20; i++) {
@@ -941,19 +930,17 @@ function getShapeVelocities(shape) {
           vels.push({ vx: ex + Math.cos(a) * 0.8, vy: -1.5 + Math.sin(a) * 0.8 });
         }
       }
-      // Smile
       for (let i = 0; i < 40; i++) {
         const t = (i / 40) * Math.PI;
         vels.push({ vx: Math.cos(t) * 2.5, vy: Math.sin(t) * 1.5 + 0.5 });
       }
-      // Face outline
       for (let i = 0; i < 60; i++) {
         const a = (i / 60) * Math.PI * 2;
         vels.push({ vx: Math.cos(a) * 4, vy: Math.sin(a) * 4 });
       }
       break;
     }
-    default: { // circle
+    default: {
       const count = prestigeOwned['mega_burst'] ? 200 : 100;
       for (let i = 0; i < count; i++) {
         const a = Math.random() * Math.PI * 2;
@@ -992,7 +979,6 @@ class Firework {
     return false;
   }
   draw() {
-    // Trail
     this.trail.forEach((t, i) => {
       const alpha = (i / this.trail.length) * 0.6;
       ctx.beginPath();
@@ -1013,7 +999,10 @@ class Firework {
 class Particle {
   constructor(x, y, colorObj, vx, vy) {
     this.x = x; this.y = y;
-    this.color = prestigeOwned['golden_sparks'] ? 'hsl(48,100%,65%)' : colorObj.color;
+    // Golden sparks: only apply gold if owned AND toggle is on
+    this.color = (prestigeOwned['golden_sparks'] && goldenSparksActive)
+      ? 'hsl(48,100%,65%)'
+      : colorObj.color;
     this.vx = vx !== undefined ? vx : Math.cos(Math.random()*Math.PI*2)*Math.random()*4;
     this.vy = vy !== undefined ? vy : Math.sin(Math.random()*Math.PI*2)*Math.random()*4;
     this.life = 100 + Math.random() * 30;
@@ -1037,7 +1026,6 @@ class Particle {
   }
 }
 
-// Snow / aurora particles for weather
 class WeatherParticle {
   constructor() { this.reset(); }
   reset() {
@@ -1046,7 +1034,6 @@ class WeatherParticle {
     this.size = Math.random() * 3 + 1;
     this.speed = Math.random() * 2 + 0.5;
     this.drift = (Math.random()-0.5)*0.5;
-    this.life = 1;
     this.color = activeWeather?.id === 'blizzard' ? `rgba(200,230,255,0.8)` : `hsla(${Math.random()*360},100%,70%,0.7)`;
   }
   update() { this.y += this.speed; this.x += this.drift; if(this.y > canvas.height+10) this.reset(); }
@@ -1055,21 +1042,18 @@ class WeatherParticle {
 let weatherParticles = [];
 
 // ═══════════════════════════════════════════════════
-//  EXPLODE FUNCTION
+//  EXPLODE
 // ═══════════════════════════════════════════════════
 function explode(x, y, colorObj) {
   if (!soundMuted) { try { const s = document.getElementById('fireworkSound'); s.currentTime = 0; s.play(); } catch(e){} }
 
-  const shape = activeShape;
-  const vels = getShapeVelocities(shape);
+  const vels = getShapeVelocities(activeShape);
   vels.forEach(v => particles.push(new Particle(x, y, colorObj, v.vx, v.vy)));
 
-  // Weather: meteor shower bonus explosion
   if (activeWeather?.id === 'meteor') {
     for(let i=0;i<20;i++) particles.push(new Particle(x+(Math.random()-0.5)*60, y+(Math.random()-0.5)*40, {color:'hsl(30,100%,60%)'}));
   }
 
-  // Dark matter prestige
   if (prestigeOwned['dark_matter']) {
     for(let i=0;i<30;i++) {
       const a = (i/30)*Math.PI*2, r = 2+Math.random()*2;
@@ -1088,13 +1072,13 @@ function explode(x, y, colorObj) {
 }
 
 // ═══════════════════════════════════════════════════
-//  LAUNCH FIREWORK
+//  LAUNCH FIREWORK  (FIX 1: auto-launches don't block manual cooldown)
 // ═══════════════════════════════════════════════════
 function launchFirework(x, y, isAuto = false) {
   const max = Math.min(unlockedColors, colors.length);
   const colorObj = colors[Math.floor(Math.random() * Math.max(1, max))];
   fireworks.push(new Firework(x, y, colorObj));
-  lastClick = Date.now();
+  if (!isAuto) lastClick = Date.now(); // FIX 1: only manual clicks set the cooldown
   achStats.launched++;
   addCombo(isAuto);
   checkAchievements();
@@ -1108,15 +1092,9 @@ canvas.addEventListener('click', e => {
 //  ANIMATION LOOP
 // ═══════════════════════════════════════════════════
 function animate() {
-  // Weather overlay
-  if (activeWeather) {
-    ctx.fillStyle = 'rgba(0,0,0,0.15)';
-  } else {
-    ctx.fillStyle = 'rgba(0,0,0,0.2)';
-  }
+  ctx.fillStyle = activeWeather ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.2)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Galaxy event
   if (galaxyEventActive) {
     if (Math.random() < 0.008) spawnGalaxySpiral();
     if (Date.now() > galaxyEventEnd) galaxyEventActive = false;
@@ -1124,12 +1102,10 @@ function animate() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Weather particles
   if (activeWeather && (activeWeather.id === 'blizzard' || activeWeather.id === 'aurora' || activeWeather.id === 'storm')) {
     weatherParticles.forEach(p => { p.update(); p.draw(); });
   }
 
-  // Aurora columns
   if (activeWeather?.id === 'aurora') {
     for (let i = 0; i < 3; i++) {
       const x = (canvas.width / 4) * (i + 1);
@@ -1145,7 +1121,6 @@ function animate() {
   for (let i = fireworks.length - 1; i >= 0; i--) { if (fireworks[i].update()) fireworks.splice(i,1); else fireworks[i].draw(); }
   for (let i = particles.length - 1; i >= 0; i--) { particles[i].update(); particles[i].draw(); if (particles[i].life <= 0) particles.splice(i,1); }
 
-  // Cooldown bar
   const pct = Math.min(100, ((Date.now() - lastClick) / clickDelay) * 100);
   document.getElementById('cooldownFill').style.width = pct + '%';
   document.getElementById('moneyMultiplier').textContent = ((rebirthCount+1) * getComboMultiplier() * (activeWeather ? activeWeather.bonus : 1)).toFixed(1) + '×';
@@ -1160,9 +1135,7 @@ animate();
 function triggerWeatherEvent(eventObj) {
   if (activeWeather) return;
   activeWeather = eventObj;
-
   weatherParticles = Array.from({length: 80}, () => new WeatherParticle());
-
   achStats.weatherEvents++;
   checkAchievements();
 
@@ -1173,7 +1146,6 @@ function triggerWeatherEvent(eventObj) {
   banner.style.borderColor = eventObj.color;
   banner.style.boxShadow = `0 0 20px ${eventObj.color}44`;
   banner.textContent = `${eventObj.name} — ${eventObj.desc}`;
-
   showNotification(`${eventObj.name} started! ${eventObj.bonus}× money bonus!`, 'event', 4000);
 
   if (weatherTimeout) clearTimeout(weatherTimeout);
@@ -1190,7 +1162,6 @@ function randomWeatherEvent() {
   triggerWeatherEvent(e);
 }
 
-// Auto weather every 2-4 minutes
 function scheduleWeather() {
   const delay = 120000 + Math.random() * 120000;
   setTimeout(() => { if (!activeWeather) randomWeatherEvent(); scheduleWeather(); }, delay);
@@ -1206,10 +1177,10 @@ function checkAchievements() {
     let val;
     switch(ach.stat) {
       case 'launched': val = achStats.launched; break;
-      case 'earned': val = achStats.earned; break;
+      case 'earned':   val = achStats.earned; break;
       case 'maxCombo': val = achStats.maxCombo; break;
       case 'rebirths': val = achStats.rebirths; break;
-      case 'shapes': val = achStats.shapes; break;
+      case 'shapes':   val = achStats.shapes; break;
       case 'weatherEvents': val = achStats.weatherEvents; break;
     }
     if (val >= ach.target) {
@@ -1239,10 +1210,10 @@ function renderAchievements() {
     let progVal;
     switch(ach.stat) {
       case 'launched': progVal = achStats.launched; break;
-      case 'earned': progVal = achStats.earned; break;
+      case 'earned':   progVal = achStats.earned; break;
       case 'maxCombo': progVal = achStats.maxCombo; break;
       case 'rebirths': progVal = achStats.rebirths; break;
-      case 'shapes': progVal = achStats.shapes; break;
+      case 'shapes':   progVal = achStats.shapes; break;
       case 'weatherEvents': progVal = achStats.weatherEvents; break;
     }
     card.innerHTML = `
@@ -1294,7 +1265,7 @@ function renderShapeShop() {
 }
 
 // ═══════════════════════════════════════════════════
-//  PRESTIGE SHOP
+//  PRESTIGE SHOP  (with Golden Sparks toggle)
 // ═══════════════════════════════════════════════════
 function renderPrestigeShop() {
   document.getElementById('ppDisplay').textContent = prestigePoints;
@@ -1304,26 +1275,46 @@ function renderPrestigeShop() {
     const owned = !!prestigeOwned[item.id];
     const el = document.createElement('div');
     el.className = 'prestige-item';
+
+    let btnHTML = '';
+    if (item.toggleable && owned) {
+      // Golden Sparks: show ON/OFF toggle button
+      const isOn = goldenSparksActive;
+      btnHTML = `<button class="pi-btn ${isOn ? 'toggle-on' : 'toggle-off'}" data-id="${item.id}" data-action="toggle">${isOn ? '✨ ON' : '○ OFF'}</button>`;
+    } else {
+      btnHTML = `<button class="pi-btn" ${owned ? 'disabled' : ''} data-id="${item.id}" data-action="buy">${owned ? '✓ Owned' : item.cost + ' PP'}</button>`;
+    }
+
     el.innerHTML = `
       <div class="pi-icon">${item.icon}</div>
       <div class="pi-info">
         <div class="pi-name">${item.name}</div>
         <div class="pi-desc">${item.desc}</div>
       </div>
-      <button class="pi-btn" ${owned ? 'disabled' : ''} data-id="${item.id}" data-cost="${item.cost}">
-        ${owned ? '✓ Owned' : item.cost + ' PP'}
-      </button>
+      ${btnHTML}
     `;
+
     el.querySelector('.pi-btn').addEventListener('click', () => {
-      if (owned) return;
-      if (prestigePoints >= item.cost) {
-        prestigePoints -= item.cost;
-        prestigeOwned[item.id] = true;
-        showNotification(`${item.name} activated!`, 'event');
-        renderPrestigeShop();
+      const action = el.querySelector('.pi-btn').dataset.action;
+      if (action === 'toggle') {
+        // Toggle golden sparks on/off
+        goldenSparksActive = !goldenSparksActive;
+        showNotification(`Golden Sparks ${goldenSparksActive ? 'ON ✨' : 'OFF'}`);
         saveProgressOnline().catch(()=>{});
+        renderPrestigeShop();
       } else {
-        showNotification(`Need ${item.cost} PP (earn from Rebirths)`);
+        // Buy
+        if (owned) return;
+        if (prestigePoints >= item.cost) {
+          prestigePoints -= item.cost;
+          prestigeOwned[item.id] = true;
+          if (item.id === 'golden_sparks') goldenSparksActive = true;
+          showNotification(`${item.name} activated!`, 'event');
+          renderPrestigeShop();
+          saveProgressOnline().catch(()=>{});
+        } else {
+          showNotification(`Need ${item.cost} PP (earn from Rebirths)`);
+        }
       }
     });
     grid.appendChild(el);
@@ -1384,17 +1375,17 @@ function updateButtons() {
   const maxC = unlockedColors >= colors.length;
   const maxD = clickDelay <= 100;
   const maxA = autoAmount >= 4;
-  document.getElementById('buyColor').innerHTML = maxC ? '<span>Buy Color</span><span class="max-tag">MAX</span>' : `<span>Buy Color</span><span class="price">$${fmt(colorPrice)}</span>`;
-  document.getElementById('reduceDelay').innerHTML = maxD ? '<span>Reduce Delay</span><span class="max-tag">MAX</span>' : `<span>Reduce Delay</span><span class="price">$${fmt(delayPrice)}</span>`;
-  document.getElementById('buyAuto').innerHTML = maxA ? '<span>Auto-Launch</span><span class="max-tag">MAX</span>' : `<span>Auto-Launch</span><span class="price">$${fmt(autoPrice)}</span>`;
-  document.getElementById('rebirthBtn').innerHTML = `<span>⚡ Rebirth</span><span class="price">$${fmt(rebirthPrice)}</span>`;
-  document.getElementById('unlockedColors').textContent = unlockedColors;
-  document.getElementById('delayDisplay').textContent = clickDelay;
-  document.getElementById('autoSpeedDisplay').textContent = autoSpeed.toFixed(2);
-  document.getElementById('rebirthBadge').textContent = 'Rebirth ' + rebirthCount;
-  document.getElementById('colorPriceTag').textContent = maxC ? 'MAX' : '$'+fmt(colorPrice);
-  document.getElementById('delayPriceTag').textContent = maxD ? 'MAX' : '$'+fmt(delayPrice);
-  document.getElementById('autoPriceTag').textContent = maxA ? 'MAX' : '$'+fmt(autoPrice);
+  document.getElementById('buyColor').innerHTML    = maxC ? '<span>Buy Color</span><span class="max-tag">MAX</span>'     : `<span>Buy Color</span><span class="price">$${fmt(colorPrice)}</span>`;
+  document.getElementById('reduceDelay').innerHTML = maxD ? '<span>Reduce Delay</span><span class="max-tag">MAX</span>'  : `<span>Reduce Delay</span><span class="price">$${fmt(delayPrice)}</span>`;
+  document.getElementById('buyAuto').innerHTML     = maxA ? '<span>Auto-Launch</span><span class="max-tag">MAX</span>'   : `<span>Auto-Launch</span><span class="price">$${fmt(autoPrice)}</span>`;
+  document.getElementById('rebirthBtn').innerHTML  = `<span>⚡ Rebirth</span><span class="price">$${fmt(rebirthPrice)}</span>`;
+  document.getElementById('unlockedColors').textContent  = unlockedColors;
+  document.getElementById('delayDisplay').textContent    = clickDelay;
+  document.getElementById('autoSpeedDisplay').textContent= autoSpeed.toFixed(2);
+  document.getElementById('rebirthBadge').textContent    = 'Rebirth ' + rebirthCount;
+  document.getElementById('colorPriceTag').textContent   = maxC ? 'MAX' : '$'+fmt(colorPrice);
+  document.getElementById('delayPriceTag').textContent   = maxD ? 'MAX' : '$'+fmt(delayPrice);
+  document.getElementById('autoPriceTag').textContent    = maxA ? 'MAX' : '$'+fmt(autoPrice);
   document.getElementById('rebirthPriceTag').textContent = '$'+fmt(rebirthPrice);
 }
 
@@ -1412,7 +1403,6 @@ document.getElementById('reduceDelay').addEventListener('click', () => {
     updateButtons(); saveProgressOnline().catch(()=>{}); showNotification('Delay reduced! ⚡');
   }
 });
-
 document.getElementById('buyAuto').addEventListener('click', () => {
   if (money >= autoPrice && autoAmount < 4) {
     money -= autoPrice; autoAmount++; autoSpeed /= 1.2; autoPrice = Math.floor(autoPrice * 1.7);
@@ -1420,10 +1410,15 @@ document.getElementById('buyAuto').addEventListener('click', () => {
     updateButtons(); saveProgressOnline().catch(()=>{}); startAutoLaunch(); showNotification('Auto-launch upgraded! 🚀');
   }
 });
+
+// FIX 2: Rebirth no longer resets autoAmount/autoSpeed/autoPrice
 document.getElementById('rebirthBtn').addEventListener('click', async () => {
   if (money < rebirthPrice) { showNotification(`Need $${fmt(rebirthPrice)} to rebirth!`); return; }
   if (!confirm(`Rebirth for $${fmt(rebirthPrice)}? You'll gain 1 Prestige Point and unlock new colors.`)) return;
-  money = 0; rebirthCount++; unlockedColors = 1; clickDelay = 1200; autoAmount = 0; autoSpeed = 2.5; autoPrice = 200; colorPrice = 50; delayPrice = 100;
+  money = 0; rebirthCount++;
+  unlockedColors = 1; clickDelay = 1200;
+  colorPrice = 50; delayPrice = 100;
+  // autoAmount, autoSpeed, autoPrice are intentionally preserved across rebirths
   rebirthPrice = Math.floor(500 * Math.pow(1.5, rebirthCount));
   prestigePoints++;
   colors = [...baseColors, ...getRebirthColors(rebirthCount)];
@@ -1431,7 +1426,7 @@ document.getElementById('rebirthBtn').addEventListener('click', async () => {
   updateButtons();
   document.getElementById('money').textContent = fmt(money);
   await saveProgressOnline().catch(()=>{});
-  startAutoLaunch();
+  // Auto-launch keeps running — no need to restart
   showNotification(`Rebirth #${rebirthCount} complete! +1 Prestige Point ⭐`, 'event', 4000);
   checkAchievements();
 });
@@ -1488,7 +1483,7 @@ async function saveProgressOnline() {
     money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed,
     colorPrice, delayPrice, rebirthPrice, autoPrice,
     achStats, unlockedAchs, ownedShapes, activeShape,
-    prestigePoints, prestigeOwned
+    prestigePoints, prestigeOwned, goldenSparksActive
   });
 }
 
@@ -1496,16 +1491,26 @@ async function loadProgressOnline(uid) {
   const snap = await db.ref('progress/' + uid).once('value');
   if (snap.exists()) {
     const p = snap.val();
-    money = p.money||0; unlockedColors = p.unlockedColors||1; clickDelay = p.clickDelay||1200;
-    rebirthCount = p.rebirthCount||0; autoAmount = p.autoAmount||0; autoSpeed = p.autoSpeed||2.5;
-    colorPrice = p.colorPrice||50; delayPrice = p.delayPrice||100; rebirthPrice = p.rebirthPrice||500;
-    autoPrice = p.autoPrice||200;
-    if (p.achStats) achStats = {...achStats, ...p.achStats};
-    if (p.unlockedAchs) unlockedAchs = p.unlockedAchs;
-    if (p.ownedShapes) ownedShapes = p.ownedShapes;
-    if (p.activeShape) activeShape = p.activeShape;
+    money          = p.money||0;
+    unlockedColors = p.unlockedColors||1;
+    clickDelay     = p.clickDelay||1200;
+    rebirthCount   = p.rebirthCount||0;
+    autoAmount     = p.autoAmount||0;
+    autoSpeed      = p.autoSpeed||2.5;
+    colorPrice     = p.colorPrice||50;
+    delayPrice     = p.delayPrice||100;
+    rebirthPrice   = p.rebirthPrice||500;
+    autoPrice      = p.autoPrice||200;
+    if (p.achStats)      achStats      = {...achStats, ...p.achStats};
+    if (p.unlockedAchs)  unlockedAchs  = p.unlockedAchs;
+    if (p.ownedShapes)   ownedShapes   = p.ownedShapes;
+    if (p.activeShape)   activeShape   = p.activeShape;
     if (p.prestigePoints !== undefined) prestigePoints = p.prestigePoints;
     if (p.prestigeOwned) prestigeOwned = p.prestigeOwned;
+    // Load golden sparks toggle state; default true if owned
+    if (p.goldenSparksActive !== undefined) goldenSparksActive = p.goldenSparksActive;
+    else goldenSparksActive = !!prestigeOwned['golden_sparks'];
+
     colors = [...baseColors, ...getRebirthColors(rebirthCount)];
     document.getElementById('money').textContent = fmt(money);
     updateButtons(); startAutoLaunch();
@@ -1522,16 +1527,16 @@ function loadSettings() {
   if (!s) return;
   const settings = JSON.parse(s);
   document.getElementById('musicVolume').value = settings.musicVolume ?? 35;
-  document.getElementById('gameVolume').value = settings.gameVolume ?? 100;
-  document.getElementById('bgMusic').volume = (settings.musicVolume ?? 35) / 100;
-  document.getElementById('fireworkSound').volume = (settings.gameVolume ?? 100) / 100;
-  document.getElementById('musicVolDisplay').textContent = (settings.musicVolume ?? 35) + '%';
-  document.getElementById('gameVolDisplay').textContent = (settings.gameVolume ?? 100) + '%';
+  document.getElementById('gameVolume').value  = settings.gameVolume  ?? 100;
+  document.getElementById('bgMusic').volume        = (settings.musicVolume ?? 35)  / 100;
+  document.getElementById('fireworkSound').volume  = (settings.gameVolume  ?? 100) / 100;
+  document.getElementById('musicVolDisplay').textContent = (settings.musicVolume ?? 35)  + '%';
+  document.getElementById('gameVolDisplay').textContent  = (settings.gameVolume  ?? 100) + '%';
 }
 function saveSettings() {
   localStorage.setItem('fireworkSettings', JSON.stringify({
     musicVolume: document.getElementById('musicVolume').value,
-    gameVolume: document.getElementById('gameVolume').value
+    gameVolume:  document.getElementById('gameVolume').value
   }));
 }
 loadSettings();
@@ -1559,23 +1564,22 @@ document.addEventListener('click', function startBgMusic() {
 // ═══════════════════════════════════════════════════
 //  MODAL HELPERS
 // ═══════════════════════════════════════════════════
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-document.getElementById('openAchBtn').addEventListener('click', () => { renderAchievements(); openModal('achModal'); });
-document.getElementById('closeAch').addEventListener('click', () => closeModal('achModal'));
-document.getElementById('openShapeBtn').addEventListener('click', () => { renderShapeShop(); openModal('shapeModal'); });
-document.getElementById('closeShape').addEventListener('click', () => closeModal('shapeModal'));
+document.getElementById('openAchBtn').addEventListener('click',      () => { renderAchievements(); openModal('achModal'); });
+document.getElementById('closeAch').addEventListener('click',        () => closeModal('achModal'));
+document.getElementById('openShapeBtn').addEventListener('click',    () => { renderShapeShop(); openModal('shapeModal'); });
+document.getElementById('closeShape').addEventListener('click',      () => closeModal('shapeModal'));
 document.getElementById('openPrestigeBtn').addEventListener('click', () => { renderPrestigeShop(); openModal('prestigeModal'); });
-document.getElementById('closePrestige').addEventListener('click', () => closeModal('prestigeModal'));
-document.getElementById('openTagBtn').addEventListener('click', () => { renderTags(); openModal('tagModal'); });
-document.getElementById('closeTag').addEventListener('click', () => closeModal('tagModal'));
+document.getElementById('closePrestige').addEventListener('click',   () => closeModal('prestigeModal'));
+document.getElementById('openTagBtn').addEventListener('click',      () => { renderTags(); openModal('tagModal'); });
+document.getElementById('closeTag').addEventListener('click',        () => closeModal('tagModal'));
 document.getElementById('openSettingsBtn').addEventListener('click', () => openModal('settingsModal'));
-document.getElementById('closeSettings').addEventListener('click', () => closeModal('settingsModal'));
+document.getElementById('closeSettings').addEventListener('click',   () => closeModal('settingsModal'));
 document.getElementById('creditsBtn').addEventListener('click', () => alert('Firework Simulator\nCreated by DR3AM STUDI0S\nCoder: Dreamcrusher\nMusic: Ayost4rr\n\nSongs: Heading Home'));
-document.getElementById('leaderboardBtn').addEventListener('click', () => window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html','_blank'));
+document.getElementById('leaderboardBtn').addEventListener('click',  () => window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html','_blank'));
 
-// Close modals on backdrop click
 document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
 
 // ═══════════════════════════════════════════════════
@@ -1587,9 +1591,10 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
   money=0; unlockedColors=1; clickDelay=1200; rebirthCount=0; autoAmount=0; autoSpeed=2.5;
   colorPrice=50; delayPrice=100; rebirthPrice=500; autoPrice=200; colors=[...baseColors];
   achStats={launched:0,earned:0,maxCombo:0,rebirths:0,shapes:1,weatherEvents:0};
-  unlockedAchs={}; ownedShapes={circle:true}; activeShape='circle'; prestigePoints=0; prestigeOwned={};
+  unlockedAchs={}; ownedShapes={circle:true}; activeShape='circle';
+  prestigePoints=0; prestigeOwned={}; goldenSparksActive=true;
   document.getElementById('money').textContent=0; updateButtons(); startAutoLaunch();
-  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints,prestigeOwned});
+  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints,prestigeOwned,goldenSparksActive});
   showNotification('Progress reset!');
 });
 document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm('Log out?')) auth.signOut().then(()=>location.reload()); });
@@ -1597,7 +1602,6 @@ document.getElementById('logoutBtn').addEventListener('click', () => { if(confir
 // ═══════════════════════════════════════════════════
 //  AUTH
 // ═══════════════════════════════════════════════════
-const bannedW = bannedWords;
 async function createNewPlayer(user, username) {
   const uid = user.uid;
   username = (username||'Player').trim();
@@ -1607,12 +1611,12 @@ async function createNewPlayer(user, username) {
   const snap = await userRef.once('value');
   if (snap.exists()) return;
   await userRef.set({ username, created: Date.now(), tags: { regular: true } });
-  await db.ref('progress/'+uid).set({ money:0, unlockedColors:1, clickDelay:1200, rebirthCount:0, autoAmount:0, autoSpeed:2.5, colorPrice:50, delayPrice:100, rebirthPrice:500, autoPrice:200, fireworksLaunched:0, achStats, unlockedAchs, ownedShapes, activeShape, prestigePoints:0, prestigeOwned:{} });
+  await db.ref('progress/'+uid).set({ money:0, unlockedColors:1, clickDelay:1200, rebirthCount:0, autoAmount:0, autoSpeed:2.5, colorPrice:50, delayPrice:100, rebirthPrice:500, autoPrice:200, fireworksLaunched:0, achStats, unlockedAchs, ownedShapes, activeShape, prestigePoints:0, prestigeOwned:{}, goldenSparksActive:true });
 }
 
 document.getElementById('loginBtn').addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
-  const pw = document.getElementById('password').value;
+  const pw    = document.getElementById('password').value;
   if (!email||!pw) { document.getElementById('loginMsg').textContent='Enter email and password.'; return; }
   document.getElementById('loginMsg').textContent='Logging in...';
   try { await auth.signInWithEmailAndPassword(email, pw); }
@@ -1620,7 +1624,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
 });
 document.getElementById('signupBtn').addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
-  const pw = document.getElementById('password').value;
+  const pw    = document.getElementById('password').value;
   const uname = document.getElementById('username').value.trim();
   if (!email||!pw) { document.getElementById('loginMsg').textContent='Enter email and password.'; return; }
   document.getElementById('loginMsg').textContent='Creating account...';
@@ -1632,14 +1636,16 @@ document.getElementById('signupBtn').addEventListener('click', async () => {
 });
 document.getElementById('forgotBtn').addEventListener('click', () => {
   const email = document.getElementById('email').value;
-  auth.sendPasswordResetEmail(email).then(()=>document.getElementById('loginMsg').textContent='Reset email sent!').catch(e=>document.getElementById('loginMsg').textContent=e.message);
+  auth.sendPasswordResetEmail(email)
+    .then(()=>document.getElementById('loginMsg').textContent='Reset email sent!')
+    .catch(e=>document.getElementById('loginMsg').textContent=e.message);
 });
 
 function afterLogin() {
   currentUsername = censorUsername(currentUsername);
-  document.getElementById('loginBox').style.display = 'none';
-  document.getElementById('hud').style.display = 'block';
-  document.getElementById('toolbar').style.display = 'flex';
+  document.getElementById('loginBox').style.display  = 'none';
+  document.getElementById('hud').style.display       = 'block';
+  document.getElementById('toolbar').style.display   = 'flex';
   if (ADMIN_FALLBACK[currentUser]) document.getElementById('ownerPanel').style.display = 'block';
   loadProgressOnline(currentUser).catch(()=>{});
 }
@@ -1655,8 +1661,8 @@ auth.onAuthStateChanged(async user => {
     afterLogin();
   } else {
     document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('hud').style.display = 'none';
-    document.getElementById('toolbar').style.display = 'none';
+    document.getElementById('hud').style.display      = 'none';
+    document.getElementById('toolbar').style.display  = 'none';
   }
 });
 
@@ -1675,12 +1681,12 @@ async function initAdminEventsListener() {
   db.ref('adminEvents/latest').on('value', snap => {
     const val=snap.val(); if(!val||val.timestamp<=lastAdminTs) return;
     lastAdminTs=val.timestamp;
-    if (val.type==='MESSAGE') showNotification('📢 '+val.message, 'event', val.duration||5000);
-    else if (val.type==='GLITCH') { showNotification(val.message||'⚠ GLITCH EVENT','event',val.duration||8000); startGlitchEvent(val.duration||30000); }
-    else if (val.type==='NUKE') { for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height,{color:'white',value:10})); showNotification('💥 NUKE LAUNCHED!','event'); }
+    if      (val.type==='MESSAGE')      showNotification('📢 '+val.message, 'event', val.duration||5000);
+    else if (val.type==='GLITCH')       { showNotification(val.message||'⚠ GLITCH EVENT','event',val.duration||8000); startGlitchEvent(val.duration||30000); }
+    else if (val.type==='NUKE')         { for(let i=0;i<10;i++) fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height,{color:'white',value:10})); showNotification('💥 NUKE LAUNCHED!','event'); }
     else if (val.type==='megaFirework') { for(let i=0;i<30;i++) fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height/2+50,{color:'red',value:50})); showNotification('🎆 Mega Firework!','event'); }
-    else if (val.type==='Galaxy') { galaxyEventActive=true; galaxyEventEnd=Date.now()+30000; showNotification('🌌 GALAXY EVENT ACTIVE!','event',30000); }
-    else if (val.type==='WEATHER') { const e=WEATHER_EVENTS.find(w=>w.id===val.weatherId); if(e) triggerWeatherEvent(e); }
+    else if (val.type==='Galaxy')       { galaxyEventActive=true; galaxyEventEnd=Date.now()+30000; showNotification('🌌 GALAXY EVENT ACTIVE!','event',30000); }
+    else if (val.type==='WEATHER')      { const e=WEATHER_EVENTS.find(w=>w.id===val.weatherId); if(e) triggerWeatherEvent(e); }
   });
 }
 initAdminEventsListener();
@@ -1693,7 +1699,7 @@ document.getElementById('adminFireworkBtn').addEventListener('click',()=>sendAdm
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>sendAdminEvent('NUKE',''));
 document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('Galaxy',''));
 document.getElementById('glitchEventBtn').addEventListener('click',()=>sendAdminEvent('GLITCH','⚠ SYSTEM GLITCH (2×)',30000));
-document.getElementById('adminMessageBtn').addEventListener('click',async()=>{
+document.getElementById('adminMessageBtn').addEventListener('click', async()=>{
   const msg=prompt('Message for players:'); if(!msg) return;
   const dur=parseInt(prompt('Duration (seconds)?','10'));
   await sendAdminEvent('MESSAGE',msg.trim(),isNaN(dur)?6000:Math.min(Math.max(dur*1000,2000),15000));
