@@ -714,7 +714,7 @@ resizeCanvas();
 let currentUser = "", currentUsername = "";
 let money = 0, unlockedColors = 1, clickDelay = 1200, lastClick = Date.now();
 let rebirthCount = 0, colorPrice = 50, delayPrice = 100, rebirthPrice = 500;
-let autoAmount = 0, autoSpeed = 2.5, autoInterval = null, autoPrice = 200;
+let autoAmount = 0, autoSpeed = 2.5, autoInterval = -1, autoPrice = 200;
 let fireworks = [], particles = [];
 const gravity = 0.04;
 
@@ -1653,21 +1653,26 @@ document.getElementById('rebirthBtn').addEventListener('click', async () => {
 //  AUTO LAUNCH  (fixed)
 // ═══════════════════════════════════════════════════
 function startAutoLaunch() {
-  if (autoInterval) {
+  // Clear any existing interval (-1 = none running)
+  if (autoInterval !== -1) {
     clearInterval(autoInterval);
-    autoInterval = null;
+    autoInterval = -1;
   }
-  if (autoAmount > 0) {
-    autoInterval = setInterval(() => {
-      for (let i = 0; i < autoAmount; i++) {
-        launchFirework(
-          Math.random() * canvas.width,
-          Math.random() * (canvas.height / 2) + 100,
-          true
-        );
-      }
-    }, Math.max(500, autoSpeed * 1000));
-  }
+
+  if (autoAmount <= 0) return;
+
+  const delayMs = Math.max(500, Math.round(autoSpeed * 1000));
+
+  autoInterval = setInterval(function autoTick() {
+    if (!canvas.width || !canvas.height) return;
+    for (let i = 0; i < autoAmount; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * (canvas.height * 0.5) + 80;
+      launchFirework(x, y, true);
+    }
+  }, delayMs);
+
+  console.log('[Auto] Started: amount=' + autoAmount + ' delay=' + delayMs + 'ms interval=' + autoInterval);
 }
 
 // ═══════════════════════════════════════════════════
@@ -1820,7 +1825,7 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
   achStats={launched:0,earned:0,maxCombo:0,rebirths:0,shapes:1,weatherEvents:0,prestigeBought:0};
   unlockedAchs={}; ownedShapes={circle:true}; activeShape='circle';
   prestigePoints=0; prestigeOwned={}; goldenSparksActive=true;
-  comboHits=0; comboLevel=0;
+  comboHits=0; comboLevel=0; autoInterval=-1;
   document.getElementById('money').textContent=0;
   updateButtons(); startAutoLaunch();
   await db.ref('progress/'+currentUser).set({
