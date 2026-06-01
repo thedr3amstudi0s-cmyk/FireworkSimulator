@@ -571,19 +571,19 @@ canvas {
   <div style="display:flex; flex-direction:column; gap:6px;">
     <button class="shop-btn panel" id="buyColor">
       <span>Buy Color</span>
-      <span class="price" id="colorPriceTag">$50</span>
+      <span class="price">$50</span>
     </button>
     <button class="shop-btn panel" id="reduceDelay">
       <span>Reduce Delay</span>
-      <span class="price" id="delayPriceTag">$100</span>
+      <span class="price">$100</span>
     </button>
     <button class="shop-btn panel" id="buyAuto">
       <span>Auto-Launch</span>
-      <span class="price" id="autoPriceTag">$200</span>
+      <span class="price">$200</span>
     </button>
     <button class="shop-btn panel" id="rebirthBtn">
       <span>⚡ Rebirth</span>
-      <span class="price" id="rebirthPriceTag">$500</span>
+      <span class="price">$500</span>
     </button>
   </div>
 </div>
@@ -1604,10 +1604,6 @@ function updateButtons() {
   document.getElementById('delayDisplay').textContent     = clickDelay;
   document.getElementById('autoSpeedDisplay').textContent = autoSpeed.toFixed(2);
   document.getElementById('rebirthBadge').textContent     = 'Rebirth ' + rebirthCount;
-  document.getElementById('colorPriceTag').textContent    = maxC ? 'MAX' : '$'+fmt(colorPrice);
-  document.getElementById('delayPriceTag').textContent    = maxD ? 'MAX' : '$'+fmt(delayPrice);
-  document.getElementById('autoPriceTag').textContent     = maxA ? 'MAX' : '$'+fmt(autoPrice);
-  document.getElementById('rebirthPriceTag').textContent  = '$'+fmt(rebirthPrice);
 }
 
 document.getElementById('buyColor').addEventListener('click', () => {
