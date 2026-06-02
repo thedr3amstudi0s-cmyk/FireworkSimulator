@@ -424,7 +424,7 @@ function addCombo(isAuto){
     const cur=COMBO_THRESHOLDS[comboLevel-5];
     const next=comboLevel<COMBO_MAX_LEVEL?COMBO_THRESHOLDS[comboLevel-5+1]:COMBO_THRESHOLDS[5];
     const prog=comboLevel<COMBO_MAX_LEVEL?((comboHits-cur)/(next-cur))*100:100;
-    document.getElementById('streakLabel').textContent=`COMBO ${comboLevel}× — ${comboLevel}x MONEY!`;
+    document.getElementById('streakLabel').textContent=`COMBO ${comboLevel}× — +${comboLevel-1} BONUS!`;
     document.getElementById('streakFill').style.width=Math.min(100,prog)+'%';
     document.getElementById('streakFill').style.background='linear-gradient(90deg,var(--accent2),var(--gold))';
     if(leveledUp)showComboBanner();
@@ -432,7 +432,14 @@ function addCombo(isAuto){
   if(comboTimeout)clearTimeout(comboTimeout);
   comboTimeout=setTimeout(()=>{comboHits=0;comboLevel=0;document.getElementById('streakBar').style.display='none';},COMBO_WINDOW);
 }
+
+// Returns the ADDITIVE bonus from combo (0 if no combo, comboLevel-1 if combo active)
+// e.g. combo level 5 adds +4 to the total multiplier
+function getComboBonus(){return comboLevel>=5?comboLevel-1:0;}
+
+// Keep getComboMultiplier as a convenience used elsewhere (returns 1 when no combo, comboLevel when active)
 function getComboMultiplier(){return comboLevel>=5?comboLevel:1;}
+
 let comboBannerTimeout;
 function showComboBanner(){
   const el=document.getElementById('comboBanner');
@@ -802,6 +809,12 @@ class WeatherParticle{
 
 // ═══════════════════════════════════════════════════
 //  EXPLODE
+//  CHANGED: multipliers are now ADDITIVE not multiplicative.
+//  Formula: colorValue × (1 + rebirthBonus + comboBonus + glitchBonus + weatherBonus)
+//    rebirthBonus  = rebirthCount          (rebirth 3 → +3)
+//    comboBonus    = comboLevel - 1        (combo 5× → +4, combo 10× → +9)
+//    glitchBonus   = globalMultiplier - 1  (glitch = +1)
+//    weatherBonus  = weather.bonus - 1     (storm 3× → +2, volcano 5× → +4)
 // ═══════════════════════════════════════════════════
 function explode(x,y,colorObj){
   if(!soundMuted){try{const s=document.getElementById('fireworkSound');s.currentTime=0;s.play();}catch(e){}}
@@ -811,7 +824,8 @@ function explode(x,y,colorObj){
   if(activeWeather?.id==='volcano'){for(let i=0;i<15;i++){const a=Math.random()*Math.PI*2;particles.push(new Particle(x,y,{color:`hsl(${10+Math.random()*40},100%,60%)`},Math.cos(a)*Math.random()*5,Math.sin(a)*Math.random()*5-2));}}
   if(prestigeOwned['dark_matter']){for(let i=0;i<30;i++){const a=(i/30)*Math.PI*2,r=2+Math.random()*2;particles.push(new Particle(x,y,{color:'hsla(260,80%,40%,0.8)'},Math.cos(a)*r,Math.sin(a)*r));}}
   const weatherBonus=activeWeather?activeWeather.bonus:1;
-  const earned=colorObj.value*(rebirthCount+1)*globalMultiplier*getComboMultiplier()*weatherBonus;
+  // ADDITIVE: total multiplier = 1 + rebirth + (combo-1) + (glitch-1) + (weather-1)
+  const earned=colorObj.value*(1+rebirthCount+(getComboMultiplier()-1)+(globalMultiplier-1)+(weatherBonus-1));
   money+=earned; achStats.earned+=earned; chSessionEarned+=earned;
   // Check simultaneous for challenge
   if(activeChallenge?.def.stat==='simultaneous'){chSimultaneous=fireworks.length+1;tickChallenge('simultaneous');}
@@ -894,7 +908,11 @@ function animate(){
 
   const pct=Math.min(100,((Date.now()-lastClick)/clickDelay)*100);
   document.getElementById('cooldownFill').style.width=pct+'%';
-  document.getElementById('moneyMultiplier').textContent=((rebirthCount+1)*getComboMultiplier()*(activeWeather?activeWeather.bonus:1)).toFixed(1)+'×';
+
+  // HUD multiplier display — ADDITIVE: 1 + rebirth + comboBonus + glitchBonus + weatherBonus
+  const weatherBonus=activeWeather?activeWeather.bonus:1;
+  const totalMult=1+rebirthCount+(getComboMultiplier()-1)+(globalMultiplier-1)+(weatherBonus-1);
+  document.getElementById('moneyMultiplier').textContent=totalMult.toFixed(1)+'×';
 
   // Tick timed challenge
   if(activeChallenge?.def.timeLimit>0)updateChallengeBar();
@@ -919,7 +937,7 @@ function triggerEvent(evObj){
       case 'glitch':
         showBanner(evObj);
         startGlitchEvent(evObj.duration);
-        showNotification('⚠️ SYSTEM GLITCH! 2× money for 30s!','event',4000);
+        showNotification('⚠️ SYSTEM GLITCH! +1 money bonus for 30s!','event',4000);
         setTimeout(()=>hideBanner(),evObj.duration);
         break;
       case 'nuke':
@@ -932,19 +950,19 @@ function triggerEvent(evObj){
         fireworkRainInterval=setInterval(()=>{
           for(let i=0;i<3;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*(canvas.height/2)+50,colors[Math.floor(Math.random()*Math.max(1,unlockedColors))]));
         },800);
-        showNotification('🎆 Firework Rain! 2× money + auto mega burst!','event',4000);
+        showNotification('🎆 Firework Rain! +1 money bonus + auto mega burst!','event',4000);
         setTimeout(()=>{activeWeather=null;clearInterval(fireworkRainInterval);fireworkRainInterval=-1;hideBanner();showNotification('Firework Rain ended.','',2000);},evObj.duration);
         break;
       case 'golden_hour':
         showBanner(evObj); activeWeather=evObj; achStats.weatherEvents++;
-        showNotification('✨ Golden Hour! 3.5× money + golden particles!','event',4000);
+        showNotification('✨ Golden Hour! +2.5 money bonus + golden particles!','event',4000);
         setTimeout(()=>{activeWeather=null;hideBanner();showNotification('Golden Hour ended.','',2000);},evObj.duration);
         break;
       case 'blackhole':
         blackholeActive=true; blackholeX=canvas.width/2; blackholeY=canvas.height/2;
         activeWeather=evObj; achStats.weatherEvents++;
         showBanner(evObj);
-        showNotification('🕳️ BLACK HOLE! 6× money — everything gets pulled in!','event',4000);
+        showNotification('🕳️ BLACK HOLE! +5 money bonus — everything gets pulled in!','event',4000);
         setTimeout(()=>{blackholeActive=false;activeWeather=null;hideBanner();showNotification('Black hole collapsed.','',2000);},evObj.duration);
         break;
     }
@@ -957,7 +975,7 @@ function triggerEvent(evObj){
   weatherParticles=Array.from({length:80},()=>new WeatherParticle());
   checkAchievements();
   showBanner(evObj);
-  showNotification(`${evObj.icon} ${evObj.name} started! ${evObj.bonus}× money!`,'event',4000);
+  showNotification(`${evObj.icon} ${evObj.name} started! +${evObj.bonus-1} money bonus!`,'event',4000);
   if(weatherTimeout)clearTimeout(weatherTimeout);
   weatherTimeout=setTimeout(()=>{activeWeather=null;weatherParticles=[];hideBanner();showNotification('Weather event ended.','',2000);},evObj.duration);
 }
@@ -992,7 +1010,7 @@ function renderEventPicker(){
         <div class="ec-name">${ev.name}</div>
         <div class="ec-desc">${ev.desc}</div>
       </div>
-      <div class="ec-badge">${ev.bonus?ev.bonus+'×':'—'}</div>
+      <div class="ec-badge">${ev.bonus?'+'+((ev.bonus-1)||0):'—'}</div>
     `;
     card.addEventListener('click',()=>{
       sendAdminEvent(ev.type==='weather'?'WEATHER':'SPECIAL',ev.id,ev.duration);
@@ -1350,27 +1368,21 @@ auth.onAuthStateChanged(async user=>{
 
 // ═══════════════════════════════════════════════════
 //  ADMIN — FIXED announcement listener
-//  Key fix: read current timestamp THEN subscribe.
-//  Only messages with timestamp STRICTLY AFTER the
-//  snapshot we read at login are treated as new.
 // ═══════════════════════════════════════════════════
 let adminListenerBound=false;
 async function initAdminEventsListener(){
   if(adminListenerBound)return;
   adminListenerBound=true;
-  // Step 1: read current event timestamp so we can ignore it
   let seenTs=0;
   try{
     const snap=await db.ref('adminEvents/latest').once('value');
     seenTs=snap.val()?.timestamp||0;
   }catch(e){}
 
-  // Step 2: subscribe — the .on fires immediately with current value,
-  //  then again on every future change. We use seenTs to skip the first.
   db.ref('adminEvents/latest').on('value',snap=>{
     const val=snap.val();
     if(!val||val.timestamp<=seenTs)return;
-    seenTs=val.timestamp; // update so we don't re-process
+    seenTs=val.timestamp;
     handleAdminEvent(val);
   });
 }
@@ -1411,7 +1423,7 @@ document.getElementById('viewUsersBtn').addEventListener('click',()=>showNotific
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>{for(let i=0;i<30;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height/2+50,{color:`hsl(${Math.random()*360},100%,60%)`,value:50}));showNotification('🎆 Mega Firework!','event');});
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>{const ev=ALL_EVENTS.find(e=>e.id==='nuke');if(ev)sendAdminEvent('SPECIAL',ev.id,ev.duration);});
 document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>{sendAdminEvent('SPECIAL','galaxy',30000);});
-document.getElementById('glitchEventBtn').addEventListener('click',()=>{db.ref('adminEvents/latest').set({type:'GLITCH',eventId:'glitch',message:'⚠ SYSTEM GLITCH (2×)',duration:30000,timestamp:Date.now()});});
+document.getElementById('glitchEventBtn').addEventListener('click',()=>{db.ref('adminEvents/latest').set({type:'GLITCH',eventId:'glitch',message:'⚠ SYSTEM GLITCH (+1 bonus)',duration:30000,timestamp:Date.now()});});
 document.getElementById('adminMessageBtn').addEventListener('click',async()=>{
   const msg=prompt('Announcement message for all players:'); if(!msg)return;
   const dur=parseInt(prompt('Duration (seconds, e.g. 10):','10'));
