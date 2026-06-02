@@ -400,7 +400,7 @@ let soundMuted=false;
 //  lvl 5=5, 6=11, 7=18, 8=26, 9=35, 10=45
 // ═══════════════════════════════════════════════════
 const COMBO_THRESHOLDS=[5,11,18,26,35,45];
-const COMBO_MAX_LEVEL=0;
+const COMBO_MAX_LEVEL=10;
 const COMBO_WINDOW=3000;
 let comboHits=0, comboLevel=0, lastFireworkTime=0, comboTimeout=null;
 
@@ -1161,7 +1161,7 @@ document.getElementById('buyAuto').addEventListener('click',()=>{
 document.getElementById('rebirthBtn').addEventListener('click',async()=>{
   if(money<rebirthPrice){showNotification(`Need $${fmt(rebirthPrice)} to rebirth!`);return;}
   if(!confirm(`Rebirth for $${fmt(rebirthPrice)}? You'll gain 1 Prestige Point and unlock new colors.`))return;
-  money=0;rebirthCount++;unlockedColors=1;clickDelay=1200;colorPrice=50;delayPrice=100;
+  money=0;rebirthCount++;unlockedColors=1;clickDelay=1200;colorPrice=50;delayPrice=100;autoAmount=0,autoSpeed=2.5,autoInterval=-1,autoPrice=200;
   rebirthPrice=Math.floor(500*Math.pow(1.5,rebirthCount));prestigePoints++;
   colors=[...baseColors,...getRebirthColors(rebirthCount)];
   achStats.rebirths=rebirthCount;updateButtons();
