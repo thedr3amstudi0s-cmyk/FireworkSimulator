@@ -500,7 +500,7 @@ const ALL_EVENTS=[
   {id:'nuke',     name:'Nuke',          icon:'💥',  color:'#ffffff',bg:'rgba(30,30,10,0.8)',   bonus:1,  duration:5000, desc:'Massive simultaneous explosion',type:'special'},
   {id:'firework_rain',name:'Firework Rain',icon:'🎆',color:'#ff66aa',bg:'rgba(20,0,20,0.8)', bonus:2,  duration:20000,desc:'2× money + auto mega burst',    type:'special'},
   {id:'golden_hour',name:'Golden Hour', icon:'✨',  color:'#ffd700',bg:'rgba(30,20,0,0.8)',   bonus:3.5,duration:20000,desc:'3.5× money + golden particles', type:'special'},
-  {id:'blackhole', name:'Black Hole',   icon:'🕳️', color:'#9900ff',bg:'rgba(5,0,20,0.8)',    bonus:6,  duration:10000,desc:'6× money + vortex pulls all',   type:'special'},
+  {id:'blackhole', name:'Black Hole',   icon:'🕳️', color:'#9900ff',bg:'rgba(5,0,20,0.8)',    bonus:6,  duration:50000,desc:'6× money + vortex pulls all',   type:'special'},
 ];
 const WEATHER_EVENTS=ALL_EVENTS.filter(e=>e.type==='weather');
 let activeWeather=null, weatherTimeout=null, weatherParticles=[];
