@@ -1387,7 +1387,7 @@ async function initAdminEventsListener(){
 
 function handleAdminEvent(val){
   if(val.type==='MESSAGE'){
-    showNotification('📢 '+val.message,'announce',val.duration||8000);
+    showNotification('📢 '+val.message,'announce',val.duration);
   } else if(val.type==='GLITCH'){
     showNotification(val.message||'⚠ GLITCH EVENT','event',5000);
     startGlitchEvent(val.duration||30000);
