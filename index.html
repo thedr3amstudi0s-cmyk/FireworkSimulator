@@ -16,8 +16,6 @@ html,body{height:100%;background:var(--bg);font-family:'Rajdhani',sans-serif;col
 canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-
-/* LOGIN */
 #loginBox{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:32px 28px;z-index:200;width:300px;box-shadow:var(--glow),0 8px 40px rgba(0,0,0,0.7)}
 #loginBox h2{font-family:'Orbitron',sans-serif;font-size:20px;text-align:center;color:var(--accent);letter-spacing:2px;margin-bottom:20px;text-shadow:0 0 20px var(--accent)}
 #loginBox input{display:block;width:100%;margin:8px 0;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s}
@@ -27,8 +25,6 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .btn:hover{filter:brightness(1.15)}.btn:active{transform:scale(0.97)}
 .btn-primary{background:var(--accent);color:#000}.btn-secondary{background:rgba(255,255,255,0.1);color:var(--text);border:1px solid var(--border)}
 #loginMsg{color:var(--gold);font-size:13px;margin-top:6px;text-align:center;min-height:18px}
-
-/* HUD */
 #hud{position:fixed;top:12px;left:12px;z-index:150;width:260px;display:none}
 #hudMoney{padding:12px 16px;margin-bottom:8px}
 #hudMoney .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px}
@@ -42,36 +38,24 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .shop-btn:hover{background:rgba(0,212,255,0.08);border-color:var(--accent)}
 .shop-btn .price{color:var(--gold);font-family:'Orbitron',sans-serif;font-size:11px}
 .shop-btn .max-tag{color:var(--green);font-size:11px}
-
-/* COMBO */
 #comboBanner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:var(--gold);text-shadow:0 0 30px var(--gold),0 0 60px rgba(255,215,0,0.4);pointer-events:none;z-index:500;transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s;white-space:nowrap}
 #comboBanner.show{transform:translate(-50%,-50%) scale(1)}
 #comboBanner.hide{opacity:0}
-
-/* STREAK BAR */
 #streakBar{position:fixed;bottom:46px;left:50%;transform:translateX(-50%);width:320px;z-index:160;text-align:center;display:none;padding:8px 14px}
 #streakLabel{font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;font-family:'Orbitron',sans-serif}
 #streakTrack{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
 #streakFill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--gold));border-radius:3px;transition:width 0.2s;width:0%}
-
-/* COOLDOWN BAR */
 #cooldownBar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:280px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;z-index:160}
 #cooldownFill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:3px;transition:width 0.05s}
-
-/* TOOLBAR */
 #toolbar{position:fixed;bottom:38px;right:12px;display:none;flex-direction:column;gap:6px;z-index:150}
 .tool-btn{padding:7px 14px;border:1px solid var(--border);border-radius:7px;background:rgba(12,12,28,0.9);color:var(--text);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px;transition:background 0.2s,border-color 0.2s;backdrop-filter:blur(10px);text-align:right}
 .tool-btn:hover{background:rgba(0,212,255,0.1);border-color:var(--accent);color:var(--accent)}
-
-/* MODALS */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal.open{display:flex}
 .modal-box{width:460px;max-height:82vh;overflow-y:auto;padding:28px;position:relative;box-shadow:var(--glow),0 20px 60px rgba(0,0,0,0.8)}
 .modal-box h2{font-family:'Orbitron',sans-serif;font-size:18px;color:var(--accent);letter-spacing:2px;margin-bottom:20px}
 .modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
 .modal-close:hover{color:var(--text)}
-
-/* ACHIEVEMENTS */
 .ach-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ach-card{padding:12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03)}
 .ach-card.unlocked{border-color:var(--gold);background:rgba(255,215,0,0.05)}
@@ -80,19 +64,13 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .ach-card .ach-name{font-weight:700;font-size:13px;color:var(--text)}
 .ach-card .ach-desc{font-size:11px;color:var(--muted);margin-top:3px}
 .ach-card .ach-prog{font-size:11px;color:var(--accent);margin-top:4px}
-
-/* SHAPES */
 .shape-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .shape-card{padding:12px 8px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;cursor:pointer;transition:all 0.2s}
 .shape-card:hover{border-color:var(--accent);background:rgba(0,212,255,0.06)}
 .shape-card.owned{border-color:var(--green)}
 .shape-card.active{border-color:var(--gold);background:rgba(255,215,0,0.08);box-shadow:0 0 12px rgba(255,215,0,0.2)}
 .shape-card .si{font-size:26px}.shape-card .sn{font-size:11px;font-weight:700;color:var(--text);margin-top:4px}.shape-card .sp{font-size:10px;color:var(--gold)}
-
-/* WEATHER BANNER */
 #weatherBanner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:400;padding:10px 22px;border-radius:8px;font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:2px;display:none;text-align:center;border:1px solid var(--border);backdrop-filter:blur(10px)}
-
-/* PRESTIGE */
 .prestige-grid{display:flex;flex-direction:column;gap:10px}
 .prestige-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03)}
 .prestige-item .pi-icon{font-size:28px;flex-shrink:0}
@@ -104,15 +82,11 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .prestige-item .pi-btn:disabled{background:rgba(255,255,255,0.1);color:var(--muted);cursor:not-allowed}
 .prestige-item .pi-btn.toggle-on{background:var(--gold);color:#000}
 .prestige-item .pi-btn.toggle-off{background:rgba(255,255,255,0.1);color:var(--muted);border:1px solid var(--border)}
-
-/* TAGS */
 .tag-row{padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .tag-name{font-weight:700;font-size:14px}.tag-desc{font-size:12px;color:var(--muted);flex:1}
 .tag-owner .tag-name{color:gold}.tag-vip .tag-name{color:cyan}.tag-donator .tag-name{color:#39ff14}
 .tag-streamer .tag-name{color:magenta}.tag-youtuber .tag-name{color:#ff4444}
 .tag-regular .tag-name{color:white}.tag-fart .tag-name{color:#c8a56b}
-
-/* NOTIFICATIONS */
 #notifications{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:600;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:8px}
 .notif{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:rgba(12,12,28,0.95);font-size:14px;font-weight:600;color:var(--text);backdrop-filter:blur(10px);animation:notifIn 0.3s ease,notifOut 0.4s ease 2.1s forwards;white-space:nowrap}
 .notif.ach{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,0.08)}
@@ -121,39 +95,24 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .notif.announce{border-color:#ff6bff;color:#ff6bff;background:rgba(255,107,255,0.08);font-size:15px;padding:12px 24px}
 @keyframes notifIn{from{opacity:0;transform:translateY(-10px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes notifOut{to{opacity:0;transform:translateY(-8px)}}
-
-/* SETTINGS */
 #settingsPanel{padding:24px;width:280px}
 #settingsPanel h3{font-family:'Orbitron',sans-serif;font-size:16px;color:var(--accent);letter-spacing:2px;margin-bottom:20px;text-align:center}
 .setting-row{margin-bottom:16px}
 .setting-row label{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
 .setting-row input[type=range]{width:100%;accent-color:var(--accent)}
 .setting-val{float:right;color:var(--accent);font-family:'Orbitron',sans-serif;font-size:11px}
-
-/* OWNER PANEL */
 #ownerPanel{padding:12px 16px 16px}
 .owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .owner-btn{padding:7px;border:1px solid rgba(255,107,53,0.3);border-radius:6px;background:rgba(255,107,53,0.08);color:var(--accent2);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;transition:all 0.2s}
 .owner-btn:hover{background:rgba(255,107,53,0.18);border-color:var(--accent2)}
-/* event picker grid */
 .event-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
-.ev-btn{padding:10px 8px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.04);color:var(--text);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:4px}
-.ev-btn:hover{border-color:var(--accent);background:rgba(0,212,255,0.08);color:var(--accent)}
-.ev-btn .ev-icon{font-size:22px}
-.ev-btn .ev-bonus{font-size:10px;color:var(--gold);font-family:'Orbitron',sans-serif}
-
-/* GLITCH */
 @keyframes glitch{0%{transform:translate(0,0);filter:hue-rotate(0deg)}20%{transform:translate(-2px,2px)}40%{transform:translate(2px,-2px);filter:hue-rotate(90deg)}60%{transform:translate(-2px,-1px)}80%{transform:translate(1px,2px);filter:hue-rotate(180deg)}100%{transform:translate(0,0)}}
 .glitch-ui{animation:glitch 0.15s infinite !important}
-
-/* ACH POPUP */
 #achPopup{position:fixed;bottom:60px;right:16px;z-index:500;padding:14px 18px;border-radius:10px;border:1px solid var(--gold);background:rgba(12,12,28,0.97);display:none;align-items:center;gap:12px;box-shadow:0 0 20px rgba(255,215,0,0.3);animation:slideInRight 0.4s cubic-bezier(0.34,1.56,0.64,1)}
 .ach-popup-icon{font-size:32px}
 .ach-popup-text .line1{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;font-family:'Orbitron',sans-serif}
 .ach-popup-text .line2{font-size:15px;font-weight:700;color:var(--text);margin-top:2px}
 @keyframes slideInRight{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
-
-/* CHALLENGE UI */
 #challengeBar{position:fixed;top:12px;right:280px;z-index:160;display:none;min-width:220px}
 #challengeBar .ch-title{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--accent2);letter-spacing:2px;padding:10px 14px 4px}
 #challengeBar .ch-body{padding:4px 14px 12px;font-size:13px;font-weight:600;color:var(--text)}
@@ -161,8 +120,6 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #challengeBar .ch-reward{font-size:11px;color:var(--gold);margin-top:2px}
 #chTrack{height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:6px;overflow:hidden}
 #chFill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--gold));border-radius:2px;transition:width 0.3s;width:0%}
-
-/* EVENT MODAL */
 #eventModal .event-list{display:flex;flex-direction:column;gap:10px}
 .event-card{display:flex;align-items:center;gap:14px;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all 0.2s}
 .event-card:hover{border-color:var(--accent);background:rgba(0,212,255,0.06);transform:translateX(4px)}
@@ -171,8 +128,6 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .event-card .ec-name{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700}
 .event-card .ec-desc{font-size:12px;color:var(--muted);margin-top:3px}
 .event-card .ec-badge{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--gold);white-space:nowrap}
-
-/* CHALLENGE MODAL */
 #challengeModal .ch-list{display:flex;flex-direction:column;gap:10px}
 .ch-card{padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03)}
 .ch-card.active{border-color:var(--accent2);background:rgba(255,107,53,0.06)}
@@ -193,37 +148,30 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 <canvas id="canvas"></canvas>
 <div id="weatherBanner"></div>
 <div id="notifications"></div>
-
 <div id="achPopup">
-  <div class="ach-popup-icon" id="achPopupIcon">🏆</div>
+  <div class="ach-popup-icon" id="achPopupIcon">&#x1F3C6;</div>
   <div class="ach-popup-text">
     <div class="line1">Achievement Unlocked!</div>
     <div class="line2" id="achPopupName">First Launch</div>
   </div>
 </div>
-
 <div id="comboBanner"></div>
-
 <div id="streakBar" class="panel">
   <div id="streakLabel">CHARGING: 0/5</div>
   <div id="streakTrack"><div id="streakFill"></div></div>
 </div>
 <div id="cooldownBar"><div id="cooldownFill"></div></div>
-
-<!-- CHALLENGE HUD BAR -->
 <div id="challengeBar" class="panel">
-  <div class="ch-title">⚡ ACTIVE CHALLENGE</div>
+  <div class="ch-title">&#x26A1; ACTIVE CHALLENGE</div>
   <div class="ch-body">
-    <div id="chName">—</div>
+    <div id="chName">&#x2014;</div>
     <div class="ch-prog" id="chProg"></div>
     <div class="ch-reward" id="chReward"></div>
     <div id="chTrack"><div id="chFill"></div></div>
   </div>
 </div>
-
-<!-- LOGIN -->
 <div id="loginBox" class="panel">
-  <h2>🎆 FIREWORKS, UNDER DEVELOPMENT</h2>
+  <h2>&#x1F386; FIREWORKS</h2>
   <input id="username" placeholder="Username (signup only)"/>
   <input id="email" type="email" placeholder="Email"/>
   <input id="password" type="password" placeholder="Password"/>
@@ -232,13 +180,11 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
   <button class="btn btn-secondary" id="forgotBtn">Forgot Password?</button>
   <p id="loginMsg"></p>
 </div>
-
-<!-- HUD -->
 <div id="hud">
   <div id="hudMoney" class="panel">
-    <div class="label">Total Funds     ❗$10 giveaway at 100 members on my main website❗</div>
+    <div class="label">Total Funds</div>
     <div class="amount">$<span id="money">0</span></div>
-    <div class="sub">×<span id="moneyMultiplier">1</span> multiplier &nbsp;·&nbsp; <span id="rebirthBadge" style="color:var(--accent2)">Rebirth 0</span></div>
+    <div class="sub">x<span id="moneyMultiplier">1</span> multiplier &nbsp;&#xB7;&nbsp; <span id="rebirthBadge" style="color:var(--accent2)">Rebirth 0</span></div>
   </div>
   <div id="statsRow">
     <div class="stat-chip panel"><div class="sv"><span id="unlockedColors">1</span></div><div class="sl">Colors</div></div>
@@ -249,101 +195,27 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
     <button class="shop-btn panel" id="buyColor"><span>Buy Color</span><span class="price">$50</span></button>
     <button class="shop-btn panel" id="reduceDelay"><span>Reduce Delay</span><span class="price">$100</span></button>
     <button class="shop-btn panel" id="buyAuto"><span>Auto-Launch</span><span class="price">$200</span></button>
-    <button class="shop-btn panel" id="rebirthBtn"><span>⚡ Rebirth</span><span class="price">$500</span></button>
+    <button class="shop-btn panel" id="rebirthBtn"><span>&#x26A1; Rebirth</span><span class="price">$500</span></button>
   </div>
 </div>
-
-<!-- TOOLBAR -->
 <div id="toolbar">
-  <button class="tool-btn" id="openAchBtn">🏆 Achievements</button>
-  <button class="tool-btn" id="openChallengeBtn">⚡ Challenges</button>
-  <button class="tool-btn" id="openShapeBtn">✨ Shapes</button>
-  <button class="tool-btn" id="openPrestigeBtn">👑 Prestige Shop</button>
-  <button class="tool-btn" id="openTagBtn">🏷 Tags</button>
-  <button class="tool-btn" id="leaderboardBtn">📊 Leaderboard</button>
-  <button class="tool-btn" id="openSettingsBtn">⚙ Settings</button>
+  <button class="tool-btn" id="openAchBtn">&#x1F3C6; Achievements</button>
+  <button class="tool-btn" id="openChallengeBtn">&#x26A1; Challenges</button>
+  <button class="tool-btn" id="openShapeBtn">&#x2728; Shapes</button>
+  <button class="tool-btn" id="openPrestigeBtn">&#x1F451; Prestige Shop</button>
+  <button class="tool-btn" id="openTagBtn">&#x1F3F7; Tags</button>
+  <button class="tool-btn" id="leaderboardBtn">&#x1F4CA; Leaderboard</button>
+  <button class="tool-btn" id="openSettingsBtn">&#x2699; Settings</button>
   <button class="tool-btn" id="logoutBtn">Exit</button>
-  <button class="tool-btn" id="resetBtn" style="color:#ff6b6b;border-color:rgba(255,100,100,0.3)">🗑 Reset</button>
+  <button class="tool-btn" id="resetBtn" style="color:#ff6b6b;border-color:rgba(255,100,100,0.3)">&#x1F5D1; Reset</button>
 </div>
-
-<!-- ACH MODAL -->
-<div class="modal" id="achModal">
-  <div class="modal-box panel">
-    <button class="modal-close" id="closeAch">✕</button>
-    <h2>🏆 Achievements</h2>
-    <div class="ach-grid" id="achGrid"></div>
-  </div>
-</div>
-
-<!-- CHALLENGE MODAL -->
-<div class="modal" id="challengeModal">
-  <div class="modal-box panel">
-    <button class="modal-close" id="closeChallenge">✕</button>
-    <h2>⚡ Challenges</h2>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Complete challenges for big money bonuses. One active at a time.</p>
-    <div class="ch-list" id="challengeList"></div>
-  </div>
-</div>
-
-<!-- SHAPE MODAL -->
-<div class="modal" id="shapeModal">
-  <div class="modal-box panel">
-    <button class="modal-close" id="closeShape">✕</button>
-    <h2>✨ Firework Shapes</h2>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Unlock special explosion patterns. Click owned to equip.</p>
-    <div class="shape-grid" id="shapeGrid"></div>
-  </div>
-</div>
-
-<!-- PRESTIGE MODAL -->
-<div class="modal" id="prestigeModal">
-  <div class="modal-box panel">
-    <button class="modal-close" id="closePrestige">✕</button>
-    <h2>👑 Prestige Shop</h2>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Spend Prestige Points earned from Rebirths.</p>
-    <div style="font-family:'Orbitron',sans-serif;font-size:18px;color:var(--gold);margin-bottom:16px">⭐ <span id="ppDisplay">0</span> PP</div>
-    <div class="prestige-grid" id="prestigeGrid"></div>
-  </div>
-</div>
-
-<!-- TAG MODAL -->
-<div class="modal" id="tagModal">
-  <div class="modal-box panel">
-    <button class="modal-close" id="closeTag">✕</button>
-    <h2>🏷 Tag Inventory</h2>
-    <div id="tagList"></div>
-  </div>
-</div>
-
-<!-- SETTINGS MODAL -->
-<div class="modal" id="settingsModal">
-  <div class="modal-box panel" id="settingsPanel" style="width:300px">
-    <button class="modal-close" id="closeSettings">✕</button>
-    <h3>Settings</h3>
-    <div class="setting-row">
-      <label>Music Volume <span class="setting-val" id="musicVolDisplay">35%</span></label>
-      <input type="range" id="musicVolume" min="0" max="100" value="35"/>
-    </div>
-    <div class="setting-row">
-      <label>SFX Volume <span class="setting-val" id="gameVolDisplay">100%</span></label>
-      <input type="range" id="gameVolume" min="0" max="100" value="100"/>
-    </div>
-    <button class="btn btn-secondary" id="creditsBtn" style="margin-top:12px">Credits</button>
-    <a href="https://thedr3amstudi0s-cmyk.github.io/dr3am-studi0s/" target="_blank" style="display:block;text-align:center;color:var(--accent);font-size:13px;margin-top:10px;text-decoration:none">Visit Our Website ↗</a>
-  </div>
-</div>
-
-<!-- EVENT PICKER MODAL -->
-<div class="modal" id="eventModal">
-  <div class="modal-box panel" id="eventModalBox">
-    <button class="modal-close" id="closeEvent">✕</button>
-    <h2>🌩 Trigger Event</h2>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Choose an event to broadcast to all players.</p>
-    <div class="event-list" id="eventList"></div>
-  </div>
-</div>
-
-<!-- OWNER PANEL -->
+<div class="modal" id="achModal"><div class="modal-box panel"><button class="modal-close" id="closeAch">&#x2715;</button><h2>&#x1F3C6; Achievements</h2><div class="ach-grid" id="achGrid"></div></div></div>
+<div class="modal" id="challengeModal"><div class="modal-box panel"><button class="modal-close" id="closeChallenge">&#x2715;</button><h2>&#x26A1; Challenges</h2><p style="font-size:13px;color:var(--muted);margin-bottom:16px">Complete challenges for big money bonuses. One active at a time.</p><div class="ch-list" id="challengeList"></div></div></div>
+<div class="modal" id="shapeModal"><div class="modal-box panel"><button class="modal-close" id="closeShape">&#x2715;</button><h2>&#x2728; Firework Shapes</h2><p style="font-size:13px;color:var(--muted);margin-bottom:16px">Unlock special explosion patterns. Click owned to equip.</p><div class="shape-grid" id="shapeGrid"></div></div></div>
+<div class="modal" id="prestigeModal"><div class="modal-box panel"><button class="modal-close" id="closePrestige">&#x2715;</button><h2>&#x1F451; Prestige Shop</h2><p style="font-size:13px;color:var(--muted);margin-bottom:16px">Spend Prestige Points earned from Rebirths.</p><div style="font-family:'Orbitron',sans-serif;font-size:18px;color:var(--gold);margin-bottom:16px">&#x2B50; <span id="ppDisplay">0</span> PP</div><div class="prestige-grid" id="prestigeGrid"></div></div></div>
+<div class="modal" id="tagModal"><div class="modal-box panel"><button class="modal-close" id="closeTag">&#x2715;</button><h2>&#x1F3F7; Tag Inventory</h2><div id="tagList"></div></div></div>
+<div class="modal" id="settingsModal"><div class="modal-box panel" id="settingsPanel" style="width:300px"><button class="modal-close" id="closeSettings">&#x2715;</button><h3>Settings</h3><div class="setting-row"><label>Music Volume <span class="setting-val" id="musicVolDisplay">35%</span></label><input type="range" id="musicVolume" min="0" max="100" value="35"/></div><div class="setting-row"><label>SFX Volume <span class="setting-val" id="gameVolDisplay">100%</span></label><input type="range" id="gameVolume" min="0" max="100" value="100"/></div><button class="btn btn-secondary" id="creditsBtn" style="margin-top:12px">Credits</button><a href="https://thedr3amstudi0s-cmyk.github.io/dr3am-studi0s/" target="_blank" style="display:block;text-align:center;color:var(--accent);font-size:13px;margin-top:10px;text-decoration:none">Visit Our Website</a></div></div>
+<div class="modal" id="eventModal"><div class="modal-box panel" id="eventModalBox"><button class="modal-close" id="closeEvent">&#x2715;</button><h2>&#x1F329; Trigger Event</h2><p style="font-size:13px;color:var(--muted);margin-bottom:16px">Choose an event to broadcast to all players.</p><div class="event-list" id="eventList"></div></div></div>
 <div id="ownerPanel" class="panel" style="position:fixed;bottom:60px;left:12px;width:250px;display:none;z-index:150">
   <div style="padding:12px 16px 0;font-family:'Orbitron',sans-serif;font-size:11px;color:var(--accent2);letter-spacing:2px">OWNER TOOLS</div>
   <div style="padding:10px 12px 14px" class="owner-grid">
@@ -351,89 +223,62 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
     <button class="owner-btn" id="unlockColorsBtn">All Colors</button>
     <button class="owner-btn" id="maxAutoBtn">Max Auto</button>
     <button class="owner-btn" id="viewUsersBtn">View Users</button>
-    <button class="owner-btn" id="adminFireworkBtn">Mega 🎆</button>
-    <button class="owner-btn" id="adminFireworkBtnNuke">NUKE 💥</button>
-    <button class="owner-btn" id="adminFireworkBtnGalaxy">Galaxy 🌌</button>
-    <button class="owner-btn" id="glitchEventBtn">Glitch ⚠</button>
-    <button class="owner-btn" id="megaBombBtn">✨ Mega PP Gift (+100)</button>
-    <button class="owner-btn" id="ppRainBtn">🌟 Force PP Rain</button>
-    <button class="owner-btn" id="giveMegaBtn">Gift 50 Mega PP</button>
-    <button class="owner-btn" id="adminMessageBtn" style="grid-column:1/-1">📢 Announcement</button>
-    <button class="owner-btn" id="triggerWeatherBtn" style="grid-column:1/-1">🌩 Trigger Event</button>
+    <button class="owner-btn" id="adminFireworkBtn">Mega</button>
+    <button class="owner-btn" id="adminFireworkBtnNuke">NUKE</button>
+    <button class="owner-btn" id="adminFireworkBtnGalaxy">Galaxy</button>
+    <button class="owner-btn" id="glitchEventBtn">Glitch</button>
+    <button class="owner-btn" id="megaBombBtn">+100 Mega PP</button>
+    <button class="owner-btn" id="ppRainBtn">PP Rain</button>
+    <button class="owner-btn" id="giveMegaBtn">+50 Mega PP</button>
+    <button class="owner-btn" id="adminMessageBtn" style="grid-column:1/-1">Announcement</button>
+    <button class="owner-btn" id="triggerWeatherBtn" style="grid-column:1/-1">Trigger Event</button>
   </div>
 </div>
-  
-
 <audio id="fireworkSound" src="assets/single-firework-79814.mp3"></audio>
 <audio id="bgMusic" src="assets/Heading Home.mp3" loop></audio>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-// ═══════════════════════════════════════════════════
-//  FIREBASE
-// ═══════════════════════════════════════════════════
 const firebaseConfig={apiKey:"AIzaSyD_OXSvcK9AWoCU0AaXuc7Z7sMhEV1nBg4",authDomain:"fireworkleaderboard.firebaseapp.com",databaseURL:"https://fireworkleaderboard-default-rtdb.firebaseio.com",projectId:"fireworkleaderboard",storageBucket:"fireworkleaderboard.firebasestorage.app",messagingSenderId:"243474267364",appId:"1:243474267364:web:8f0f2bedbbbca3c05f40f1",measurementId:"G-H07BZY385S"};
 firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth(), db=firebase.database();
-
-// ═══════════════════════════════════════════════════
-//  CANVAS
-// ═══════════════════════════════════════════════════
-const canvas=document.getElementById('canvas'), ctx=canvas.getContext('2d');
+const auth=firebase.auth(),db=firebase.database();
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
 function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
-window.addEventListener('resize',resizeCanvas); resizeCanvas();
-
-// ═══════════════════════════════════════════════════
-//  GAME STATE
-// ═══════════════════════════════════════════════════
-let currentUser='', currentUsername='';
-let money=0, unlockedColors=1, clickDelay=1200, lastClick=Date.now();
-let rebirthCount=0, colorPrice=50, delayPrice=100, rebirthPrice=500;
-let autoAmount=0, autoSpeed=2.5, autoInterval=-1, autoPrice=200;
-let fireworks=[], particles=[];
+window.addEventListener('resize',resizeCanvas);resizeCanvas();
+let currentUser='',currentUsername='';
+let money=0,unlockedColors=1,clickDelay=1200,lastClick=Date.now();
+let rebirthCount=0,colorPrice=50,delayPrice=100,rebirthPrice=500;
+let autoAmount=0,autoSpeed=2.5,autoInterval=-1,autoPrice=200;
+let fireworks=[],particles=[];
 const gravity=0.04;
-let globalMultiplier=1, glitchActive=false;
-let galaxyEventActive=false, galaxyEventEnd=0;
-let soundMuted=false;
-  // === PRESTIGE POINTS (PP) SYSTEM ===
-let prestigePoints = 0;     // Regular Prestige Points (PP)
-let megaPP = 0;             // Mega Prestige Points (10 PP = 1 Mega PP)
-let maxAutos = 1;
-let autoLevel = 0;
-
-// ═══════════════════════════════════════════════════
-//  COMBO SYSTEM
-//  Thresholds (cumulative hits to reach each level):
-//  lvl 5=5, 6=11, 7=18, 8=26, 9=35, 10=45
-// ═══════════════════════════════════════════════════
+let globalMultiplier=1,glitchActive=false;
+let galaxyEventActive=false,galaxyEventEnd=0;
+// FIX #1+2: megaPP starts at 0, only gained via convert or owner gifts
+let prestigePoints=0,megaPP=0,maxAutos=1;
 const COMBO_THRESHOLDS=[5,11,18,26,35,45];
-const COMBO_MAX_LEVEL=10;
-const COMBO_WINDOW=3000;
-let comboHits=0, comboLevel=0, lastFireworkTime=0, comboTimeout=null;
-
+const COMBO_MAX_LEVEL=10,COMBO_WINDOW=3000;
+let comboHits=0,comboLevel=0,lastFireworkTime=0,comboTimeout=null;
 function addCombo(isAuto){
   if(isAuto&&!prestigeOwned['auto_combo'])return;
   const now=Date.now();
-  if(now-lastFireworkTime>COMBO_WINDOW){comboHits=1;comboLevel=0;}
-  else comboHits++;
+  if(now-lastFireworkTime>COMBO_WINDOW){comboHits=1;comboLevel=0;}else comboHits++;
   lastFireworkTime=now;
   let newLevel=0;
   for(let lvl=5;lvl<=COMBO_MAX_LEVEL;lvl++){if(comboHits>=COMBO_THRESHOLDS[lvl-5])newLevel=lvl;}
-  const leveledUp=newLevel>comboLevel; comboLevel=newLevel;
+  const leveledUp=newLevel>comboLevel;comboLevel=newLevel;
   if(comboLevel>(achStats.maxCombo||0)){achStats.maxCombo=comboLevel;checkAchievements();}
   document.getElementById('streakBar').style.display='block';
   if(comboLevel<5){
     const pct=(comboHits/COMBO_THRESHOLDS[0])*100;
-    document.getElementById('streakLabel').textContent=`CHARGING: ${comboHits}/${COMBO_THRESHOLDS[0]}`;
+    document.getElementById('streakLabel').textContent='CHARGING: '+comboHits+'/'+COMBO_THRESHOLDS[0];
     document.getElementById('streakFill').style.width=pct+'%';
     document.getElementById('streakFill').style.background='linear-gradient(90deg,#00d4ff,#7b68ee)';
-  } else {
+  }else{
     const cur=COMBO_THRESHOLDS[comboLevel-5];
     const next=comboLevel<COMBO_MAX_LEVEL?COMBO_THRESHOLDS[comboLevel-5+1]:COMBO_THRESHOLDS[5];
     const prog=comboLevel<COMBO_MAX_LEVEL?((comboHits-cur)/(next-cur))*100:100;
-    document.getElementById('streakLabel').textContent=`COMBO ${comboLevel}× — +${comboLevel-1} BONUS!`;
+    document.getElementById('streakLabel').textContent='COMBO '+comboLevel+'x +' +(comboLevel-1)+' BONUS!';
     document.getElementById('streakFill').style.width=Math.min(100,prog)+'%';
     document.getElementById('streakFill').style.background='linear-gradient(90deg,var(--accent2),var(--gold))';
     if(leveledUp)showComboBanner();
@@ -441,962 +286,653 @@ function addCombo(isAuto){
   if(comboTimeout)clearTimeout(comboTimeout);
   comboTimeout=setTimeout(()=>{comboHits=0;comboLevel=0;document.getElementById('streakBar').style.display='none';},COMBO_WINDOW);
 }
-
-// Returns the ADDITIVE bonus from combo (0 if no combo, comboLevel-1 if combo active)
-// e.g. combo level 5 adds +4 to the total multiplier
-function getComboBonus(){return comboLevel>=5?comboLevel-1:0;}
-
-// Keep getComboMultiplier as a convenience used elsewhere (returns 1 when no combo, comboLevel when active)
 function getComboMultiplier(){return comboLevel>=5?comboLevel:1;}
-
 let comboBannerTimeout;
 function showComboBanner(){
   const el=document.getElementById('comboBanner');
-  el.textContent=comboLevel+'× COMBO!'; el.className='show';
+  el.textContent=comboLevel+'x COMBO!';el.className='show';
   clearTimeout(comboBannerTimeout);
   comboBannerTimeout=setTimeout(()=>{el.classList.add('hide');setTimeout(()=>{el.className='';},400);},900);
 }
-
-// ═══════════════════════════════════════════════════
-//  SHAPES
-// ═══════════════════════════════════════════════════
-const SHAPES = [
-  {id:'circle',   name:'Classic Burst',   icon:'🔵', price:0,    mult:1.0,  desc:'Standard explosion'},
-  {id:'star',     name:'Star Shower',     icon:'⭐', price:500,  mult:1.3,  desc:'Bright 5-point star'},
-  {id:'heart',    name:'Love Burst',      icon:'❤️', price:800,  mult:1.4,  desc:'Heart-shaped explosion'},
-  {id:'ring',     name:'Magic Ring',      icon:'💍', price:600,  mult:1.2,  desc:'Hollow glowing ring'},
-  {id:'spiral',   name:'Cosmic Spiral',   icon:'🌀', price:1000, mult:1.6,  desc:'Swirling spiral'},
-  {id:'smiley',   name:'Happy Face',      icon:'😊', price:1200, mult:1.5,  desc:'Smiling explosion'},
-  {id:'cross',    name:'Spark Cross',     icon:'✝️', price:700,  mult:1.4,  desc:'Four-arm sparkle'},
-  {id:'diamond',  name:'Crystal Diamond', icon:'💎', price:900,  mult:1.7,  desc:'Shining diamond'},
-  {id:'triangle', name:'Pyramid Burst',   icon:'🔺', price:750,  mult:1.5,  desc:'Triangle explosion'},
-  {id:'burst8',   name:'Super Star',      icon:'✳️', price:1100, mult:1.8,  desc:'8-point starburst'},
-  {id:'double',   name:'Double Ring',     icon:'🎇', price:1400, mult:2.0,  desc:'Concentric rings'},
-  {id:'comet',    name:'Comet Trail',     icon:'☄️', price:1600, mult:2.2,  desc:'Fast comet'},
-  {id:'snowflake',name:'Winter Crystal',  icon:'❄️', price:1300, mult:1.9,  desc:'Beautiful snowflake'},
-  {id:'crown',    name:'Royal Crown',     icon:'👑', price:2000, mult:2.5,  desc:'King’s crown'},
-  {id:'infinity', name:'Eternal Loop',    icon:'♾️', price:2500, mult:2.8,  desc:'Infinity symbol'},
-  // Extra powerful shapes
-  {id:'phoenix',  name:'Phoenix Flame',   icon:'🔥', price:3000, mult:3.2,  desc:'Rising phoenix'},
-  {id:'nebula',   name:'Nebula Cloud',    icon:'🌌', price:4500, mult:3.8,  desc:'Colorful space cloud'},
-  {id:'dragonfly',name:'Dragonfly',       icon:'🐉', price:6000, mult:4.5,  desc:'Graceful dragonfly'},
-  {id:'butterfly',name:'Butterfly Wing',  icon:'🦋', price:7500, mult:5.2,  desc:'Beautiful butterfly'},
-  {id:'galaxy',   name:'Galaxy Bloom',    icon:'🌠', price:9000, mult:6.0,  desc:'Galaxy explosion'},
-  {id:'sunburst', name:'Sun Burst',       icon:'☀️', price:15000,mult:8.0,  desc:'Golden sun explosion'}
+const SHAPES=[
+  {id:'circle',   name:'Classic Burst',   icon:'&#x1F535;',price:0,    mult:1.0},
+  {id:'star',     name:'Star Shower',     icon:'&#x2B50;', price:500,  mult:1.3},
+  {id:'heart',    name:'Love Burst',      icon:'&#x2764;&#xFE0F;',price:800,  mult:1.4},
+  {id:'ring',     name:'Magic Ring',      icon:'&#x1F48D;',price:600,  mult:1.2},
+  {id:'spiral',   name:'Cosmic Spiral',   icon:'&#x1F300;',price:1000, mult:1.6},
+  {id:'smiley',   name:'Happy Face',      icon:'&#x1F60A;',price:1200, mult:1.5},
+  {id:'cross',    name:'Spark Cross',     icon:'&#x271D;&#xFE0F;',price:700,mult:1.4},
+  {id:'diamond',  name:'Crystal Diamond', icon:'&#x1F48E;',price:900,  mult:1.7},
+  {id:'triangle', name:'Pyramid Burst',   icon:'&#x1F53A;',price:750,  mult:1.5},
+  {id:'burst8',   name:'Super Star',      icon:'&#x2733;&#xFE0F;',price:1100,mult:1.8},
+  {id:'double',   name:'Double Ring',     icon:'&#x1F387;',price:1400, mult:2.0},
+  {id:'comet',    name:'Comet Trail',     icon:'&#x2604;&#xFE0F;',price:1600,mult:2.2},
+  {id:'snowflake',name:'Winter Crystal',  icon:'&#x2744;&#xFE0F;',price:1300,mult:1.9},
+  {id:'crown',    name:'Royal Crown',     icon:'&#x1F451;',price:2000, mult:2.5},
+  {id:'infinity', name:'Eternal Loop',    icon:'&#x267E;&#xFE0F;',price:2500,mult:2.8},
+  {id:'phoenix',  name:'Phoenix Flame',   icon:'&#x1F525;',price:3000, mult:3.2},
+  {id:'nebula',   name:'Nebula Cloud',    icon:'&#x1F30C;',price:4500, mult:3.8},
+  {id:'dragonfly',name:'Dragonfly',       icon:'&#x1F409;',price:6000, mult:4.5},
+  {id:'butterfly',name:'Butterfly Wing',  icon:'&#x1F98B;',price:7500, mult:5.2},
+  {id:'galaxy',   name:'Galaxy Bloom',    icon:'&#x1F320;',price:9000, mult:6.0},
+  {id:'sunburst', name:'Sun Burst',       icon:'&#x2600;&#xFE0F;',price:15000,mult:8.0}
 ];
-let ownedShapes = {circle:true};
-let activeShape = 'circle';
-
-// ═══════════════════════════════════════════════════
-//  PRESTIGE
-// ═══════════════════════════════════════════════════
+let ownedShapes={circle:true},activeShape='circle';
 const PRESTIGE_ITEMS=[
-  {id:'rainbow_trail',name:'Rainbow Trail', icon:'🌈',desc:'Fireworks leave rainbow trails',      cost:2,toggleable:false},
-  {id:'golden_sparks',name:'Golden Sparks', icon:'✨',desc:'All particles shine gold — toggleable',cost:3,toggleable:true},
-  {id:'mega_burst',   name:'Mega Burst',    icon:'💥',desc:'2× particles per explosion',          cost:4,toggleable:false},
-  {id:'auto_combo',   name:'Auto-Combo',    icon:'⚡',desc:'Auto-launches count for combo streak', cost:5,toggleable:false},
-  {id:'dark_matter',  name:'Dark Matter',   icon:'🌑',desc:'Black-hole vortex effect',            cost:6,toggleable:false},
+  {id:'rainbow_trail',name:'Rainbow Trail',icon:'&#x1F308;',desc:'Fireworks leave rainbow trails',cost:2,toggleable:false},
+  {id:'golden_sparks',name:'Golden Sparks',icon:'&#x2728;',desc:'All particles shine gold',cost:3,toggleable:true},
+  {id:'mega_burst',   name:'Mega Burst',   icon:'&#x1F4A5;',desc:'2x particles per explosion',cost:4,toggleable:false},
+  {id:'auto_combo',   name:'Auto-Combo',   icon:'&#x26A1;',desc:'Auto-launches count for combo streak',cost:5,toggleable:false},
+  {id:'dark_matter',  name:'Dark Matter',  icon:'&#x1F311;',desc:'Black-hole vortex effect',cost:6,toggleable:false},
 ];
-let prestigeOwned={}, goldenSparksActive=true;
-
-// ═══════════════════════════════════════════════════
-//  WEATHER / EVENTS
-// ═══════════════════════════════════════════════════
+let prestigeOwned={},goldenSparksActive=true;
 const ALL_EVENTS=[
-  // Weather
-  {id:'storm',    name:'Thunderstorm',  icon:'⛈',  color:'#7b68ee',bg:'rgba(30,0,80,0.8)',   bonus:3,  duration:20000,desc:'3× money + lightning wind',    type:'weather'},
-  {id:'aurora',   name:'Aurora',        icon:'🌌',  color:'#00ff88',bg:'rgba(0,40,30,0.8)',   bonus:2,  duration:25000,desc:'2× money + aurora borealis',   type:'weather'},
-  {id:'blizzard', name:'Blizzard',      icon:'❄️',  color:'#aaddff',bg:'rgba(0,20,50,0.8)',   bonus:1.5,duration:18000,desc:'1.5× money + snow particles',  type:'weather'},
-  {id:'meteor',   name:'Meteor Shower', icon:'☄️',  color:'#ff8844',bg:'rgba(40,10,0,0.8)',   bonus:4,  duration:15000,desc:'4× money + meteor rain',       type:'weather'},
-  {id:'rainbow',  name:'Rainbow Storm', icon:'🌈',  color:'#ff66ff',bg:'rgba(30,0,50,0.8)',   bonus:2.5,duration:22000,desc:'2.5× money + rainbow trails',  type:'weather'},
-  {id:'volcano',  name:'Volcano',       icon:'🌋',  color:'#ff4400',bg:'rgba(50,10,0,0.8)',   bonus:5,  duration:12000,desc:'5× money + lava bursts',       type:'weather'},
-  // Special
-  {id:'galaxy',   name:'Galaxy',        icon:'🌌',  color:'#aa66ff',bg:'rgba(10,0,30,0.8)',   bonus:3,  duration:30000,desc:'Spiral galaxy fireworks rain',  type:'special'},
-  {id:'glitch',   name:'Glitch',        icon:'⚠️',  color:'#00ff00',bg:'rgba(0,20,0,0.8)',    bonus:2,  duration:30000,desc:'2× money + system glitch VFX', type:'special'},
-  {id:'nuke',     name:'Nuke',          icon:'💥',  color:'#ffffff',bg:'rgba(30,30,10,0.8)',   bonus:1,  duration:5000, desc:'Massive simultaneous explosion',type:'special'},
-  {id:'firework_rain',name:'Firework Rain',icon:'🎆',color:'#ff66aa',bg:'rgba(20,0,20,0.8)', bonus:2,  duration:20000,desc:'2× money + auto mega burst',    type:'special'},
-  {id:'golden_hour',name:'Golden Hour', icon:'✨',  color:'#ffd700',bg:'rgba(30,20,0,0.8)',   bonus:3.5,duration:20000,desc:'3.5× money + golden particles', type:'special'},
-  {id:'blackhole', name:'Black Hole',   icon:'🕳️', color:'#9900ff',bg:'rgba(5,0,20,0.8)',    bonus:6,  duration:50000,desc:'6× money + vortex pulls all',   type:'special'},
-];
-
-const EXTRA_EVENTS = [
-  {id:'pp_rain',     name:'PP Rain',        icon:'✨', bonus:3, duration:45000, desc:'Triple Prestige Point gains!', type:'special'},
-  {id:'mega_storm',  name:'Mega PP Storm',  icon:'🌟', bonus:2, duration:30000, desc:'Double Mega PP drops', type:'special'},
-  {id:'shape_evo',   name:'Shape Evolution',icon:'🌀', bonus:1.5,duration:60000,desc:'Free random shape upgrades', type:'special'}
+  {id:'storm',    name:'Thunderstorm',  icon:'&#x26C8;', color:'#7b68ee',bg:'rgba(30,0,80,0.8)',   bonus:3,  duration:20000,desc:'3x money + lightning wind',   type:'weather'},
+  {id:'aurora',   name:'Aurora',        icon:'&#x1F30C;',color:'#00ff88',bg:'rgba(0,40,30,0.8)',   bonus:2,  duration:25000,desc:'2x money + aurora borealis',  type:'weather'},
+  {id:'blizzard', name:'Blizzard',      icon:'&#x2744;&#xFE0F;',color:'#aaddff',bg:'rgba(0,20,50,0.8)',bonus:1.5,duration:18000,desc:'1.5x money + snow',type:'weather'},
+  {id:'meteor',   name:'Meteor Shower', icon:'&#x2604;&#xFE0F;',color:'#ff8844',bg:'rgba(40,10,0,0.8)',bonus:4,duration:15000,desc:'4x money + meteor rain',type:'weather'},
+  {id:'rainbow',  name:'Rainbow Storm', icon:'&#x1F308;',color:'#ff66ff',bg:'rgba(30,0,50,0.8)',   bonus:2.5,duration:22000,desc:'2.5x money + rainbow trails',type:'weather'},
+  {id:'volcano',  name:'Volcano',       icon:'&#x1F30B;',color:'#ff4400',bg:'rgba(50,10,0,0.8)',   bonus:5,  duration:12000,desc:'5x money + lava bursts',      type:'weather'},
+  {id:'galaxy_ev',name:'Galaxy',        icon:'&#x1F30C;',color:'#aa66ff',bg:'rgba(10,0,30,0.8)',   bonus:3,  duration:30000,desc:'Spiral galaxy fireworks rain', type:'special'},
+  {id:'glitch',   name:'Glitch',        icon:'&#x26A0;&#xFE0F;',color:'#00ff00',bg:'rgba(0,20,0,0.8)',bonus:2,duration:30000,desc:'2x money + system glitch',type:'special'},
+  {id:'nuke',     name:'Nuke',          icon:'&#x1F4A5;',color:'#ffffff',bg:'rgba(30,30,10,0.8)',  bonus:1,  duration:5000, desc:'Massive simultaneous explosion',type:'special'},
+  {id:'firework_rain',name:'Firework Rain',icon:'&#x1F386;',color:'#ff66aa',bg:'rgba(20,0,20,0.8)',bonus:2,duration:20000,desc:'2x money + auto mega burst',type:'special'},
+  {id:'golden_hour',name:'Golden Hour', icon:'&#x2728;', color:'#ffd700',bg:'rgba(30,20,0,0.8)',   bonus:3.5,duration:20000,desc:'3.5x money + golden particles',type:'special'},
+  {id:'blackhole', name:'Black Hole',   icon:'&#x1F573;&#xFE0F;',color:'#9900ff',bg:'rgba(5,0,20,0.8)',bonus:6,duration:50000,desc:'6x money + vortex',type:'special'},
 ];
 const WEATHER_EVENTS=ALL_EVENTS.filter(e=>e.type==='weather');
-let activeWeather=null, weatherTimeout=null, weatherParticles=[];
-let blackholeActive=false, blackholeX=0, blackholeY=0;
-let fireworkRainInterval=-1;
+let activeWeather=null,weatherTimeout=null,weatherParticles=[];
+let blackholeActive=false,blackholeX=0,blackholeY=0,fireworkRainInterval=-1;
 
-// ═══════════════════════════════════════════════════
-//  CHALLENGES
-// ═══════════════════════════════════════════════════
-const CHALLENGE_DEFS = [
-  {id:'rapid_fire',   name:'Rapid Fire',       icon:'🔥', desc:'Launch 20 fireworks in 30 seconds',     goal:20,  stat:'launched_timed', reward:5000, timeLimit:30},
-  {id:'color_burst',  name:'Color Burst',      icon:'🎨', desc:'Launch in 5 different spots in 10s',    goal:5,   stat:'spots',           reward:4000, timeLimit:10},
-  {id:'auto_king',    name:'Auto Master',      icon:'🤖', desc:'50 auto launches',                      goal:50,  stat:'auto_count',      reward:7500},
-  {id:'shape_shifter',name:'Shape Collector',  icon:'🌟', desc:'Use 5 different shapes',                goal:5,   stat:'shapes_used',     reward:5000},
-  {id:'weather_rider',name:'Weather Rider',    icon:'🌩', desc:'30 launches during a weather event',    goal:30,  stat:'during_weather',  reward:12000},
-  // New PP Challenges
-  {id:'mega_accum',   name:'Mega Accumulator', icon:'💎', desc:'Collect 50 Mega PP',                    goal:50,  stat:'mega_pp',         reward:25000},
-  {id:'auto_empire',  name:'Auto Empire',      icon:'🚀', desc:'Reach 8 Auto Launchers',                goal:8,   stat:'max_autos',       reward:40000},
-  {id:'legendary',    name:'Legendary Score',  icon:'🌌', desc:'Earn 1,000,000 total points',          goal:1000000, stat:'earned',        reward:100000},
-  {id:'shape_god',    name:'Master Collector', icon:'👑', desc:'Own 12 different shapes',              goal:12,  stat:'shapes',          reward:75000},
-  {id:'pp_storm',     name:'PP Storm',         icon:'✨', desc:'Reach 10,000 Prestige Points',         goal:10000, stat:'prestigePoints', reward:50000}
+// FIX #2: Challenge stat names updated to ones that are actually ticked
+const CHALLENGE_DEFS=[
+  {id:'rapid_fire',   name:'Rapid Fire',       icon:'&#x1F525;',desc:'Launch 20 fireworks in 30s',         goal:20,   stat:'launched_timed', reward:5000,  timeLimit:30},
+  {id:'color_burst',  name:'Color Burst',       icon:'&#x1F3A8;',desc:'Launch in 5 different spots in 10s', goal:5,    stat:'spots',           reward:4000,  timeLimit:10},
+  {id:'auto_king',    name:'Auto Master',        icon:'&#x1F916;',desc:'50 auto launches',                   goal:50,   stat:'auto_count',      reward:7500},
+  {id:'shape_shifter',name:'Shape Collector',    icon:'&#x1F31F;',desc:'Use 5 different shapes',             goal:5,    stat:'shapes_used',     reward:5000},
+  {id:'weather_rider',name:'Weather Rider',      icon:'&#x1F329;',desc:'30 launches during weather event',   goal:30,   stat:'during_weather',  reward:12000},
+  // FIX #2: 'mega_pp' -> 'mega_pp_count' (ticked in convertToMega/owner gifts)
+  {id:'mega_accum',   name:'Mega Accumulator',   icon:'&#x1F48E;',desc:'Collect 50 Mega PP',                 goal:50,   stat:'mega_pp_count',   reward:25000},
+  // FIX #2: 'max_autos' -> 'max_autos_count' (ticked in upgradeAutoMax)
+  {id:'auto_empire',  name:'Auto Empire',         icon:'&#x1F680;',desc:'Reach 8 Auto Launchers',             goal:8,    stat:'max_autos_count', reward:40000},
+  // FIX #2: 'earned' -> 'earned_total' (ticked in explode via achStats.earned)
+  {id:'legendary',    name:'Legendary Score',     icon:'&#x1F30C;',desc:'Earn 1,000,000 total points',        goal:1000000,stat:'earned_total',   reward:100000},
+  // FIX #4: 'shapes' -> 'shapes_owned' (ticked when shape purchased)
+  {id:'shape_god',    name:'Master Collector',    icon:'&#x1F451;',desc:'Own 12 different shapes',            goal:12,   stat:'shapes_owned',    reward:75000},
+  // FIX #2: 'prestigePoints' -> 'pp_count' (ticked when PP changes)
+  {id:'pp_storm',     name:'PP Storm',            icon:'&#x2728;', desc:'Reach 10,000 Prestige Points',       goal:10000,stat:'pp_count',        reward:50000}
 ];
-let activeChallenge=null;   // {def, progress, startTime, sessionShapes}
-let challengeCompleted={};  // id -> true
-let chSessionLaunched=0, chSessionEarned=0, chAutoCount=0, chShapesUsed=new Set(), chDuringWeather=0, chSpots=[], chTopZone=0, chSimultaneous=0;
+let activeChallenge=null,challengeCompleted={};
+let chSessionLaunched=0,chAutoCount=0,chShapesUsed=new Set(),chDuringWeather=0,chSpots=[],chTopZone=0,chSimultaneous=0;
 
 function startChallenge(def){
-  activeChallenge={def, progress:0, startTime:Date.now(), sessionShapes:new Set()};
-  chSessionLaunched=0; chSessionEarned=0; chAutoCount=0;
-  chShapesUsed=new Set([activeShape]); chDuringWeather=0; chSpots=[]; chTopZone=0; chSimultaneous=0;
+  activeChallenge={def,progress:0,startTime:Date.now()};
+  chSessionLaunched=0;chAutoCount=0;chShapesUsed=new Set([activeShape]);chDuringWeather=0;chSpots=[];chTopZone=0;chSimultaneous=0;
   document.getElementById('challengeBar').style.display='block';
   updateChallengeBar();
-  showNotification(`⚡ Challenge started: ${def.name}!`,'event',3000);
+  showNotification('Challenge started: '+def.name+'!','event',3000);
 }
-
 function updateChallengeBar(){
   if(!activeChallenge)return;
-  const {def,progress}=activeChallenge;
+  const{def,progress}=activeChallenge;
   document.getElementById('chName').textContent=def.icon+' '+def.name;
   const pct=Math.min(100,(progress/def.goal)*100);
-  document.getElementById('chProg').textContent=`${Math.min(progress,def.goal)} / ${def.goal}`;
-  document.getElementById('chReward').textContent=`Reward: $${fmt(def.reward)}`;
+  document.getElementById('chProg').textContent=Math.min(progress,def.goal)+' / '+def.goal;
+  document.getElementById('chReward').textContent='Reward: $'+fmt(def.reward);
   document.getElementById('chFill').style.width=pct+'%';
   if(def.timeLimit>0){
     const elapsed=Math.floor((Date.now()-activeChallenge.startTime)/1000);
     const rem=def.timeLimit-elapsed;
-    document.getElementById('chProg').textContent+=` (${Math.max(0,rem)}s left)`;
-    if(rem<=0){failChallenge(); return;}
+    document.getElementById('chProg').textContent+=' ('+Math.max(0,rem)+'s left)';
+    if(rem<=0){failChallenge();return;}
   }
 }
-
-function tickChallenge(eventType, value){
+function tickChallenge(eventType,value){
   if(!activeChallenge)return;
-  const {def}=activeChallenge;
+  const{def}=activeChallenge;
   if(def.timeLimit>0){
     const elapsed=(Date.now()-activeChallenge.startTime)/1000;
     if(elapsed>def.timeLimit){failChallenge();return;}
   }
+  if(def.stat!==eventType)return;
   let prog=activeChallenge.progress;
-   if(def.stat===eventType){
-    if(eventType==='earn_session') prog=Math.min(def.goal, chSessionEarned);
-    else if(eventType==='combo') prog=Math.min(def.goal, value||comboLevel);
-    else if(eventType==='auto_count') prog=chAutoCount;
-    else if(eventType==='shapes_used') prog=chShapesUsed.size;
-    else if(eventType==='during_weather') prog=chDuringWeather;
-    else if(eventType==='top_zone') prog=chTopZone;
-    else if(eventType==='simultaneous') prog=chSimultaneous;
-    else if(eventType==='spots'){ prog=chSpots.length; }
-    else if(eventType==='mega_pp') prog = Math.min(def.goal, megaPP);
-    else if(eventType==='prestigePoints') prog = Math.min(def.goal, prestigePoints);
-    
-    else prog++;
-  }
+  if(eventType==='auto_count') prog=chAutoCount;
+  else if(eventType==='shapes_used') prog=chShapesUsed.size;
+  else if(eventType==='during_weather') prog=chDuringWeather;
+  else if(eventType==='top_zone') prog=chTopZone;
+  else if(eventType==='simultaneous') prog=chSimultaneous;
+  else if(eventType==='spots') prog=chSpots.length;
+  // FIX #2: PP-based stats all receive explicit value argument
+  else if(eventType==='earned_total') prog=Math.min(def.goal,achStats.earned);
+  else if(eventType==='mega_pp_count'||eventType==='max_autos_count'||eventType==='shapes_owned'||eventType==='pp_count') prog=value!==undefined?value:prog;
+  else prog++;
   activeChallenge.progress=prog;
   updateChallengeBar();
-  if(prog>=def.goal) completeChallenge();
+  if(prog>=def.goal)completeChallenge();
 }
-
 function completeChallenge(){
   if(!activeChallenge)return;
-  const {def}=activeChallenge;
+  const{def}=activeChallenge;
   money+=def.reward;
   document.getElementById('money').textContent=fmt(money);
   challengeCompleted[def.id]=true;
   achStats.challengesDone=(achStats.challengesDone||0)+1;
-  showNotification(`🏆 Challenge complete: ${def.name}! +$${fmt(def.reward)}`,'ach',5000);
+  showNotification('Challenge complete: '+def.name+'! +$'+fmt(def.reward),'ach',5000);
   activeChallenge=null;
   document.getElementById('challengeBar').style.display='none';
   saveProgressOnline().catch(()=>{});
   checkAchievements();
 }
-
 function failChallenge(){
   if(!activeChallenge)return;
-  showNotification(`❌ Challenge failed: ${activeChallenge.def.name}`,'',3000);
+  showNotification('Challenge failed: '+activeChallenge.def.name,'',3000);
   activeChallenge=null;
   document.getElementById('challengeBar').style.display='none';
 }
-
 function renderChallenges(){
-  const list=document.getElementById('challengeList');
-  list.innerHTML='';
+  const list=document.getElementById('challengeList');list.innerHTML='';
   CHALLENGE_DEFS.forEach(def=>{
-    const done=!!challengeCompleted[def.id];
-    const isActive=activeChallenge&&activeChallenge.def.id===def.id;
-    const card=document.createElement('div');
-    card.className='ch-card'+(isActive?' active':done?' done':'');
-    const prog=isActive?activeChallenge.progress:0;
-    const pct=isActive?Math.min(100,(prog/def.goal)*100):done?100:0;
-    card.innerHTML=`
-      <div class="ch-head">
-        <div class="ch-icon">${def.icon}</div>
-        <div class="ch-name">${def.name}</div>
-        <div class="ch-status" style="color:${done?'var(--gold)':isActive?'var(--accent2)':'var(--muted)'}">${done?'✓ DONE':isActive?'ACTIVE':'READY'}</div>
-      </div>
-      <div class="ch-desc">${def.desc}</div>
-      <div class="ch-reward-line">Reward: $${fmt(def.reward)}${def.timeLimit?'  ⏱ '+def.timeLimit+'s limit':''}</div>
-      <div class="ch-pbar"><div class="ch-pfill" style="width:${pct}%"></div></div>
-      ${!done&&!isActive?`<button class="ch-accept-btn" data-id="${def.id}">Accept Challenge</button>`:''}
-    `;
+    const done=!!challengeCompleted[def.id],isActive=activeChallenge&&activeChallenge.def.id===def.id;
+    const card=document.createElement('div');card.className='ch-card'+(isActive?' active':done?' done':'');
+    const prog=isActive?activeChallenge.progress:0,pct=isActive?Math.min(100,(prog/def.goal)*100):done?100:0;
+    card.innerHTML='<div class="ch-head"><div class="ch-icon">'+def.icon+'</div><div class="ch-name">'+def.name+'</div><div class="ch-status" style="color:'+(done?'var(--gold)':isActive?'var(--accent2)':'var(--muted)')+'">'+( done?'DONE':isActive?'ACTIVE':'READY')+'</div></div><div class="ch-desc">'+def.desc+'</div><div class="ch-reward-line">Reward: $'+fmt(def.reward)+(def.timeLimit?' &#x23F1; '+def.timeLimit+'s limit':'')+'</div><div class="ch-pbar"><div class="ch-pfill" style="width:'+pct+'%"></div></div>'+((!done&&!isActive)?'<button class="ch-accept-btn" data-id="'+def.id+'">Accept Challenge</button>':'');
     list.appendChild(card);
   });
   document.querySelectorAll('.ch-accept-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      if(activeChallenge){showNotification('Finish your current challenge first!');return;}
+      if(activeChallenge){showNotification('Finish current challenge first!');return;}
       const def=CHALLENGE_DEFS.find(d=>d.id===btn.dataset.id);
       if(def){closeModal('challengeModal');startChallenge(def);}
     });
   });
 }
-
-// ═══════════════════════════════════════════════════
-//  ACHIEVEMENTS  (expanded)
-// ═══════════════════════════════════════════════════
 const ACHIEVEMENTS=[
-  // Launches
-  {id:'first',        name:'First Launch',     icon:'🚀',desc:'Launch your first firework',   target:1,     stat:'launched'},
-  {id:'ten',          name:'Getting Started',  icon:'🎇',desc:'Launch 10 fireworks',          target:10,    stat:'launched'},
-  {id:'fifty',        name:'Warm Up',          icon:'🔥',desc:'Launch 50 fireworks',          target:50,    stat:'launched'},
-  {id:'hundred',      name:'Pyro Apprentice',  icon:'🎆',desc:'Launch 100 fireworks',         target:100,   stat:'launched'},
-  {id:'fivehundred',  name:'Pyro Journeyman',  icon:'💫',desc:'Launch 500 fireworks',         target:500,   stat:'launched'},
-  {id:'thousand',     name:'Pyro Master',      icon:'🔥',desc:'Launch 1,000 fireworks',       target:1000,  stat:'launched'},
-  {id:'fivek',        name:'Pyro Legend',      icon:'🌟',desc:'Launch 5,000 fireworks',       target:5000,  stat:'launched'},
-  {id:'tenk_launch',  name:'Pyromaniac',       icon:'☄️',desc:'Launch 10,000 fireworks',      target:10000, stat:'launched'},
-  {id:'fiftyk',       name:'The Destroyer',    icon:'💀',desc:'Launch 50,000 fireworks',      target:50000, stat:'launched'},
-  // Money
-  {id:'rich',         name:'Making Bank',      icon:'💰',desc:'Earn $1,000 total',            target:1000,  stat:'earned'},
-  {id:'tenk',         name:'Hustler',          icon:'💵',desc:'Earn $10,000 total',           target:10000, stat:'earned'},
-  {id:'hundredk',     name:'Big Spender',      icon:'💸',desc:'Earn $100,000 total',          target:1e5,   stat:'earned'},
-  {id:'millionaire',  name:'Millionaire',      icon:'🤑',desc:'Earn $1,000,000 total',        target:1e6,   stat:'earned'},
-  {id:'billionaire',  name:'Billionaire',      icon:'🏦',desc:'Earn $1,000,000,000 total',    target:1e9,   stat:'earned'},
-  {id:'trillionaire', name:'Trillionaire',     icon:'🌌',desc:'Earn $1,000,000,000,000 total',target:1e12,  stat:'earned'},
-  // Combo
-  {id:'combo5',       name:'Hot Streak',       icon:'🔥',desc:'Reach a 5× combo',            target:5,     stat:'maxCombo'},
-  {id:'combo7',       name:'On Fire',          icon:'🌋',desc:'Reach a 7× combo',            target:7,     stat:'maxCombo'},
-  {id:'combo10',      name:'UNSTOPPABLE',      icon:'⚡',desc:'Reach a 10× combo',           target:10,    stat:'maxCombo'},
-  // Rebirths
-  {id:'rebirth1',     name:'Born Again',       icon:'♻️',desc:'Complete first rebirth',      target:1,     stat:'rebirths'},
-  {id:'rebirth3',     name:'Cycle Breaker',    icon:'🔄',desc:'Complete 3 rebirths',         target:3,     stat:'rebirths'},
-  {id:'rebirth5',     name:'Eternal',          icon:'🌀',desc:'Complete 5 rebirths',         target:5,     stat:'rebirths'},
-  {id:'rebirth10',    name:'Transcendent',     icon:'🌌',desc:'Complete 10 rebirths',        target:10,    stat:'rebirths'},
-  {id:'rebirth25',    name:'Godlike',          icon:'👑',desc:'Complete 25 rebirths',        target:25,    stat:'rebirths'},
-  // Shapes
-  {id:'shapes3',      name:'Shape Shifter',    icon:'🌟',desc:'Own 3 shapes',                target:3,     stat:'shapes'},
-  {id:'shapes6',      name:'Pattern Master',   icon:'🎨',desc:'Own 6 shapes',                target:6,     stat:'shapes'},
-  {id:'shapes_all',   name:'Collector',        icon:'🏅',desc:'Own all 15 shapes',           target:15,    stat:'shapes'},
-  // Weather/Events
-  {id:'weather1',     name:'Storm Chaser',     icon:'🌩',desc:'Survive a weather event',     target:1,     stat:'weatherEvents'},
-  {id:'weather5',     name:'Weather Veteran',  icon:'🌪️',desc:'Survive 5 weather events',    target:5,     stat:'weatherEvents'},
-  {id:'weather10',    name:'Nature Master',    icon:'🌊',desc:'Survive 10 weather events',   target:10,    stat:'weatherEvents'},
-  // Prestige
-  {id:'prestige1',    name:'Prestige Buyer',   icon:'👑',desc:'Buy first prestige item',     target:1,     stat:'prestigeBought'},
-  {id:'prestige_all', name:'Prestige Hoarder', icon:'💎',desc:'Own all prestige upgrades',   target:5,     stat:'prestigeBought'},
-  // Challenges
-  {id:'ch_first',     name:'Challenger',       icon:'⚡',desc:'Complete first challenge',    target:1,     stat:'challengesDone'},
-  {id:'ch_five',      name:'Challenge Champ',  icon:'🏆',desc:'Complete 5 challenges',       target:5,     stat:'challengesDone'},
-  {id:'ch_all',       name:'Challenge God',    icon:'🌟',desc:'Complete all 10 challenges',  target:10,    stat:'challengesDone'},
-  // Fun hidden
-  {id:'night_owl',    name:'Night Owl',        icon:'🦉',desc:'Launch 100 auto fireworks',   target:100,   stat:'autoLaunched'},
-  {id:'clicker',      name:'Click Master',     icon:'🖱️',desc:'Click 500 times manually',   target:500,   stat:'manualClicks'},
-  {id:'patient',      name:'Patient Zero',     icon:'⏳',desc:'Wait for 10× combo',         target:10,    stat:'maxCombo'},
+  {id:'first',       name:'First Launch',    icon:'&#x1F680;',desc:'Launch first firework',       target:1,     stat:'launched'},
+  {id:'ten',         name:'Getting Started', icon:'&#x1F387;',desc:'Launch 10 fireworks',         target:10,    stat:'launched'},
+  {id:'fifty',       name:'Warm Up',         icon:'&#x1F525;',desc:'Launch 50 fireworks',         target:50,    stat:'launched'},
+  {id:'hundred',     name:'Pyro Apprentice', icon:'&#x1F386;',desc:'Launch 100 fireworks',        target:100,   stat:'launched'},
+  {id:'fivehundred', name:'Pyro Journeyman', icon:'&#x1F4AB;',desc:'Launch 500 fireworks',        target:500,   stat:'launched'},
+  {id:'thousand',    name:'Pyro Master',     icon:'&#x1F525;',desc:'Launch 1,000 fireworks',      target:1000,  stat:'launched'},
+  {id:'fivek',       name:'Pyro Legend',     icon:'&#x1F31F;',desc:'Launch 5,000 fireworks',      target:5000,  stat:'launched'},
+  {id:'tenk_launch', name:'Pyromaniac',      icon:'&#x2604;&#xFE0F;',desc:'Launch 10,000 fireworks',target:10000,stat:'launched'},
+  {id:'fiftyk',      name:'The Destroyer',   icon:'&#x1F480;',desc:'Launch 50,000 fireworks',     target:50000, stat:'launched'},
+  {id:'rich',        name:'Making Bank',     icon:'&#x1F4B0;',desc:'Earn $1,000 total',           target:1000,  stat:'earned'},
+  {id:'tenk',        name:'Hustler',         icon:'&#x1F4B5;',desc:'Earn $10,000 total',          target:10000, stat:'earned'},
+  {id:'hundredk',    name:'Big Spender',     icon:'&#x1F4B8;',desc:'Earn $100,000 total',         target:1e5,   stat:'earned'},
+  {id:'millionaire', name:'Millionaire',     icon:'&#x1F911;',desc:'Earn $1,000,000 total',       target:1e6,   stat:'earned'},
+  {id:'billionaire', name:'Billionaire',     icon:'&#x1F3E6;',desc:'Earn $1,000,000,000 total',   target:1e9,   stat:'earned'},
+  {id:'trillionaire',name:'Trillionaire',    icon:'&#x1F30C;',desc:'Earn $1T total',              target:1e12,  stat:'earned'},
+  {id:'combo5',      name:'Hot Streak',      icon:'&#x1F525;',desc:'Reach 5x combo',              target:5,     stat:'maxCombo'},
+  {id:'combo7',      name:'On Fire',         icon:'&#x1F30B;',desc:'Reach 7x combo',              target:7,     stat:'maxCombo'},
+  {id:'combo10',     name:'UNSTOPPABLE',     icon:'&#x26A1;', desc:'Reach 10x combo',             target:10,    stat:'maxCombo'},
+  {id:'rebirth1',    name:'Born Again',      icon:'&#x267B;&#xFE0F;',desc:'First rebirth',        target:1,     stat:'rebirths'},
+  {id:'rebirth3',    name:'Cycle Breaker',   icon:'&#x1F504;',desc:'3 rebirths',                  target:3,     stat:'rebirths'},
+  {id:'rebirth5',    name:'Eternal',         icon:'&#x1F300;',desc:'5 rebirths',                  target:5,     stat:'rebirths'},
+  {id:'rebirth10',   name:'Transcendent',    icon:'&#x1F30C;',desc:'10 rebirths',                 target:10,    stat:'rebirths'},
+  {id:'rebirth25',   name:'Godlike',         icon:'&#x1F451;',desc:'25 rebirths',                 target:25,    stat:'rebirths'},
+  {id:'shapes3',     name:'Shape Shifter',   icon:'&#x1F31F;',desc:'Own 3 shapes',                target:3,     stat:'shapes'},
+  {id:'shapes6',     name:'Pattern Master',  icon:'&#x1F3A8;',desc:'Own 6 shapes',                target:6,     stat:'shapes'},
+  {id:'shapes_all',  name:'Collector',       icon:'&#x1F3C5;',desc:'Own all 15 shapes',           target:15,    stat:'shapes'},
+  {id:'weather1',    name:'Storm Chaser',    icon:'&#x1F329;',desc:'Survive a weather event',     target:1,     stat:'weatherEvents'},
+  {id:'weather5',    name:'Weather Veteran', icon:'&#x1F32A;&#xFE0F;',desc:'Survive 5 weather events',target:5,stat:'weatherEvents'},
+  {id:'weather10',   name:'Nature Master',   icon:'&#x1F30A;',desc:'Survive 10 weather events',   target:10,    stat:'weatherEvents'},
+  {id:'prestige1',   name:'Prestige Buyer',  icon:'&#x1F451;',desc:'Buy first prestige item',     target:1,     stat:'prestigeBought'},
+  {id:'prestige_all',name:'Prestige Hoarder',icon:'&#x1F48E;',desc:'Own all prestige upgrades',   target:5,     stat:'prestigeBought'},
+  {id:'ch_first',    name:'Challenger',      icon:'&#x26A1;', desc:'Complete first challenge',    target:1,     stat:'challengesDone'},
+  {id:'ch_five',     name:'Challenge Champ', icon:'&#x1F3C6;',desc:'Complete 5 challenges',       target:5,     stat:'challengesDone'},
+  {id:'ch_all',      name:'Challenge God',   icon:'&#x1F31F;',desc:'Complete all 10 challenges',  target:10,    stat:'challengesDone'},
+  {id:'night_owl',   name:'Night Owl',       icon:'&#x1F989;',desc:'100 auto fireworks',          target:100,   stat:'autoLaunched'},
+  {id:'clicker',     name:'Click Master',    icon:'&#x1F5B1;&#xFE0F;',desc:'Click 500 times',      target:500,   stat:'manualClicks'},
+  {id:'patient',     name:'Patient Zero',    icon:'&#x23F3;', desc:'Wait for 10x combo',          target:10,    stat:'maxCombo'},
 ];
 let achStats={launched:0,earned:0,maxCombo:0,rebirths:0,shapes:1,weatherEvents:0,prestigeBought:0,challengesDone:0,autoLaunched:0,manualClicks:0};
 let unlockedAchs={};
-
-// ═══════════════════════════════════════════════════
-//  ADMIN / TAGS
-// ═══════════════════════════════════════════════════
 const ADMIN_FALLBACK={"FaZgGtIHzVcnSS6c8JAoir9RG8J2":true,"BxQ1aTqPndOfHzuX3OzlCcD4pbC3":true};
-const TAGS_INFO={owner:{name:"Owner",description:"Assigned to the owner"},vip:{name:"VIP",description:"Give to some supporters"},donator:{name:"Donator",description:"Thank-you for supporting DR3AM STUDI0S"},streamer:{name:"Streamer",description:"Verified streamers"},youtuber:{name:"Youtuber",description:"Verified youtubers"},regular:{name:"Regular",description:"Default player tag"},fart:{name:"Fart",description:"A tag for the fart"}};
-
-// ═══════════════════════════════════════════════════
-//  COLORS
-// ═══════════════════════════════════════════════════
+const TAGS_INFO={owner:{name:"Owner",description:"Owner tag"},vip:{name:"VIP",description:"VIP supporters"},donator:{name:"Donator",description:"Thank-you donors"},streamer:{name:"Streamer",description:"Verified streamers"},youtuber:{name:"Youtuber",description:"Verified youtubers"},regular:{name:"Regular",description:"Default player"},fart:{name:"Fart",description:"The fart tag"}};
 const baseColors=[{color:"hsl(0,100%,60%)",value:1},{color:"hsl(30,100%,60%)",value:2},{color:"hsl(60,100%,60%)",value:3},{color:"hsl(120,100%,60%)",value:4},{color:"hsl(180,100%,60%)",value:5},{color:"hsl(240,100%,60%)",value:6}];
 let colors=[...baseColors];
-
-// ═══════════════════════════════════════════════════
-//  NOTIFICATIONS
-// ═══════════════════════════════════════════════════
-function showNotification(text,type='',duration=2500){
-  const el=document.createElement('div');
-  el.className='notif'+(type?' '+type:'');
-  el.textContent=text;
+function showNotification(text,type,duration){
+  duration=duration||2500;
+  const el=document.createElement('div');el.className='notif'+(type?' '+type:'');el.textContent=text;
   document.getElementById('notifications').appendChild(el);
   setTimeout(()=>el.remove(),duration+400);
 }
-
-// ═══════════════════════════════════════════════════
-//  CENSORING
-// ═══════════════════════════════════════════════════
 const bannedWords=["slut","fuck","shit","bitch","nigger","niger","pussy","dick","penis"];
 const leetMap={'4':'a','@':'a','8':'b','3':'e','1':'i','0':'o','5':'s','$':'s','7':'t','2':'z'};
 function normalizeName(n){return n.toLowerCase().split('').map(c=>leetMap[c]||c).join('');}
 function censorUsername(u){let n=normalizeName(u);bannedWords.forEach(w=>{if(n.includes(w))u=u.replace(new RegExp(w,'gi'),'*'.repeat(w.length));});return u;}
-
-// ═══════════════════════════════════════════════════
-//  FORMAT
-// ═══════════════════════════════════════════════════
 function fmt(n){if(n>=1e12)return(n/1e12).toFixed(1).replace(/\.0$/,'')+'T';if(n>=1e9)return(n/1e9).toFixed(1).replace(/\.0$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1000)return(n/1000).toFixed(1).replace(/\.0$/,'')+'k';return Math.floor(n);}
 
-// ═══════════════════════════════════════════════════
-//  PARTICLE SHAPES
-// ═══════════════════════════════════════════════════
+// ===================================================================
+// FIX #3: getShapeVelocities — all 6 missing shapes now implemented
+// ===================================================================
 function getShapeVelocities(shape){
   const extra=prestigeOwned['mega_burst']?2:1;
   const vels=[];
   function addRing(count,r){for(let i=0;i<count*extra;i++){const a=(i/count)*Math.PI*2;vels.push({vx:Math.cos(a)*(r+(Math.random()-0.5)*0.4),vy:Math.sin(a)*(r+(Math.random()-0.5)*0.4)});}}
   switch(shape){
-    case 'star':{const pts=5,outer=4.5,inner=2;for(let i=0;i<pts*2;i++){const a=(i*Math.PI)/pts-Math.PI/2,r=(i%2===0)?outer:inner;for(let j=0;j<8*extra;j++){const s=(Math.random()-0.5)*0.8;vels.push({vx:Math.cos(a)*r+s,vy:Math.sin(a)*r+s});}}break;}
+    case 'star':{const pts=5,outer=4.5,inner=2;for(let i=0;i<pts*2;i++){const a=(i*Math.PI)/pts-Math.PI/2,r=i%2===0?outer:inner;for(let j=0;j<8*extra;j++){const s=(Math.random()-0.5)*0.8;vels.push({vx:Math.cos(a)*r+s,vy:Math.sin(a)*r+s});}}break;}
     case 'heart':{for(let i=0;i<120*extra;i++){const t=(i/(120*extra))*Math.PI*2;vels.push({vx:16*Math.pow(Math.sin(t),3)*0.22,vy:-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))*0.22});}break;}
     case 'ring':{addRing(80,4);break;}
     case 'spiral':{for(let i=0;i<100*extra;i++){const a=(i/(100*extra))*Math.PI*6,r=(i/(100*extra))*5;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}break;}
-    case 'smiley':{for(let e=0;e<2;e++){const ex=(e===0?-1.5:1.5);for(let i=0;i<20*extra;i++){const a=(i/(20*extra))*Math.PI*2;vels.push({vx:ex+Math.cos(a)*0.8,vy:-1.5+Math.sin(a)*0.8});}}for(let i=0;i<40*extra;i++){const t=(i/(40*extra))*Math.PI;vels.push({vx:Math.cos(t)*2.5,vy:Math.sin(t)*1.5+0.5});}addRing(60,4);break;}
+    case 'smiley':{for(let e=0;e<2;e++){const ex=e===0?-1.5:1.5;for(let i=0;i<20*extra;i++){const a=(i/(20*extra))*Math.PI*2;vels.push({vx:ex+Math.cos(a)*0.8,vy:-1.5+Math.sin(a)*0.8});}}for(let i=0;i<40*extra;i++){const t=(i/(40*extra))*Math.PI;vels.push({vx:Math.cos(t)*2.5,vy:Math.sin(t)*1.5+0.5});}addRing(60,4);break;}
     case 'cross':{const arms=4,len=5;for(let arm=0;arm<arms;arm++){const a=(arm/arms)*Math.PI*2;for(let j=0;j<20*extra;j++){const d=(j/(20*extra))*len,s=(Math.random()-0.5)*0.6;vels.push({vx:Math.cos(a)*d+s,vy:Math.sin(a)*d+s});}}break;}
-    case 'diamond':{const pts=[[0,-5],[4,0],[0,5],[-4,0]];for(let i=0;i<4;i++){const p1=pts[i],p2=pts[(i+1)%4];for(let j=0;j<25*extra;j++){const t=j/(25*extra),s=(Math.random()-0.5)*0.5;vels.push({vx:p1[0]*(1-t)+p2[0]*t+s,vy:p1[1]*(1-t)+p2[1]*t+s});}}break;}
-    case 'triangle':{const pts=[[0,-5],[4.3,2.5],[-4.3,2.5]];for(let i=0;i<3;i++){const p1=pts[i],p2=pts[(i+1)%3];for(let j=0;j<30*extra;j++){const t=j/(30*extra),s=(Math.random()-0.5)*0.5;vels.push({vx:p1[0]*(1-t)+p2[0]*t+s,vy:p1[1]*(1-t)+p2[1]*t+s});}}break;}
-    case 'burst8':{const pts=8,outer=4.5,inner=2;for(let i=0;i<pts*2;i++){const a=(i*Math.PI)/pts-Math.PI/2,r=(i%2===0)?outer:inner;for(let j=0;j<8*extra;j++){const s=(Math.random()-0.5)*0.6;vels.push({vx:Math.cos(a)*r+s,vy:Math.sin(a)*r+s});}}break;}
+    case 'diamond':{const dpts=[[0,-5],[4,0],[0,5],[-4,0]];for(let i=0;i<4;i++){const p1=dpts[i],p2=dpts[(i+1)%4];for(let j=0;j<25*extra;j++){const t=j/(25*extra),s=(Math.random()-0.5)*0.5;vels.push({vx:p1[0]*(1-t)+p2[0]*t+s,vy:p1[1]*(1-t)+p2[1]*t+s});}}break;}
+    case 'triangle':{const tpts=[[0,-5],[4.3,2.5],[-4.3,2.5]];for(let i=0;i<3;i++){const p1=tpts[i],p2=tpts[(i+1)%3];for(let j=0;j<30*extra;j++){const t=j/(30*extra),s=(Math.random()-0.5)*0.5;vels.push({vx:p1[0]*(1-t)+p2[0]*t+s,vy:p1[1]*(1-t)+p2[1]*t+s});}}break;}
+    case 'burst8':{const pts8=8,outer8=4.5,inner8=2;for(let i=0;i<pts8*2;i++){const a=(i*Math.PI)/pts8-Math.PI/2,r=i%2===0?outer8:inner8;for(let j=0;j<8*extra;j++){const s=(Math.random()-0.5)*0.6;vels.push({vx:Math.cos(a)*r+s,vy:Math.sin(a)*r+s});}}break;}
     case 'double':{addRing(50,2.5);addRing(80,4.5);break;}
     case 'comet':{for(let i=0;i<40*extra;i++){const a=Math.random()*Math.PI*2,s=Math.random()*3;vels.push({vx:Math.cos(a)*s,vy:Math.sin(a)*s});}for(let i=0;i<60*extra;i++){const s=(Math.random()-0.5)*1.5;vels.push({vx:2+Math.random()*3+s,vy:1+Math.random()*2+s});}break;}
-    case 'snowflake':{const arms=6;for(let arm=0;arm<arms;arm++){const a=(arm/arms)*Math.PI*2;for(let j=0;j<20*extra;j++){const d=(j/(20*extra))*5;vels.push({vx:Math.cos(a)*d,vy:Math.sin(a)*d});if(j===Math.floor(12*extra)){vels.push({vx:Math.cos(a+Math.PI/3)*2,vy:Math.sin(a+Math.PI/3)*2});vels.push({vx:Math.cos(a-Math.PI/3)*2,vy:Math.sin(a-Math.PI/3)*2});}}}break;}
-    case 'crown':{for(let i=0;i<60*extra;i++){const t=(i/(60*extra))*Math.PI;vels.push({vx:Math.cos(t)*4,vy:Math.sin(t)*1.5+1});}const spikes=5;for(let s=0;s<spikes;s++){const x=-4+(s/(spikes-1))*8;for(let j=0;j<12*extra;j++){const f=j/(12*extra);vels.push({vx:x+(Math.random()-0.5)*0.4,vy:-f*4-0.5});}}break;}
+    case 'snowflake':{for(let arm=0;arm<6;arm++){const a=(arm/6)*Math.PI*2;for(let j=0;j<20*extra;j++){const d=(j/(20*extra))*5;vels.push({vx:Math.cos(a)*d,vy:Math.sin(a)*d});if(j===Math.floor(12*extra)){vels.push({vx:Math.cos(a+Math.PI/3)*2,vy:Math.sin(a+Math.PI/3)*2});vels.push({vx:Math.cos(a-Math.PI/3)*2,vy:Math.sin(a-Math.PI/3)*2});}}}break;}
+    case 'crown':{for(let i=0;i<60*extra;i++){const t=(i/(60*extra))*Math.PI;vels.push({vx:Math.cos(t)*4,vy:Math.sin(t)*1.5+1});}for(let s=0;s<5;s++){const x=-4+(s/4)*8;for(let j=0;j<12*extra;j++){const f=j/(12*extra);vels.push({vx:x+(Math.random()-0.5)*0.4,vy:-f*4-0.5});}}break;}
     case 'infinity':{for(let i=0;i<120*extra;i++){const t=(i/(120*extra))*Math.PI*2,sc=1/(1+Math.sin(t)*Math.sin(t));vels.push({vx:Math.cos(t)*sc*4.5,vy:Math.sin(t)*Math.cos(t)*sc*3});}break;}
-    case 'phoenix':{for(let i=0;i<80*extra;i++){const a=(i/(80*extra))*Math.PI*2;vels.push({vx:Math.cos(a)*3.5,vy:Math.sin(a)*2.5-1});}for(let i=0;i<60*extra;i++){const a=(i/(60*extra))*Math.PI*4;vels.push({vx:Math.cos(a)*2+Math.random()*1.5,vy:Math.sin(a)*1.5-2});}break;}
-    case 'nebula':{for(let i=0;i<140*extra;i++){const a=Math.random()*Math.PI*2,r=1+Math.random()*4;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}break;}
-    case 'dragonfly':{for(let i=0;i<90*extra;i++){const t=(i/(90*extra))*Math.PI*3;vels.push({vx:Math.sin(t)*3,vy:Math.cos(t)*2.5});}for(let i=0;i<40*extra;i++){vels.push({vx:Math.random()*4-2,vy:Math.random()*3-3});}break;}
-    case 'butterfly':{for(let i=0;i<110*extra;i++){const t=(i/(110*extra))*Math.PI*2;vels.push({vx:Math.sin(t*2)*3.2,vy:Math.cos(t)*2.8});}break;}
-    case 'galaxy':{for(let i=0;i<120*extra;i++){const a=(i/(120*extra))*Math.PI*5,r=i/(120*extra)*4.5;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}break;}
-    case 'sunburst':{for(let i=0;i<16;i++){const a=i/16*Math.PI*2;for(let j=0;j<12*extra;j++){const r=2+j/3;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}}break;}
+
+    // --- FIX #3: Previously missing shapes ---
+
+    case 'phoenix':{
+      // Sweeping wing arcs
+      const wc=60*extra;
+      for(let i=0;i<wc;i++){const t=(i/wc)*Math.PI*2,r=3+1.5*Math.sin(t*2),angle=t+Math.PI/4;vels.push({vx:Math.cos(angle)*r,vy:Math.sin(angle)*r-2});}
+      // Downward tail feathers
+      for(let i=0;i<40*extra;i++){const sp=((i/(40*extra))-0.5)*3,len=2+Math.random()*3;vels.push({vx:sp+(Math.random()-0.5)*0.5,vy:len+Math.random()});}
+      // Rising flame core
+      for(let i=0;i<30*extra;i++){const a=(Math.random()-0.5)*1.2;vels.push({vx:a,vy:-(2+Math.random()*4)});}
+      break;
+    }
+    case 'nebula':{
+      // Multiple offset cloud clusters
+      for(let c=0;c<5;c++){
+        const cx=(Math.random()-0.5)*3,cy=(Math.random()-0.5)*3,r=1.5+Math.random()*3;
+        for(let i=0;i<30*extra;i++){const a=Math.random()*Math.PI*2,rr=r*(0.6+Math.random()*0.8);vels.push({vx:cx+Math.cos(a)*rr,vy:cy+Math.sin(a)*rr});}
+      }
+      // Fill scatter
+      for(let i=0;i<60*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*5;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}
+      break;
+    }
+    case 'dragonfly':{
+      // 4 elliptical wings (2 pairs)
+      [{cx:-2,cy:-1,rx:3,ry:1.5,ra:-0.5},{cx:2,cy:-1,rx:3,ry:1.5,ra:0.5},{cx:-1.5,cy:1,rx:2,ry:1,ra:-0.3},{cx:1.5,cy:1,rx:2,ry:1,ra:0.3}].forEach(w=>{
+        for(let i=0;i<25*extra;i++){const t=(i/(25*extra))*Math.PI*2,lx=w.rx*Math.cos(t),ly=w.ry*Math.sin(t);vels.push({vx:w.cx+lx*Math.cos(w.ra)-ly*Math.sin(w.ra),vy:w.cy+lx*Math.sin(w.ra)+ly*Math.cos(w.ra)});}
+      });
+      // Elongated body
+      for(let i=0;i<20*extra;i++){const f=(i/(20*extra))*6-3;vels.push({vx:(Math.random()-0.5)*0.3,vy:f});}
+      break;
+    }
+    case 'butterfly':{
+      // Upper wings (larger cardioid per side)
+      for(let side=-1;side<=1;side+=2){
+        for(let i=0;i<50*extra;i++){const t=(i/(50*extra))*Math.PI*2,r=4*Math.abs(Math.sin(t/2));vels.push({vx:side*(Math.cos(t)*r+0.5),vy:Math.sin(t)*r-1});}
+      }
+      // Lower wings (smaller)
+      for(let side=-1;side<=1;side+=2){
+        for(let i=0;i<30*extra;i++){const t=(i/(30*extra))*Math.PI*2,r=2*Math.abs(Math.sin(t/2));vels.push({vx:side*(Math.cos(t)*r+0.3),vy:Math.sin(t)*r+2});}
+      }
+      // Body
+      for(let i=0;i<15*extra;i++){const f=(i/(15*extra))*5-2.5;vels.push({vx:(Math.random()-0.5)*0.2,vy:f});}
+      break;
+    }
+    case 'galaxy':{
+      // 4 logarithmic spiral arms
+      for(let arm=0;arm<4;arm++){
+        const offset=(arm/4)*Math.PI*2;
+        for(let i=0;i<60*extra;i++){
+          const t=(i/(60*extra))*Math.PI*3,r=0.3*Math.exp(0.25*t),sc=(Math.random()-0.5)*0.4;
+          vels.push({vx:Math.cos(t+offset)*r+sc,vy:Math.sin(t+offset)*r+sc});
+        }
+      }
+      // Dense core
+      for(let i=0;i<40*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*0.8;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}
+      break;
+    }
+    case 'sunburst':{
+      // 16 alternating long/short rays
+      for(let ray=0;ray<16;ray++){
+        const angle=(ray/16)*Math.PI*2,isLong=ray%2===0,rayLen=isLong?5.5:3,pCount=(isLong?20:12)*extra;
+        for(let j=0;j<pCount;j++){
+          const d=(j/pCount)*rayLen,sp=(Math.random()-0.5)*0.3;
+          vels.push({vx:Math.cos(angle)*d+Math.cos(angle+Math.PI/2)*sp,vy:Math.sin(angle)*d+Math.sin(angle+Math.PI/2)*sp});
+        }
+      }
+      // Bright core
+      for(let i=0;i<50*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*1.2;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}
+      break;
+    }
+
     default:{const count=prestigeOwned['mega_burst']?200:100;for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,s=Math.random()*4;vels.push({vx:Math.cos(a)*s,vy:Math.sin(a)*s});}}
+  }
+  return vels;
 }
 
-// ═══════════════════════════════════════════════════
-//  FIREWORK & PARTICLE CLASSES
-// ═══════════════════════════════════════════════════
 class Firework{
-  constructor(x,y,colorObj){
-    this.x=x; this.y=canvas.height; this.targetY=y;
-    this.speed=Math.random()*2+4; this.colorObj=colorObj;
-    this.exploded=false; this.trail=[]; this.hue=Math.random()*360;
-  }
+  constructor(x,y,colorObj){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;this.exploded=false;this.trail=[];this.hue=Math.random()*360;}
   update(){
     if(glitchActive){this.x+=(Math.random()-0.5)*6;this.y+=(Math.random()-0.5)*6;}
     if(blackholeActive){const dx=blackholeX-this.x,dy=blackholeY-this.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<200){this.x+=dx/dist*2;this.y+=dy/dist*2;}}
-    this.trail.push({x:this.x,y:this.y});
-    if(this.trail.length>12)this.trail.shift();
+    this.trail.push({x:this.x,y:this.y});if(this.trail.length>12)this.trail.shift();
     this.y-=this.speed;
     if(this.y<=this.targetY&&!this.exploded){this.exploded=true;explode(this.x,this.y,this.colorObj);return true;}
     return false;
   }
   draw(){
     this.trail.forEach((t,i)=>{
-      const alpha=(i/this.trail.length)*0.6;
-      ctx.beginPath(); ctx.arc(t.x,t.y,1.5,0,Math.PI*2);
-      const c=prestigeOwned['rainbow_trail']?`hsla(${(this.hue+i*15)%360},100%,70%,${alpha})`:glitchActive?`hsla(${Math.random()*360},100%,60%,${alpha})`:this.colorObj.color.replace(')' ,`,${alpha})`).replace('hsl','hsla');
-      ctx.fillStyle=c; ctx.fill();
+      const alpha=(i/this.trail.length)*0.6;ctx.beginPath();ctx.arc(t.x,t.y,1.5,0,Math.PI*2);
+      const c=prestigeOwned['rainbow_trail']?'hsla('+(((this.hue+i*15)%360))+',100%,70%,'+alpha+')':this.colorObj.color.replace(')',','+alpha+')').replace('hsl','hsla');
+      ctx.fillStyle=c;ctx.fill();
     });
-    ctx.beginPath(); ctx.arc(this.x,this.y,2.5,0,Math.PI*2);
-    ctx.fillStyle=glitchActive?`hsl(${Math.random()*360},100%,60%)`:this.colorObj.color; ctx.fill();
+    ctx.beginPath();ctx.arc(this.x,this.y,2.5,0,Math.PI*2);ctx.fillStyle=this.colorObj.color;ctx.fill();
   }
 }
-
 class Particle{
   constructor(x,y,colorObj,vx,vy){
-    this.x=x; this.y=y;
-    this.color=(prestigeOwned['golden_sparks']&&goldenSparksActive)||activeWeather?.id==='golden_hour'?'hsl(48,100%,65%)':colorObj.color;
+    this.x=x;this.y=y;
+    this.color=(prestigeOwned['golden_sparks']&&goldenSparksActive)||activeWeather&&activeWeather.id==='golden_hour'?'hsl(48,100%,65%)':colorObj.color;
     this.vx=vx!==undefined?vx:Math.cos(Math.random()*Math.PI*2)*Math.random()*4;
     this.vy=vy!==undefined?vy:Math.sin(Math.random()*Math.PI*2)*Math.random()*4;
-    this.life=100+Math.random()*30; this.maxLife=this.life; this.size=2+Math.random();
+    this.life=100+Math.random()*30;this.maxLife=this.life;this.size=2+Math.random();
   }
   update(){
-    if(activeWeather?.id==='storm')this.vx+=(Math.random()-0.5)*0.15;
+    if(activeWeather&&activeWeather.id==='storm')this.vx+=(Math.random()-0.5)*0.15;
     if(blackholeActive){const dx=blackholeX-this.x,dy=blackholeY-this.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<300){this.vx+=dx/dist*0.5;this.vy+=dy/dist*0.5;}}
-    this.vy+=gravity; this.x+=this.vx; this.y+=this.vy; this.life--;
+    this.vy+=gravity;this.x+=this.vx;this.y+=this.vy;this.life--;
   }
-  draw(){
-    const alpha=this.life/this.maxLife;
-    ctx.globalAlpha=alpha; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-    ctx.fillStyle=glitchActive?`hsl(${Math.random()*360},100%,60%)`:this.color;
-    ctx.fill(); ctx.globalAlpha=1;
-  }
+  draw(){const alpha=this.life/this.maxLife;ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=glitchActive?'hsl('+(Math.random()*360)+',100%,60%)':this.color;ctx.fill();ctx.globalAlpha=1;}
 }
-
 class WeatherParticle{
   constructor(){this.reset();}
-  reset(){
-    this.x=Math.random()*canvas.width; this.y=-10;
-    this.size=Math.random()*3+1; this.speed=Math.random()*2+0.5; this.drift=(Math.random()-0.5)*0.5;
-    this.color=activeWeather?.id==='blizzard'?'rgba(200,230,255,0.8)':activeWeather?.id==='volcano'?`hsla(${10+Math.random()*30},100%,60%,0.8)`:`hsla(${Math.random()*360},100%,70%,0.7)`;
-  }
+  reset(){this.x=Math.random()*canvas.width;this.y=-10;this.size=Math.random()*3+1;this.speed=Math.random()*2+0.5;this.drift=(Math.random()-0.5)*0.5;this.color=activeWeather&&activeWeather.id==='blizzard'?'rgba(200,230,255,0.8)':activeWeather&&activeWeather.id==='volcano'?'hsla('+(10+Math.random()*30)+',100%,60%,0.8)':'hsla('+(Math.random()*360)+',100%,70%,0.7)';}
   update(){this.y+=this.speed;this.x+=this.drift;if(this.y>canvas.height+10)this.reset();}
   draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}
 }
 
-// ═══════════════════════════════════════════════════
-//  EXPLODE
-//  CHANGED: multipliers are now ADDITIVE not multiplicative.
-//  Formula: colorValue × (1 + rebirthBonus + comboBonus + glitchBonus + weatherBonus)
-//    rebirthBonus  = rebirthCount          (rebirth 3 → +3)
-//    comboBonus    = comboLevel - 1        (combo 5× → +4, combo 10× → +9)
-//    glitchBonus   = globalMultiplier - 1  (glitch = +1)
-//    weatherBonus  = weather.bonus - 1     (storm 3× → +2, volcano 5× → +4)
-// ═══════════════════════════════════════════════════
 function explode(x,y,colorObj){
-  if(!soundMuted){try{const s=document.getElementById('fireworkSound');s.currentTime=0;s.play();}catch(e){}}
+  try{const s=document.getElementById('fireworkSound');s.currentTime=0;s.play();}catch(e){}
   const vels=getShapeVelocities(activeShape);
   vels.forEach(v=>particles.push(new Particle(x,y,colorObj,v.vx,v.vy)));
-  if(activeWeather?.id==='meteor'){for(let i=0;i<20;i++)particles.push(new Particle(x+(Math.random()-0.5)*60,y+(Math.random()-0.5)*40,{color:'hsl(30,100%,60%)'}));}
-  if(activeWeather?.id==='volcano'){for(let i=0;i<15;i++){const a=Math.random()*Math.PI*2;particles.push(new Particle(x,y,{color:`hsl(${10+Math.random()*40},100%,60%)`},Math.cos(a)*Math.random()*5,Math.sin(a)*Math.random()*5-2));}}
+  if(activeWeather&&activeWeather.id==='meteor'){for(let i=0;i<20;i++)particles.push(new Particle(x+(Math.random()-0.5)*60,y+(Math.random()-0.5)*40,{color:'hsl(30,100%,60%)'}));}
+  if(activeWeather&&activeWeather.id==='volcano'){for(let i=0;i<15;i++){const a=Math.random()*Math.PI*2;particles.push(new Particle(x,y,{color:'hsl('+(10+Math.random()*40)+',100%,60%)'},Math.cos(a)*Math.random()*5,Math.sin(a)*Math.random()*5-2));}}
   if(prestigeOwned['dark_matter']){for(let i=0;i<30;i++){const a=(i/30)*Math.PI*2,r=2+Math.random()*2;particles.push(new Particle(x,y,{color:'hsla(260,80%,40%,0.8)'},Math.cos(a)*r,Math.sin(a)*r));}}
   const weatherBonus=activeWeather?activeWeather.bonus:1;
-  // ADDITIVE: total multiplier = 1 + rebirth + (combo-1) + (glitch-1) + (weather-1)
-  const shapeData = SHAPES.find(s => s.id === activeShape) || {mult:1.0};
-  const shapeMult = shapeData.mult;
-  const earned = Math.floor(colorObj.value * shapeMult * (1 + rebirthCount + (getComboMultiplier()-1) + (globalMultiplier-1) + (weatherBonus-1)));
-  money+=earned; achStats.earned+=earned; chSessionEarned+=earned;
-  // Check simultaneous for challenge
-  if(activeChallenge?.def.stat==='simultaneous'){chSimultaneous=fireworks.length+1;tickChallenge('simultaneous');}
-  if(activeChallenge?.def.stat==='during_weather'&&activeWeather){chDuringWeather++;tickChallenge('during_weather');}
+  const shapeMult=(SHAPES.find(s=>s.id===activeShape)||{mult:1.0}).mult;
+  const earned=Math.floor(colorObj.value*shapeMult*(1+rebirthCount+(getComboMultiplier()-1)+(globalMultiplier-1)+(weatherBonus-1)));
+  money+=earned;achStats.earned+=earned;
   document.getElementById('money').textContent=fmt(money);
+  // FIX #2: tick earned_total challenge
+  if(activeChallenge&&activeChallenge.def.stat==='earned_total') tickChallenge('earned_total');
+  if(activeChallenge&&activeChallenge.def.stat==='simultaneous'){chSimultaneous=fireworks.length+1;tickChallenge('simultaneous');}
+  if(activeChallenge&&activeChallenge.def.stat==='during_weather'&&activeWeather){chDuringWeather++;tickChallenge('during_weather');}
   saveProgressOnline().catch(()=>{});
   checkAchievements();
 }
 
-  
-function ppToMega(pp) {
-  return Math.floor(pp / 10);
+// FIX #2: convertToMega ticks mega_pp_count
+function convertToMega(amount){
+  if(prestigePoints>=amount){
+    const gain=Math.floor(amount/10);
+    prestigePoints-=amount;megaPP+=gain;
+    showNotification('Converted '+amount+' PP -> '+gain+' Mega PP!','event',3000);
+    if(activeChallenge&&activeChallenge.def.stat==='mega_pp_count') tickChallenge('mega_pp_count',megaPP);
+    if(activeChallenge&&activeChallenge.def.stat==='pp_count') tickChallenge('pp_count',prestigePoints);
+    renderPrestigeShop();saveProgressOnline();
+  }else showNotification('Not enough Prestige Points!','',2000);
 }
+// FIX #2: upgradeAutoMax ticks max_autos_count
+function upgradeAutoMax(){
+  if(megaPP>=1){
+    megaPP-=1;maxAutos+=1;autoAmount=Math.min(autoAmount+1,maxAutos);
+    showNotification('Auto Launchers increased! New max: '+maxAutos,'event');
+    if(activeChallenge&&activeChallenge.def.stat==='max_autos_count') tickChallenge('max_autos_count',maxAutos);
+    startAutoLaunch();saveProgressOnline();renderPrestigeShop();
+  }else showNotification('Need 1 Mega PP (have '+megaPP+')');
+}
+function buyPrestige(id){
+  const item=PRESTIGE_ITEMS.find(i=>i.id===id);
+  if(!item||prestigePoints<item.cost){showNotification('Not enough PP!','',2000);return;}
+  prestigePoints-=item.cost;
+  prestigeOwned[id]=true;
+  if(id==='golden_sparks')goldenSparksActive=true;
+  achStats.prestigeBought=Object.keys(prestigeOwned).length;
+  showNotification(item.name+' purchased!','event');
+  // FIX #2: tick pp_count after spend
+  if(activeChallenge&&activeChallenge.def.stat==='pp_count') tickChallenge('pp_count',prestigePoints);
+  renderPrestigeShop();checkAchievements();saveProgressOnline();
+}
+function toggleGoldenSparks(){goldenSparksActive=!goldenSparksActive;renderPrestigeShop();saveProgressOnline();}
 
-function convertToMega(amount) {
-  if (prestigePoints >= amount) {
-    const gain = ppToMega(amount);
-    prestigePoints -= amount;
-    megaPP += gain;
-    showNotification(`✅ Converted ${amount} PP → ${gain} Mega PP!`, 'event', 3000);
-    renderPrestigeShop();
-    tickChallenge('mega_pp');
-    tickChallenge('prestigePoints');
-    saveProgressOnline();
-  } else {
-    showNotification(`Not enough Prestige Points!`, '', 2000);
-  }
-}
-
-function upgradeAutoMax() {
-  const cost = 1;
-  if (megaPP >= cost) {
-    megaPP -= cost;
-    tickChallenge('mega_pp');
-    maxAutos += 1;
-    autoAmount = Math.min(autoAmount + 1, maxAutos);
-    showNotification(`🚀 Auto Launchers increased! New max: ${maxAutos}`, 'event');
-    startAutoLaunch();
-    saveProgressOnline();
-  } else {
-    showNotification(`Need 1 Mega PP (you have ${megaPP})`);
-  }
-}
-  
-function buyPrestige(id) {
-  const item = PRESTIGE_ITEMS.find(i => i.id === id);
-  if (!item || prestigePoints < item.cost) {
-    showNotification("Not enough PP!", "", 2000);
-    return;
-  }
-  prestigePoints -= item.cost;
-  tickChallenge('prestigePoints');
-  prestigeOwned[id] = true;
-  if (id === 'golden_sparks') goldenSparksActive = true;
-  showNotification(`${item.name} purchased!`, 'event');
-  renderPrestigeShop();
-  saveProgressOnline();
-}
-
-function toggleGoldenSparks() {
-  goldenSparksActive = !goldenSparksActive;
-  renderPrestigeShop();
-  saveProgressOnline();
-}
-// ═══════════════════════════════════════════════════
-//  LAUNCH FIREWORK
-// ═══════════════════════════════════════════════════
 function launchFirework(x,y,isAuto){
   const max=Math.min(unlockedColors,colors.length);
   const colorObj=colors[Math.floor(Math.random()*Math.max(1,max))];
   fireworks.push(new Firework(x,y,colorObj));
   if(!isAuto){
-    lastClick=Date.now();
-    achStats.manualClicks++;
-    // challenge: precision top zone
-    if(activeChallenge?.def.stat==='top_zone'&&y<canvas.height*0.2){chTopZone++;tickChallenge('top_zone');}
-    // challenge: spots (unique-ish positions)
-    if(activeChallenge?.def.stat==='spots'){
-      const existing=chSpots.find(p=>Math.abs(p.x-x)<80&&Math.abs(p.y-y)<80);
-      if(!existing){chSpots.push({x,y});tickChallenge('spots');}
+    lastClick=Date.now();achStats.manualClicks++;
+    if(activeChallenge&&activeChallenge.def.stat==='top_zone'&&y<canvas.height*0.2){chTopZone++;tickChallenge('top_zone');}
+    if(activeChallenge&&activeChallenge.def.stat==='spots'){
+      const ex=chSpots.find(p=>Math.abs(p.x-x)<80&&Math.abs(p.y-y)<80);
+      if(!ex){chSpots.push({x,y});tickChallenge('spots');}
     }
-  } else {
-    achStats.autoLaunched++;
-    chAutoCount++;
-    if(activeChallenge?.def.stat==='auto_count')tickChallenge('auto_count');
+  }else{
+    achStats.autoLaunched++;chAutoCount++;
+    if(activeChallenge&&activeChallenge.def.stat==='auto_count') tickChallenge('auto_count');
   }
-  // challenge: shape tracking
-  if(activeChallenge?.def.stat==='shapes_used'){chShapesUsed.add(activeShape);tickChallenge('shapes_used');}
-  // challenge: rapid/speed
-  if(activeChallenge?.def.stat==='launched_timed'){chSessionLaunched++;tickChallenge('launched_timed');}
-  achStats.launched++;
-  addCombo(isAuto);
-  checkAchievements();
+  if(activeChallenge&&activeChallenge.def.stat==='shapes_used'){chShapesUsed.add(activeShape);tickChallenge('shapes_used');}
+  if(activeChallenge&&activeChallenge.def.stat==='launched_timed'){chSessionLaunched++;tickChallenge('launched_timed');}
+  achStats.launched++;addCombo(isAuto);checkAchievements();
 }
+canvas.addEventListener('click',e=>{if(Date.now()-lastClick>=clickDelay)launchFirework(e.clientX,e.clientY,false);});
 
-canvas.addEventListener('click',e=>{
-  if(Date.now()-lastClick>=clickDelay)launchFirework(e.clientX,e.clientY,false);
-});
-
-// ═══════════════════════════════════════════════════
-//  ANIMATION LOOP
-// ═══════════════════════════════════════════════════
 function animate(){
-  ctx.fillStyle=activeWeather?'rgba(0,0,0,0.15)':'rgba(0,0,0,0.2)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  // Galaxy event
-  if(galaxyEventActive){
-    if(Math.random()<0.008)spawnGalaxySpiral();
-    if(Date.now()>galaxyEventEnd)galaxyEventActive=false;
-    ctx.fillStyle='rgba(20,0,40,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
-  }
-
-  // Black hole visual
+  ctx.fillStyle=activeWeather?'rgba(0,0,0,0.15)':'rgba(0,0,0,0.2)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  if(galaxyEventActive){if(Math.random()<0.008)spawnGalaxySpiral();if(Date.now()>galaxyEventEnd)galaxyEventActive=false;}
   if(blackholeActive){
     const grad=ctx.createRadialGradient(blackholeX,blackholeY,0,blackholeX,blackholeY,200);
     grad.addColorStop(0,'rgba(80,0,160,0.7)');grad.addColorStop(0.3,'rgba(40,0,80,0.4)');grad.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=grad;ctx.beginPath();ctx.arc(blackholeX,blackholeY,200,0,Math.PI*2);ctx.fill();
-    // ring
     ctx.strokeStyle='rgba(150,0,255,0.5)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(blackholeX,blackholeY,80,0,Math.PI*2);ctx.stroke();
   }
-
-  // Weather particles
-  if(activeWeather&&['blizzard','aurora','storm','volcano','rainbow'].includes(activeWeather.id)){
-    weatherParticles.forEach(p=>{p.update();p.draw();});
+  if(activeWeather&&['blizzard','aurora','storm','volcano','rainbow'].includes(activeWeather.id)){weatherParticles.forEach(p=>{p.update();p.draw();});}
+  if(activeWeather&&(activeWeather.id==='aurora'||activeWeather.id==='rainbow')){
+    const rc=activeWeather.id==='rainbow'?'hsla('+(( Date.now()/50)%360)+',100%,70%,0.04)':'rgba(0,255,136,0.04)';
+    for(let i=0;i<3;i++){const x=(canvas.width/4)*(i+1);const g=ctx.createLinearGradient(x,0,x,canvas.height*0.5);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(0.5,rc);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(x-40,0,80,canvas.height*0.5);}
   }
-  // Aurora ribbons
-  if(activeWeather?.id==='aurora'||activeWeather?.id==='rainbow'){
-    const ribbonColor=activeWeather.id==='rainbow'?`hsla(${(Date.now()/50)%360},100%,70%,0.04)`:'rgba(0,255,136,0.04)';
-    for(let i=0;i<3;i++){const x=(canvas.width/4)*(i+1);const grad=ctx.createLinearGradient(x,0,x,canvas.height*0.5);grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(0.5,ribbonColor);grad.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=grad;ctx.fillRect(x-40,0,80,canvas.height*0.5);}
-  }
-
   for(let i=fireworks.length-1;i>=0;i--){if(fireworks[i].update())fireworks.splice(i,1);else fireworks[i].draw();}
   for(let i=particles.length-1;i>=0;i--){particles[i].update();particles[i].draw();if(particles[i].life<=0)particles.splice(i,1);}
-
-  const pct=Math.min(100,((Date.now()-lastClick)/clickDelay)*100);
-  document.getElementById('cooldownFill').style.width=pct+'%';
-
-  // HUD multiplier display — ADDITIVE: 1 + rebirth + comboBonus + glitchBonus + weatherBonus
+  const pct=Math.min(100,((Date.now()-lastClick)/clickDelay)*100);document.getElementById('cooldownFill').style.width=pct+'%';
   const weatherBonus=activeWeather?activeWeather.bonus:1;
   const totalMult=1+rebirthCount+(getComboMultiplier()-1)+(globalMultiplier-1)+(weatherBonus-1);
-  document.getElementById('moneyMultiplier').textContent=totalMult.toFixed(1)+'×';
-
-  // Tick timed challenge
-  if(activeChallenge?.def.timeLimit>0)updateChallengeBar();
-
+  document.getElementById('moneyMultiplier').textContent=totalMult.toFixed(1)+'x';
+  if(activeChallenge&&activeChallenge.def.timeLimit>0)updateChallengeBar();
   requestAnimationFrame(animate);
 }
 animate();
 
-// ═══════════════════════════════════════════════════
-//  WEATHER / EVENT TRIGGERS
-// ═══════════════════════════════════════════════════
 function triggerEvent(evObj){
-  // Handle special events
   if(evObj.type==='special'){
     switch(evObj.id){
-      case 'galaxy':
-        galaxyEventActive=true; galaxyEventEnd=Date.now()+evObj.duration;
-        showBanner(evObj);
-        showNotification('🌌 GALAXY EVENT! Spiral fireworks rain down!','event',4000);
-        setTimeout(()=>hideBanner(),evObj.duration);
-        break;
-      case 'glitch':
-        showBanner(evObj);
-        startGlitchEvent(evObj.duration);
-        showNotification('⚠️ SYSTEM GLITCH! +1 money bonus for 30s!','event',4000);
-        setTimeout(()=>hideBanner(),evObj.duration);
-        break;
-      case 'nuke':
-        for(let i=0;i<25;i++)setTimeout(()=>{fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*(canvas.height/2)+50,{color:`hsl(${Math.random()*360},100%,60%)`,value:10}));},i*60);
-        showNotification('💥 NUKE! Massive explosion incoming!','event',4000);
-        break;
+      case 'galaxy_ev':galaxyEventActive=true;galaxyEventEnd=Date.now()+evObj.duration;showBanner(evObj);setTimeout(()=>hideBanner(),evObj.duration);break;
+      case 'glitch':showBanner(evObj);startGlitchEvent(evObj.duration);setTimeout(()=>hideBanner(),evObj.duration);break;
+      case 'nuke':for(let i=0;i<25;i++)setTimeout(()=>{fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*(canvas.height/2)+50,{color:'hsl('+(Math.random()*360)+',100%,60%)',value:10}));},i*60);break;
       case 'firework_rain':
-        showBanner(evObj); activeWeather=evObj; achStats.weatherEvents++;
+        showBanner(evObj);activeWeather=evObj;achStats.weatherEvents++;
         weatherParticles=Array.from({length:60},()=>new WeatherParticle());
-        fireworkRainInterval=setInterval(()=>{
-          for(let i=0;i<3;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*(canvas.height/2)+50,colors[Math.floor(Math.random()*Math.max(1,unlockedColors))]));
-        },800);
-        showNotification('🎆 Firework Rain! +1 money bonus + auto mega burst!','event',4000);
-        setTimeout(()=>{activeWeather=null;clearInterval(fireworkRainInterval);fireworkRainInterval=-1;hideBanner();showNotification('Firework Rain ended.','',2000);},evObj.duration);
-        break;
-      case 'golden_hour':
-        showBanner(evObj); activeWeather=evObj; achStats.weatherEvents++;
-        showNotification('✨ Golden Hour! +2.5 money bonus + golden particles!','event',4000);
-        setTimeout(()=>{activeWeather=null;hideBanner();showNotification('Golden Hour ended.','',2000);},evObj.duration);
-        break;
+        fireworkRainInterval=setInterval(()=>{for(let i=0;i<3;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*(canvas.height/2)+50,colors[Math.floor(Math.random()*Math.max(1,unlockedColors))]));},800);
+        setTimeout(()=>{activeWeather=null;clearInterval(fireworkRainInterval);fireworkRainInterval=-1;hideBanner();},evObj.duration);break;
+      case 'golden_hour':showBanner(evObj);activeWeather=evObj;achStats.weatherEvents++;setTimeout(()=>{activeWeather=null;hideBanner();},evObj.duration);break;
       case 'blackhole':
-        blackholeActive=true; blackholeX=canvas.width/2; blackholeY=canvas.height/2;
-        activeWeather=evObj; achStats.weatherEvents++;
-        showBanner(evObj);
-        showNotification('🕳️ BLACK HOLE! +5 money bonus — everything gets pulled in!','event',4000);
-        setTimeout(()=>{blackholeActive=false;activeWeather=null;hideBanner();showNotification('Black hole collapsed.','',2000);},evObj.duration);
-        break;
+        blackholeActive=true;blackholeX=canvas.width/2;blackholeY=canvas.height/2;
+        activeWeather=evObj;achStats.weatherEvents++;showBanner(evObj);
+        setTimeout(()=>{blackholeActive=false;activeWeather=null;hideBanner();},evObj.duration);break;
     }
-    checkAchievements();
-    return;
+    checkAchievements();return;
   }
-  // Weather event
   if(activeWeather)return;
-  activeWeather=evObj; achStats.weatherEvents++;
+  activeWeather=evObj;achStats.weatherEvents++;
   weatherParticles=Array.from({length:80},()=>new WeatherParticle());
-  checkAchievements();
-  showBanner(evObj);
-  showNotification(`${evObj.icon} ${evObj.name} started! +${evObj.bonus-1} money bonus!`,'event',4000);
+  checkAchievements();showBanner(evObj);
   if(weatherTimeout)clearTimeout(weatherTimeout);
-  weatherTimeout=setTimeout(()=>{activeWeather=null;weatherParticles=[];hideBanner();showNotification('Weather event ended.','',2000);},evObj.duration);
+  weatherTimeout=setTimeout(()=>{activeWeather=null;weatherParticles=[];hideBanner();},evObj.duration);
 }
-
-function showBanner(evObj){
-  const b=document.getElementById('weatherBanner');
-  b.style.display='block'; b.style.background=evObj.bg;
-  b.style.color=evObj.color; b.style.borderColor=evObj.color;
-  b.style.boxShadow=`0 0 20px ${evObj.color}44`;
-  b.textContent=`${evObj.icon} ${evObj.name} — ${evObj.desc}`;
-}
+function showBanner(evObj){const b=document.getElementById('weatherBanner');b.style.display='block';b.style.background=evObj.bg;b.style.color=evObj.color;b.style.borderColor=evObj.color;b.textContent=evObj.icon+' '+evObj.name+' - '+evObj.desc;}
 function hideBanner(){document.getElementById('weatherBanner').style.display='none';}
-
-function scheduleWeather(){
-  const delay=120000+Math.random()*120000;
-  setTimeout(()=>{if(!activeWeather){const e=WEATHER_EVENTS[Math.floor(Math.random()*WEATHER_EVENTS.length)];triggerEvent(e);}scheduleWeather();},delay);
-}
+function scheduleWeather(){const delay=120000+Math.random()*120000;setTimeout(()=>{if(!activeWeather){const e=WEATHER_EVENTS[Math.floor(Math.random()*WEATHER_EVENTS.length)];triggerEvent(e);}scheduleWeather();},delay);}
 scheduleWeather();
 
-// ═══════════════════════════════════════════════════
-//  RENDER EVENT PICKER (for owner panel)
-// ═══════════════════════════════════════════════════
 function renderEventPicker(){
-  const list=document.getElementById('eventList');
-  list.innerHTML='';
+  const list=document.getElementById('eventList');list.innerHTML='';
   ALL_EVENTS.forEach(ev=>{
-    const card=document.createElement('div');
-    card.className='event-card';
-    card.innerHTML=`
-      <div class="ec-icon">${ev.icon}</div>
-      <div class="ec-info">
-        <div class="ec-name">${ev.name}</div>
-        <div class="ec-desc">${ev.desc}</div>
-      </div>
-      <div class="ec-badge">${ev.bonus?'+'+((ev.bonus-1)||0):'—'}</div>
-    `;
-    card.addEventListener('click',()=>{
-      sendAdminEvent(ev.type==='weather'?'WEATHER':'SPECIAL',ev.id,ev.duration);
-      closeModal('eventModal');
-      showNotification(`📢 Triggered: ${ev.name}`,'event',3000);
-    });
+    const card=document.createElement('div');card.className='event-card';
+    card.innerHTML='<div class="ec-icon">'+ev.icon+'</div><div class="ec-info"><div class="ec-name">'+ev.name+'</div><div class="ec-desc">'+ev.desc+'</div></div><div class="ec-badge">+'+(ev.bonus-1||0)+'</div>';
+    card.addEventListener('click',()=>{sendAdminEvent(ev.type==='weather'?'WEATHER':'SPECIAL',ev.id,ev.duration);closeModal('eventModal');});
     list.appendChild(card);
   });
 }
-
-// ═══════════════════════════════════════════════════
-//  ACHIEVEMENTS
-// ═══════════════════════════════════════════════════
-function checkAchievements(){
-  ACHIEVEMENTS.forEach(ach=>{
-    if(unlockedAchs[ach.id])return;
-    const val=achStats[ach.stat]||0;
-    if(val>=ach.target){unlockedAchs[ach.id]=true;showAchievementPopup(ach);saveProgressOnline().catch(()=>{});}
-  });
-}
+function checkAchievements(){ACHIEVEMENTS.forEach(ach=>{if(unlockedAchs[ach.id])return;const val=achStats[ach.stat]||0;if(val>=ach.target){unlockedAchs[ach.id]=true;showAchievementPopup(ach);saveProgressOnline().catch(()=>{});}});}
 function showAchievementPopup(ach){
   const popup=document.getElementById('achPopup');
-  document.getElementById('achPopupIcon').textContent=ach.icon;
-  document.getElementById('achPopupName').textContent=ach.name;
-  popup.style.display='flex';
-  showNotification(`🏆 ${ach.name}`,'ach',3000);
-  setTimeout(()=>{popup.style.display='none';},4000);
+  document.getElementById('achPopupIcon').textContent=ach.icon;document.getElementById('achPopupName').textContent=ach.name;
+  popup.style.display='flex';showNotification(ach.name,'ach',3000);setTimeout(()=>{popup.style.display='none';},4000);
 }
 function renderAchievements(){
-  const grid=document.getElementById('achGrid');
-  grid.innerHTML='';
+  const grid=document.getElementById('achGrid');grid.innerHTML='';
   ACHIEVEMENTS.forEach(ach=>{
-    const unlocked=!!unlockedAchs[ach.id];
-    const card=document.createElement('div');
-    card.className='ach-card '+(unlocked?'unlocked':'locked');
+    const unlocked=!!unlockedAchs[ach.id],card=document.createElement('div');card.className='ach-card '+(unlocked?'unlocked':'locked');
     const val=Math.min(Math.floor(achStats[ach.stat]||0),ach.target);
-    card.innerHTML=`<div class="ach-icon">${unlocked?ach.icon:'🔒'}</div><div class="ach-name">${ach.name}</div><div class="ach-desc">${ach.desc}</div><div class="ach-prog">${val} / ${ach.target}</div>`;
+    card.innerHTML='<div class="ach-icon">'+(unlocked?ach.icon:'&#x1F512;')+'</div><div class="ach-name">'+ach.name+'</div><div class="ach-desc">'+ach.desc+'</div><div class="ach-prog">'+val+' / '+ach.target+'</div>';
     grid.appendChild(card);
   });
 }
 
-// ═══════════════════════════════════════════════════
-//  SHAPE SHOP
-// ═══════════════════════════════════════════════════
 function renderShapeShop(){
-  const grid=document.getElementById('shapeGrid');
-  grid.innerHTML='';
+  const grid=document.getElementById('shapeGrid');grid.innerHTML='';
   SHAPES.forEach(shape=>{
-    const owned=!!ownedShapes[shape.id],isActive=activeShape===shape.id;
-    const card=document.createElement('div');
+    const owned=!!ownedShapes[shape.id],isActive=activeShape===shape.id,card=document.createElement('div');
     card.className='shape-card'+(owned?' owned':'')+(isActive?' active':'');
-    card.innerHTML=`<div class="si">${shape.icon}</div><div class="sn">${shape.name}</div><div class="sp">${owned?(isActive?'✓ Active':'Owned'):'$'+fmt(shape.price)}</div>`;
+    card.innerHTML='<div class="si">'+shape.icon+'</div><div class="sn">'+shape.name+'</div><div class="sp">'+(owned?(isActive?'Active':'Owned'):'$'+fmt(shape.price))+'</div>';
     card.addEventListener('click',()=>{
-      if(owned){activeShape=shape.id;showNotification(`Shape: ${shape.name} equipped!`);renderShapeShop();saveProgressOnline().catch(()=>{});}
-      else if(money>=shape.price){money-=shape.price;ownedShapes[shape.id]=true;achStats.shapes=Object.keys(ownedShapes).length;document.getElementById('money').textContent=fmt(money);showNotification(`${shape.name} unlocked!`);renderShapeShop();checkAchievements();saveProgressOnline().catch(()=>{});}
-      else showNotification(`Need $${fmt(shape.price)} to unlock!`);
+      if(owned){activeShape=shape.id;showNotification(shape.name+' equipped!');renderShapeShop();saveProgressOnline().catch(()=>{});}
+      else if(money>=shape.price){
+        money-=shape.price;ownedShapes[shape.id]=true;achStats.shapes=Object.keys(ownedShapes).length;
+        document.getElementById('money').textContent=fmt(money);showNotification(shape.name+' unlocked!');
+        // FIX #4: tick shapes_owned challenge when shape bought
+        if(activeChallenge&&activeChallenge.def.stat==='shapes_owned') tickChallenge('shapes_owned',achStats.shapes);
+        renderShapeShop();checkAchievements();saveProgressOnline().catch(()=>{});
+      }else showNotification('Need $'+fmt(shape.price)+' to unlock!');
     });
     grid.appendChild(card);
   });
 }
 
-// ═══════════════════════════════════════════════════
-//  PRESTIGE SHOP
-// ═══════════════════════════════════════════════════
-function renderPrestigeShop() {
-  document.getElementById('ppDisplay').innerHTML = 
-    `${prestigePoints} <span style="color:#ffd700">PP</span> | ${megaPP} <span style="color:#00ffcc">Mega PP</span>`;
-
-  const grid = document.getElementById('prestigeGrid');
-  grid.innerHTML = '';
-
-  // Original Prestige Items
-  PRESTIGE_ITEMS.forEach(item => {
-    const owned = !!prestigeOwned[item.id];
-    const el = document.createElement('div');
-    el.className = 'prestige-item';
-    let btnHTML = '';
-    if (item.toggleable && owned) {
-      const isOn = goldenSparksActive;
-      btnHTML = `<button class="pi-btn ${isOn ? 'toggle-on' : 'toggle-off'}" onclick="toggleGoldenSparks()">${isOn ? '✨ ON' : '○ OFF'}</button>`;
-    } else {
-      btnHTML = `<button class="pi-btn" ${owned ? 'disabled' : ''} onclick="buyPrestige('${item.id}')">${owned ? '✓ Owned' : item.cost + ' PP'}</button>`;
-    }
-    el.innerHTML = `<div class="pi-icon">${item.icon}</div><div class="pi-info"><div class="pi-name">${item.name}</div><div class="pi-desc">${item.desc}</div></div>${btnHTML}`;
+function renderPrestigeShop(){
+  document.getElementById('ppDisplay').innerHTML=prestigePoints+' <span style="color:#ffd700">PP</span> | '+megaPP+' <span style="color:#00ffcc">Mega PP</span>';
+  const grid=document.getElementById('prestigeGrid');grid.innerHTML='';
+  PRESTIGE_ITEMS.forEach(item=>{
+    const owned=!!prestigeOwned[item.id],el=document.createElement('div');el.className='prestige-item';
+    let btn=item.toggleable&&owned?'<button class="pi-btn '+(goldenSparksActive?'toggle-on':'toggle-off')+'" onclick="toggleGoldenSparks()">'+(goldenSparksActive?'ON':'OFF')+'</button>':'<button class="pi-btn" '+(owned?'disabled':'')+' onclick="buyPrestige(\''+item.id+'\')">'+(owned?'Owned':item.cost+' PP')+'</button>';
+    el.innerHTML='<div class="pi-icon">'+item.icon+'</div><div class="pi-info"><div class="pi-name">'+item.name+'</div><div class="pi-desc">'+item.desc+'</div></div>'+btn;
     grid.appendChild(el);
   });
-
-  // === NEW PP SYSTEM SECTION ===
-  grid.innerHTML += `
-    <div class="prestige-item">
-      <div class="pi-icon">🔄</div>
-      <div class="pi-info">
-        <div class="pi-name">Convert to Mega PP</div>
-        <div class="pi-desc">100 PP = 10 Mega PP</div>
-      </div>
-      <button class="pi-btn" onclick="convertToMega(100)">Convert 100 PP</button>
-    </div>
-    <div class="prestige-item">
-      <div class="pi-icon">🚀</div>
-      <div class="pi-info">
-        <div class="pi-name">Increase Max Autos</div>
-        <div class="pi-desc">+1 Max Auto Launcher (1 Mega PP)</div>
-      </div>
-      <button class="pi-btn" onclick="upgradeAutoMax()">Upgrade (1 Mega PP)</button>
-    </div>`;
+  grid.innerHTML+='<div class="prestige-item"><div class="pi-icon">&#x1F504;</div><div class="pi-info"><div class="pi-name">Convert to Mega PP</div><div class="pi-desc">100 PP = 10 Mega PP</div></div><button class="pi-btn" onclick="convertToMega(100)">Convert 100 PP</button></div><div class="prestige-item"><div class="pi-icon">&#x1F680;</div><div class="pi-info"><div class="pi-name">Increase Max Autos</div><div class="pi-desc">+1 Max Auto Launcher (1 Mega PP)</div></div><button class="pi-btn" onclick="upgradeAutoMax()">Upgrade (1 Mega PP)</button></div>';
 }
 
-// ═══════════════════════════════════════════════════
-//  TAGS
-// ═══════════════════════════════════════════════════
 async function renderTags(){
-  const list=document.getElementById('tagList');
-  list.innerHTML='<div style="color:var(--muted);font-size:13px;padding:10px 0">Loading...</div>';
+  const list=document.getElementById('tagList');list.innerHTML='Loading...';
   try{
-    const snap=await db.ref('tags/'+currentUser).once('value');
-    const owned=snap.val()||{};
-    let activeTag=null;
-    try{const s=await db.ref('activeTag/'+currentUser).once('value');activeTag=s.val();}catch(e){}
+    const snap=await db.ref('tags/'+currentUser).once('value'),owned=snap.val()||{};
+    let activeTag=null;try{const s=await db.ref('activeTag/'+currentUser).once('value');activeTag=s.val();}catch(e){}
     list.innerHTML='';
     for(const key in TAGS_INFO){
-      const info=TAGS_INFO[key];
-      const row=document.createElement('div'); row.className='tag-row tag-'+key;
+      const info=TAGS_INFO[key],row=document.createElement('div');row.className='tag-row tag-'+key;
       const nameEl=document.createElement('span');nameEl.className='tag-name';nameEl.textContent=info.name;
       const descEl=document.createElement('span');descEl.className='tag-desc';descEl.textContent=info.description;
-      const btn=document.createElement('button');
-      btn.style.cssText='padding:5px 10px;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-family:Rajdhani;font-weight:700;font-size:12px;';
+      const btn=document.createElement('button');btn.style.cssText='padding:5px 10px;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-family:Rajdhani;font-weight:700;font-size:12px;';
       if(owned[key]){
-        btn.style.background=activeTag===key?'var(--gold)':'rgba(255,255,255,0.1)';
-        btn.style.color=activeTag===key?'#000':'var(--text)';
-        btn.textContent=activeTag===key?'✓ Equipped':'Equip';
-        btn.onclick=async()=>{if(activeTag===key){await db.ref('activeTag/'+currentUser).remove();}else{await db.ref('activeTag/'+currentUser).set(key);}showNotification(activeTag===key?`Unequipped ${info.name}`:`Equipped ${info.name}`);renderTags();};
-      } else {
-        btn.textContent='🔒 Locked';btn.disabled=true;
-        btn.style.cssText+='opacity:0.4;cursor:not-allowed;background:rgba(255,255,255,0.05);color:var(--muted);';
-      }
-      row.append(nameEl,descEl,btn); list.appendChild(row);
+        btn.style.background=activeTag===key?'var(--gold)':'rgba(255,255,255,0.1)';btn.style.color=activeTag===key?'#000':'var(--text)';
+        btn.textContent=activeTag===key?'Equipped':'Equip';
+        btn.onclick=async()=>{if(activeTag===key)await db.ref('activeTag/'+currentUser).remove();else await db.ref('activeTag/'+currentUser).set(key);renderTags();};
+      }else{btn.textContent='Locked';btn.disabled=true;btn.style.cssText+='opacity:0.4;cursor:not-allowed;';}
+      row.append(nameEl,descEl,btn);list.appendChild(row);
     }
-  }catch(e){list.innerHTML='<div style="color:red">Error loading tags.</div>';}
+  }catch(e){list.innerHTML='Error loading tags.';}
 }
 
-// ═══════════════════════════════════════════════════
-//  UPGRADES
-// ═══════════════════════════════════════════════════
-function getRebirthColors(rc){const num=Math.min(10+rc,50);return Array.from({length:num},(_,i)=>({color:`hsl(${Math.floor(Math.random()*360)},${80+rc%20}%,60%)`,value:i+1}));}
-
+function getRebirthColors(rc){const num=Math.min(10+rc,50);return Array.from({length:num},(_,i)=>({color:'hsl('+(Math.floor(Math.random()*360))+','+(80+rc%20)+'%,60%)',value:i+1}));}
 function updateButtons(){
-  const maxC=unlockedColors>=colors.length,maxD=clickDelay<=100,maxA=autoAmount>=4;
-  document.getElementById('buyColor').innerHTML=maxC?'<span>Buy Color</span><span class="max-tag">MAX</span>':`<span>Buy Color</span><span class="price">$${fmt(colorPrice)}</span>`;
-  document.getElementById('reduceDelay').innerHTML=maxD?'<span>Reduce Delay</span><span class="max-tag">MAX</span>':`<span>Reduce Delay</span><span class="price">$${fmt(delayPrice)}</span>`;
-  document.getElementById('buyAuto').innerHTML=maxA?'<span>Auto-Launch</span><span class="max-tag">MAX</span>':`<span>Auto-Launch</span><span class="price">$${fmt(autoPrice)}</span>`;
-  document.getElementById('rebirthBtn').innerHTML=`<span>⚡ Rebirth</span><span class="price">$${fmt(rebirthPrice)}</span>`;
+  const maxC=unlockedColors>=colors.length,maxD=clickDelay<=100,maxA=autoAmount>=maxAutos;
+  document.getElementById('buyColor').innerHTML=maxC?'<span>Buy Color</span><span class="max-tag">MAX</span>':'<span>Buy Color</span><span class="price">$'+fmt(colorPrice)+'</span>';
+  document.getElementById('reduceDelay').innerHTML=maxD?'<span>Reduce Delay</span><span class="max-tag">MAX</span>':'<span>Reduce Delay</span><span class="price">$'+fmt(delayPrice)+'</span>';
+  document.getElementById('buyAuto').innerHTML=maxA?'<span>Auto-Launch</span><span class="max-tag">MAX</span>':'<span>Auto-Launch</span><span class="price">$'+fmt(autoPrice)+'</span>';
+  document.getElementById('rebirthBtn').innerHTML='<span>Rebirth</span><span class="price">$'+fmt(rebirthPrice)+'</span>';
   document.getElementById('unlockedColors').textContent=unlockedColors;
   document.getElementById('delayDisplay').textContent=clickDelay;
   document.getElementById('autoSpeedDisplay').textContent=autoSpeed.toFixed(2);
   document.getElementById('rebirthBadge').textContent='Rebirth '+rebirthCount;
 }
+document.getElementById('buyColor').addEventListener('click',()=>{if(money>=colorPrice&&unlockedColors<colors.length){money-=colorPrice;unlockedColors++;colorPrice=Math.floor(colorPrice*1.5);document.getElementById('money').textContent=fmt(money);updateButtons();saveProgressOnline().catch(()=>{});}});
+document.getElementById('reduceDelay').addEventListener('click',()=>{if(money>=delayPrice&&clickDelay>100){money-=delayPrice;clickDelay=Math.max(100,clickDelay-100);delayPrice=Math.floor(delayPrice*1.7);document.getElementById('money').textContent=fmt(money);updateButtons();saveProgressOnline().catch(()=>{});}});
+document.getElementById('buyAuto').addEventListener('click',()=>{if(money>=autoPrice&&autoAmount<maxAutos){money-=autoPrice;autoAmount++;autoSpeed/=1.2;autoPrice=Math.floor(autoPrice*1.7);document.getElementById('money').textContent=fmt(money);updateButtons();startAutoLaunch();saveProgressOnline().catch(()=>{});}});
 
-document.getElementById('buyColor').addEventListener('click',()=>{
-  if(money>=colorPrice&&unlockedColors<colors.length){money-=colorPrice;unlockedColors++;colorPrice=Math.floor(colorPrice*1.5);document.getElementById('money').textContent=fmt(money);updateButtons();saveProgressOnline().catch(()=>{});showNotification('Color unlocked! 🎨');}
-});
-document.getElementById('reduceDelay').addEventListener('click',()=>{
-  if(money>=delayPrice&&clickDelay>100){money-=delayPrice;clickDelay=Math.max(100,clickDelay-100);delayPrice=Math.floor(delayPrice*1.7);document.getElementById('money').textContent=fmt(money);updateButtons();saveProgressOnline().catch(()=>{});showNotification('Delay reduced! ⚡');}
-});
-document.getElementById('buyAuto').addEventListener('click',()=>{
-  if(money>=autoPrice&&autoAmount<4){money-=autoPrice;autoAmount++;autoSpeed/=1.2;autoPrice=Math.floor(autoPrice*1.7);document.getElementById('money').textContent=fmt(money);updateButtons();saveProgressOnline().catch(()=>{});startAutoLaunch();showNotification('Auto-launch upgraded! 🚀');}
-});
-document.getElementById('rebirthBtn').addEventListener('click', async () => {
-  if (money < rebirthPrice) {
-    showNotification(`Need $${fmt(rebirthPrice)} to rebirth!`);
-    return;
-  }
-  if (!confirm(`Rebirth for $${fmt(rebirthPrice)}?`)) return;
-
-  // Reset
-  fireworks = []; particles = []; weatherParticles = [];
-  if (fireworkRainInterval !== -1) clearInterval(fireworkRainInterval);
-  blackholeActive = false; galaxyEventActive = false; activeWeather = null;
-  comboHits = 0; comboLevel = 0;
-
-  money = 0;
-  unlockedColors = 1;
-  clickDelay = 1200;
-  colorPrice = 50;
-  delayPrice = 100;
-  autoAmount = 0;
-  autoSpeed = 2.5;
-  autoPrice = 200;
-
-  rebirthCount++;
-  rebirthPrice = Math.floor(500 * Math.pow(1.5, rebirthCount));
-  
-  prestigePoints += 1;
-  tickChallenge('prestigePoints');
-
-  colors = [...baseColors, ...getRebirthColors(rebirthCount)];
-  achStats.rebirths = rebirthCount;
-  
-  updateButtons();
-  document.getElementById('money').textContent = fmt(money);
+// ===================================================================
+// FIX #1 + #2: Rebirth — removed free megaPP grant, only +1 PP
+// ===================================================================
+document.getElementById('rebirthBtn').addEventListener('click',async()=>{
+  if(money<rebirthPrice){showNotification('Need $'+fmt(rebirthPrice)+' to rebirth!');return;}
+  if(!confirm('Rebirth for $'+fmt(rebirthPrice)+'?'))return;
+  fireworks=[];particles=[];weatherParticles=[];
+  if(fireworkRainInterval!==-1)clearInterval(fireworkRainInterval);
+  blackholeActive=false;galaxyEventActive=false;activeWeather=null;comboHits=0;comboLevel=0;
+  money=0;unlockedColors=1;clickDelay=1200;colorPrice=50;delayPrice=100;autoAmount=0;autoSpeed=2.5;autoPrice=200;
+  rebirthCount++;rebirthPrice=Math.floor(500*Math.pow(1.5,rebirthCount));
+  // FIX #1: Only +1 PP per rebirth. No free megaPP.
+  prestigePoints+=1;
+  // FIX #2: tick pp_count challenge after PP increases
+  if(activeChallenge&&activeChallenge.def.stat==='pp_count') tickChallenge('pp_count',prestigePoints);
+  colors=[...baseColors,...getRebirthColors(rebirthCount)];achStats.rebirths=rebirthCount;
+  updateButtons();document.getElementById('money').textContent=fmt(money);
   await saveProgressOnline().catch(()=>{});
-  showNotification(`Rebirth #${rebirthCount} complete! +1 PP`, 'event', 4000);
-  checkAchievements();
-  renderPrestigeShop();
+  showNotification('Rebirth #'+rebirthCount+' complete! +1 PP','event',4000);
+  checkAchievements();renderPrestigeShop();
 });
 
-// ═══════════════════════════════════════════════════
-//  AUTO LAUNCH  (fixed)
-// ═══════════════════════════════════════════════════
 function startAutoLaunch(){
   if(autoInterval!==-1){clearInterval(autoInterval);autoInterval=-1;}
   if(autoAmount<=0)return;
   const delayMs=Math.max(500,Math.round(autoSpeed*1000));
-  autoInterval=setInterval(function autoTick(){
-    if(!canvas.width||!canvas.height)return;
-    for(let i=0;i<autoAmount;i++){
-      launchFirework(Math.random()*canvas.width,Math.random()*(canvas.height*0.5)+80,true);
-    }
-  },delayMs);
+  autoInterval=setInterval(()=>{if(!canvas.width||!canvas.height)return;for(let i=0;i<autoAmount;i++)launchFirework(Math.random()*canvas.width,Math.random()*(canvas.height*0.5)+80,true);},delayMs);
 }
-
-// ═══════════════════════════════════════════════════
-//  GALAXY SPIRAL
-// ═══════════════════════════════════════════════════
 function spawnGalaxySpiral(){
-  const cx=Math.random()*canvas.width;
-  let cy=canvas.height-60;
-  const offset=Math.random()*Math.PI*2;
-  for(let i=0;i<6;i++){
-    let a=offset+i,r=i*6;
-    const colorObj={color:`hsl(${260+Math.random()*60},100%,70%)`,value:5};
-    const fw=new Firework(cx,cy,colorObj);
-    fw._spiral=true; fw._a=a; fw._r=r; fw._cx=cx;
-    fireworks.push(fw);
-  }
+  const cx=Math.random()*canvas.width,offset=Math.random()*Math.PI*2;
+  for(let i=0;i<6;i++)fireworks.push(new Firework(cx,canvas.height-60,{color:'hsl('+(260+Math.random()*60)+',100%,70%)',value:5}));
 }
+function startGlitchEvent(duration){if(glitchActive)return;glitchActive=true;globalMultiplier=2;document.body.classList.add('glitch-ui');setTimeout(()=>{glitchActive=false;globalMultiplier=1;document.body.classList.remove('glitch-ui');},duration);}
 
-// ═══════════════════════════════════════════════════
-//  GLITCH EVENT
-// ═══════════════════════════════════════════════════
-function startGlitchEvent(duration){
-  if(glitchActive)return;
-  glitchActive=true;globalMultiplier=2;document.body.classList.add('glitch-ui');
-  setTimeout(()=>{glitchActive=false;globalMultiplier=1;document.body.classList.remove('glitch-ui');},duration);
-}
-
-// ═══════════════════════════════════════════════════
-//  SAVE / LOAD
-// ═══════════════════════════════════════════════════
 async function saveProgressOnline(){
   if(!currentUser)return;
-  await db.ref('progress/'+currentUser).set({
-    money, unlockedColors, clickDelay, rebirthCount, autoAmount, autoSpeed,
-    colorPrice, delayPrice, rebirthPrice, autoPrice,
-    prestigePoints, megaPP, maxAutos,  
-    achStats, unlockedAchs, ownedShapes, activeShape,
-    prestigeOwned, goldenSparksActive, challengeCompleted
-});
+  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,prestigePoints,megaPP,maxAutos,achStats,unlockedAchs,ownedShapes,activeShape,prestigeOwned,goldenSparksActive,challengeCompleted});
 }
-
 async function loadProgressOnline(uid){
   const snap=await db.ref('progress/'+uid).once('value');
   if(snap.exists()){
     const p=snap.val();
-    money=p.money||0; unlockedColors=p.unlockedColors||1; clickDelay=p.clickDelay||1200;
-    rebirthCount=p.rebirthCount||0; autoAmount=p.autoAmount||0; autoSpeed=p.autoSpeed||2.5;
-    colorPrice=p.colorPrice||50; delayPrice=p.delayPrice||100; rebirthPrice=p.rebirthPrice||500; autoPrice=p.autoPrice||200;
-    prestigePoints = p.prestigePoints || 0;
-    megaPP = p.megaPP || 0;
-    maxAutos = p.maxAutos || 1;
+    money=p.money||0;unlockedColors=p.unlockedColors||1;clickDelay=p.clickDelay||1200;
+    rebirthCount=p.rebirthCount||0;autoAmount=p.autoAmount||0;autoSpeed=p.autoSpeed||2.5;
+    colorPrice=p.colorPrice||50;delayPrice=p.delayPrice||100;rebirthPrice=p.rebirthPrice||500;autoPrice=p.autoPrice||200;
+    prestigePoints=p.prestigePoints||0;megaPP=p.megaPP||0;maxAutos=p.maxAutos||1;
     if(p.achStats)achStats={...achStats,...p.achStats};
     if(p.unlockedAchs)unlockedAchs=p.unlockedAchs;
     if(p.ownedShapes)ownedShapes=p.ownedShapes;
     if(p.activeShape)activeShape=p.activeShape;
-    if(p.prestigePoints!==undefined)prestigePoints=p.prestigePoints;
     if(p.prestigeOwned)prestigeOwned=p.prestigeOwned;
     if(p.challengeCompleted)challengeCompleted=p.challengeCompleted;
     goldenSparksActive=p.goldenSparksActive!==undefined?p.goldenSparksActive:!!prestigeOwned['golden_sparks'];
-    achStats.shapes=Object.keys(ownedShapes).length;
-    achStats.prestigeBought=Object.keys(prestigeOwned).length;
+    achStats.shapes=Object.keys(ownedShapes).length;achStats.prestigeBought=Object.keys(prestigeOwned).length;
     colors=[...baseColors,...getRebirthColors(rebirthCount)];
-    document.getElementById('money').textContent=fmt(money);
-    updateButtons(); startAutoLaunch();
-  } else {
-    colors=[...baseColors]; updateButtons(); startAutoLaunch();
-  }
+    document.getElementById('money').textContent=fmt(money);updateButtons();startAutoLaunch();
+  }else{colors=[...baseColors];updateButtons();startAutoLaunch();}
 }
 
-// ═══════════════════════════════════════════════════
-//  SETTINGS
-// ═══════════════════════════════════════════════════
 function loadSettings(){
-  const s=localStorage.getItem('fireworkSettings'); if(!s)return;
+  const s=localStorage.getItem('fireworkSettings');if(!s)return;
   const st=JSON.parse(s);
-  document.getElementById('musicVolume').value=st.musicVolume??35;
-  document.getElementById('gameVolume').value=st.gameVolume??100;
-  document.getElementById('bgMusic').volume=(st.musicVolume??35)/100;
-  document.getElementById('fireworkSound').volume=(st.gameVolume??100)/100;
-  document.getElementById('musicVolDisplay').textContent=(st.musicVolume??35)+'%';
-  document.getElementById('gameVolDisplay').textContent=(st.gameVolume??100)+'%';
+  document.getElementById('musicVolume').value=st.musicVolume||35;document.getElementById('gameVolume').value=st.gameVolume||100;
+  document.getElementById('bgMusic').volume=(st.musicVolume||35)/100;document.getElementById('fireworkSound').volume=(st.gameVolume||100)/100;
+  document.getElementById('musicVolDisplay').textContent=(st.musicVolume||35)+'%';document.getElementById('gameVolDisplay').textContent=(st.gameVolume||100)+'%';
 }
 function saveSettings(){localStorage.setItem('fireworkSettings',JSON.stringify({musicVolume:document.getElementById('musicVolume').value,gameVolume:document.getElementById('gameVolume').value}));}
 loadSettings();
@@ -1404,9 +940,6 @@ document.getElementById('musicVolume').addEventListener('input',e=>{document.get
 document.getElementById('gameVolume').addEventListener('input',e=>{document.getElementById('fireworkSound').volume=e.target.value/100;document.getElementById('gameVolDisplay').textContent=e.target.value+'%';saveSettings();});
 document.addEventListener('click',function startBg(){document.getElementById('bgMusic').volume=document.getElementById('musicVolume').value/100;document.getElementById('bgMusic').play().catch(()=>{});document.removeEventListener('click',startBg);},{once:true});
 
-// ═══════════════════════════════════════════════════
-//  MODAL HELPERS
-// ═══════════════════════════════════════════════════
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.getElementById('openAchBtn').addEventListener('click',()=>{renderAchievements();openModal('achModal');});
@@ -1422,41 +955,27 @@ document.getElementById('closeTag').addEventListener('click',()=>closeModal('tag
 document.getElementById('openSettingsBtn').addEventListener('click',()=>openModal('settingsModal'));
 document.getElementById('closeSettings').addEventListener('click',()=>closeModal('settingsModal'));
 document.getElementById('closeEvent').addEventListener('click',()=>closeModal('eventModal'));
-document.getElementById('creditsBtn').addEventListener('click',()=>alert('Firework Simulator\nCreated by DR3AM STUDI0S\nCoder: Dreamcrusher\nMusic: Ayost4rr\n\nSongs: Heading Home'));
+document.getElementById('creditsBtn').addEventListener('click',()=>alert('Firework Simulator\nCreated by DR3AM STUDI0S'));
 document.getElementById('leaderboardBtn').addEventListener('click',()=>window.open('https://thedr3amstudi0s-cmyk.github.io/FireworkSimulator/fireworkleaderboard.html','_blank'));
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
-// ═══════════════════════════════════════════════════
-//  RESET / LOGOUT
-// ═══════════════════════════════════════════════════
 document.getElementById('resetBtn').addEventListener('click',async()=>{
-  if(!currentUser)return;
-  if(!confirm('Reset all progress? This cannot be undone.'))return;
-  money=0;unlockedColors=1;clickDelay=1200;rebirthCount=0;autoAmount=0;autoSpeed=2.5;
-  colorPrice=50;delayPrice=100;rebirthPrice=500;autoPrice=200;colors=[...baseColors];
+  if(!currentUser||!confirm('Reset all progress?'))return;
+  money=0;unlockedColors=1;clickDelay=1200;rebirthCount=0;autoAmount=0;autoSpeed=2.5;colorPrice=50;delayPrice=100;rebirthPrice=500;autoPrice=200;colors=[...baseColors];
   achStats={launched:0,earned:0,maxCombo:0,rebirths:0,shapes:1,weatherEvents:0,prestigeBought:0,challengesDone:0,autoLaunched:0,manualClicks:0};
-  unlockedAchs={};ownedShapes={circle:true};activeShape='circle';
-  prestigePoints=0;prestigeOwned={};goldenSparksActive=true;challengeCompleted={};
+  unlockedAchs={};ownedShapes={circle:true};activeShape='circle';prestigePoints=0;megaPP=0;maxAutos=1;prestigeOwned={};goldenSparksActive=true;challengeCompleted={};
   comboHits=0;comboLevel=0;autoInterval=-1;activeChallenge=null;
-  document.getElementById('challengeBar').style.display='none';
-  document.getElementById('money').textContent=0;updateButtons();startAutoLaunch();
-  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints,prestigeOwned,goldenSparksActive,challengeCompleted});
+  document.getElementById('challengeBar').style.display='none';document.getElementById('money').textContent=0;updateButtons();startAutoLaunch();
+  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints,megaPP,maxAutos,prestigeOwned,goldenSparksActive,challengeCompleted});
   showNotification('Progress reset!');
 });
 document.getElementById('logoutBtn').addEventListener('click',()=>{if(confirm('Log out?'))auth.signOut().then(()=>location.reload());});
 
-// ═══════════════════════════════════════════════════
-//  AUTH
-// ═══════════════════════════════════════════════════
 async function createNewPlayer(user,username){
-  const uid=user.uid;
-  username=(username||'Player').trim();
-  if(username.length<3)username='Player';
-  username=censorUsername(username);
-  const userRef=db.ref('users/'+uid);
-  const snap=await userRef.once('value'); if(snap.exists())return;
+  const uid=user.uid;username=(username||'Player').trim();if(username.length<3)username='Player';username=censorUsername(username);
+  const userRef=db.ref('users/'+uid),snap=await userRef.once('value');if(snap.exists())return;
   await userRef.set({username,created:Date.now(),tags:{regular:true}});
-  await db.ref('progress/'+uid).set({money:0,unlockedColors:1,clickDelay:1200,rebirthCount:0,autoAmount:0,autoSpeed:2.5,colorPrice:50,delayPrice:100,rebirthPrice:500,autoPrice:200,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints:0,prestigeOwned:{},goldenSparksActive:true,challengeCompleted:{}});
+  await db.ref('progress/'+uid).set({money:0,unlockedColors:1,clickDelay:1200,rebirthCount:0,autoAmount:0,autoSpeed:2.5,colorPrice:50,delayPrice:100,rebirthPrice:500,autoPrice:200,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints:0,megaPP:0,maxAutos:1,prestigeOwned:{},goldenSparksActive:true,challengeCompleted:{}});
 }
 document.getElementById('loginBtn').addEventListener('click',async()=>{
   const email=document.getElementById('email').value.trim(),pw=document.getElementById('password').value;
@@ -1475,115 +994,63 @@ document.getElementById('forgotBtn').addEventListener('click',()=>{
   const email=document.getElementById('email').value;
   auth.sendPasswordResetEmail(email).then(()=>document.getElementById('loginMsg').textContent='Reset email sent!').catch(e=>document.getElementById('loginMsg').textContent=e.message);
 });
-
 function afterLogin(){
   currentUsername=censorUsername(currentUsername);
-  document.getElementById('loginBox').style.display='none';
-  document.getElementById('hud').style.display='block';
-  document.getElementById('toolbar').style.display='flex';
+  document.getElementById('loginBox').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('toolbar').style.display='flex';
   if(ADMIN_FALLBACK[currentUser])document.getElementById('ownerPanel').style.display='block';
   loadProgressOnline(currentUser).catch(()=>{});
 }
 auth.onAuthStateChanged(async user=>{
   if(user){
     currentUser=user.uid;
-    const prof=await db.ref('users/'+currentUser).once('value');
-    if(!prof.exists())await createNewPlayer(user,document.getElementById('username')?.value||'Player');
+    const prof=await db.ref('users/'+currentUser).once('value');if(!prof.exists())await createNewPlayer(user,'Player');
     const userSnap=await db.ref('users/'+currentUser).once('value');
-    currentUsername=(userSnap.exists()&&typeof userSnap.val().username==='string')?userSnap.val().username:'Player';
-    currentUsername=censorUsername(currentUsername);
-    afterLogin();
-    renderPrestigeShop();
-    initAdminEventsListener();
-  } else {
-    document.getElementById('loginBox').style.display='block';
-    document.getElementById('hud').style.display='none';
-    document.getElementById('toolbar').style.display='none';
-  }
+    currentUsername=userSnap.exists()&&typeof userSnap.val().username==='string'?userSnap.val().username:'Player';
+    currentUsername=censorUsername(currentUsername);afterLogin();renderPrestigeShop();initAdminEventsListener();
+  }else{document.getElementById('loginBox').style.display='block';document.getElementById('hud').style.display='none';document.getElementById('toolbar').style.display='none';}
 });
 
-// ═══════════════════════════════════════════════════
-//  ADMIN — FIXED announcement listener
-// ═══════════════════════════════════════════════════
 let adminListenerBound=false;
 async function initAdminEventsListener(){
-  if(adminListenerBound)return;
-  adminListenerBound=true;
-  let seenTs=0;
-  try{
-    const snap=await db.ref('adminEvents/latest').once('value');
-    seenTs=snap.val()?.timestamp||0;
-  }catch(e){}
-
-  db.ref('adminEvents/latest').on('value',snap=>{
-    const val=snap.val();
-    if(!val||val.timestamp<=seenTs)return;
-    seenTs=val.timestamp;
-    handleAdminEvent(val);
-  });
+  if(adminListenerBound)return;adminListenerBound=true;let seenTs=0;
+  try{const snap=await db.ref('adminEvents/latest').once('value');seenTs=snap.val()&&snap.val().timestamp||0;}catch(e){}
+  db.ref('adminEvents/latest').on('value',snap=>{const val=snap.val();if(!val||val.timestamp<=seenTs)return;seenTs=val.timestamp;handleAdminEvent(val);});
 }
-
 function handleAdminEvent(val){
-  if(val.type==='MESSAGE'){
-    showNotification('📢 '+val.message,'announce',val.duration);
-  } else if(val.type==='GLITCH'){
-    showNotification(val.message||'⚠ GLITCH EVENT','event',5000);
-    startGlitchEvent(val.duration||30000);
-  } else if(val.type==='NUKE'){
-    const ev=ALL_EVENTS.find(e=>e.id==='nuke');
-    if(ev)triggerEvent(ev);
-  } else if(val.type==='megaFirework'){
-    for(let i=0;i<30;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height/2+50,{color:`hsl(${Math.random()*360},100%,60%)`,value:50}));
-    showNotification('🎆 Mega Firework!','event');
-  } else if(val.type==='WEATHER'){
-    const ev=ALL_EVENTS.find(e=>e.id===val.eventId);
-    if(ev)triggerEvent(ev);
-  } else if(val.type==='SPECIAL'){
-    const ev=ALL_EVENTS.find(e=>e.id===val.eventId);
-    if(ev)triggerEvent(ev);
-  }
+  if(val.type==='MESSAGE') showNotification(val.message,'announce',val.duration);
+  else if(val.type==='GLITCH'){showNotification('GLITCH EVENT','event',5000);startGlitchEvent(val.duration||30000);}
+  else if(val.type==='NUKE'){const ev=ALL_EVENTS.find(e=>e.id==='nuke');if(ev)triggerEvent(ev);}
+  else if(val.type==='megaFirework'){for(let i=0;i<30;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height/2+50,{color:'hsl('+(Math.random()*360)+',100%,60%)',value:50}));}
+  else if(val.type==='WEATHER'||val.type==='SPECIAL'){const ev=ALL_EVENTS.find(e=>e.id===val.eventId);if(ev)triggerEvent(ev);}
 }
-
-async function sendAdminEvent(type,eventId='',duration=3000){
-  if(!ADMIN_FALLBACK[currentUser]){
-    try{const s=await db.ref('admins/'+currentUser).once('value');if(!s.exists()){showNotification('Not admin');return;}}catch(e){}
-  }
-  await db.ref('adminEvents/latest').set({type,eventId,message:'',duration,timestamp:Date.now()});
+async function sendAdminEvent(type,eventId,duration){
+  if(!ADMIN_FALLBACK[currentUser]){try{const s=await db.ref('admins/'+currentUser).once('value');if(!s.exists()){showNotification('Not admin');return;}}catch(e){}}
+  await db.ref('adminEvents/latest').set({type,eventId:eventId||'',message:'',duration:duration||3000,timestamp:Date.now()});
 }
-
-// Owner panel buttons
 document.getElementById('giveMoneyBtn').addEventListener('click',()=>{money+=10000;document.getElementById('money').textContent=fmt(money);saveProgressOnline().catch(()=>{});});
 document.getElementById('unlockColorsBtn').addEventListener('click',()=>{unlockedColors=colors.length;updateButtons();saveProgressOnline().catch(()=>{});});
-document.getElementById('maxAutoBtn').addEventListener('click',()=>{autoAmount=4;autoSpeed=0.5;updateButtons();startAutoLaunch();saveProgressOnline().catch(()=>{});});
+document.getElementById('maxAutoBtn').addEventListener('click',()=>{autoAmount=maxAutos;autoSpeed=0.5;updateButtons();startAutoLaunch();saveProgressOnline().catch(()=>{});});
 document.getElementById('viewUsersBtn').addEventListener('click',()=>showNotification('Check Firebase console.'));
-document.getElementById('adminFireworkBtn').addEventListener('click',()=>{for(let i=0;i<30;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height/2+50,{color:`hsl(${Math.random()*360},100%,60%)`,value:50}));showNotification('🎆 Mega Firework!','event');});
+document.getElementById('adminFireworkBtn').addEventListener('click',()=>{for(let i=0;i<30;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height/2+50,{color:'hsl('+(Math.random()*360)+',100%,60%)',value:50}));});
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>{const ev=ALL_EVENTS.find(e=>e.id==='nuke');if(ev)sendAdminEvent('SPECIAL',ev.id,ev.duration);});
-document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>{sendAdminEvent('SPECIAL','galaxy',30000);});
-document.getElementById('glitchEventBtn').addEventListener('click',()=>{db.ref('adminEvents/latest').set({type:'GLITCH',eventId:'glitch',message:'⚠ SYSTEM GLITCH (+1 bonus)',duration:30000,timestamp:Date.now()});});
+document.getElementById('adminFireworkBtnGalaxy').addEventListener('click',()=>sendAdminEvent('SPECIAL','galaxy_ev',30000));
+document.getElementById('glitchEventBtn').addEventListener('click',()=>db.ref('adminEvents/latest').set({type:'GLITCH',eventId:'glitch',message:'SYSTEM GLITCH',duration:30000,timestamp:Date.now()}));
 document.getElementById('adminMessageBtn').addEventListener('click',async()=>{
-  const msg=prompt('Announcement message for all players:'); if(!msg)return;
-  const dur=parseInt(prompt('Duration (seconds, e.g. 10):','10'));
+  const msg=prompt('Announcement:');if(!msg)return;
+  const dur=parseInt(prompt('Duration (seconds):','10'));
   await db.ref('adminEvents/latest').set({type:'MESSAGE',eventId:'',message:msg.trim(),duration:isNaN(dur)?8000:Math.min(Math.max(dur*1000,3000),20000),timestamp:Date.now()});
-  showNotification('📢 Announcement sent!','event',3000);
 });
-document.getElementById('triggerWeatherBtn').addEventListener('click',()=>{
-  renderEventPicker(); openModal('eventModal');
+document.getElementById('triggerWeatherBtn').addEventListener('click',()=>{renderEventPicker();openModal('eventModal');});
+document.getElementById('megaBombBtn').addEventListener('click',()=>{
+  megaPP+=100;showNotification('+100 Mega PP','event');
+  if(activeChallenge&&activeChallenge.def.stat==='mega_pp_count') tickChallenge('mega_pp_count',megaPP);
+  saveProgressOnline();renderPrestigeShop();
 });
-
-  document.getElementById('megaBombBtn').addEventListener('click', () => {
-  megaPP += 100;
-  showNotification('✨ OWNER GIFT! +100 Mega PP', 'event');
-  saveProgressOnline();
-});
-
-document.getElementById('ppRainBtn').addEventListener('click', () => {
-  triggerEvent({id:'pp_rain', name:'PP Rain', icon:'✨', bonus:3, duration:30000, type:'special'});
-});
-
-document.getElementById('giveMegaBtn').addEventListener('click', () => {
-  megaPP += 50;
-  showNotification('🎁 +50 Mega PP from Owner!', 'event');
-  saveProgressOnline();
+document.getElementById('ppRainBtn').addEventListener('click',()=>triggerEvent({id:'pp_rain',name:'PP Rain',icon:'&#x2728;',bonus:3,duration:30000,type:'special',desc:'Triple PP gains',color:'#ffd700',bg:'rgba(30,20,0,0.8)'}));
+document.getElementById('giveMegaBtn').addEventListener('click',()=>{
+  megaPP+=50;showNotification('+50 Mega PP from Owner!','event');
+  if(activeChallenge&&activeChallenge.def.stat==='mega_pp_count') tickChallenge('mega_pp_count',megaPP);
+  saveProgressOnline();renderPrestigeShop();
 });
 </script>
 </body>
