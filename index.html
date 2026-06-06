@@ -1298,7 +1298,7 @@ document.getElementById('rebirthBtn').addEventListener('click', async () => {
   updateButtons();
   document.getElementById('money').textContent = fmt(money);
   await saveProgressOnline().catch(()=>{});
-  showNotification(`Rebirth #${rebirthCount} complete! +1 PP + Mega PP bonus!`, 'event', 4000);
+  showNotification(`Rebirth #${rebirthCount} complete! +1 PP`, 'event', 4000);
   checkAchievements();
   renderPrestigeShop();
 });
