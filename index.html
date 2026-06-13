@@ -219,7 +219,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 <div class="setting-row"><label>SFX Volume <span class="setting-val" id="gameVolDisplay">100%</span></label><input type="range" id="gameVolume" min="0" max="100" value="100"/></div>
 <div style="font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:2px;margin:14px 0 10px">&#x26A1; Performance</div>
 <div class="setting-row"><label>Particle Density <span class="setting-val" id="particleDensityDisplay">100%</span></label><input type="range" id="particleDensity" min="10" max="100" step="10" value="100"/><div style="font-size:10px;color:var(--muted);margin-top:3px">Reduces particles on ALL explosions</div></div>
-<div class="setting-row"><label>Max Particles on Screen <span class="setting-val" id="maxParticlesDisplay">2000</span></label><input type="range" id="maxParticles" min="200" max="4000" step="200" value="2000"/><div style="font-size:10px;color:var(--muted);margin-top:3px">Hard cap — older particles removed first</div></div>
+<div class="setting-row"><label>Max Particles on Screen <span class="setting-val" id="maxParticlesDisplay">2000</span></label><input type="range" id="maxParticles" min="200" max="40000" step="200" value="20000"/><div style="font-size:10px;color:var(--muted);margin-top:3px">Hard cap — older particles removed first</div></div>
 <div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
   <div><label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Hide Auto-Launch Particles</label><div style="font-size:10px;color:var(--muted);margin-top:2px">Money still earned, no visuals</div></div>
   <button id="toggleAutoParticles" style="padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.06);color:var(--muted);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;white-space:nowrap;transition:all 0.2s">OFF</button>
@@ -352,11 +352,21 @@ const SHAPES=[
 ];
 let ownedShapes={circle:true},activeShape='circle';
 const PRESTIGE_ITEMS=[
-  {id:'rainbow_trail',name:'Rainbow Trail',icon:'&#x1F308;',desc:'Fireworks leave rainbow trails',cost:2,toggleable:false},
-  {id:'golden_sparks',name:'Golden Sparks',icon:'&#x2728;',desc:'All particles shine gold',cost:3,toggleable:true},
-  {id:'mega_burst',   name:'Mega Burst',   icon:'&#x1F4A5;',desc:'2x particles per explosion',cost:4,toggleable:false},
-  {id:'auto_combo',   name:'Auto-Combo',   icon:'&#x26A1;',desc:'Auto-launches count for combo streak',cost:5,toggleable:false},
-  {id:'dark_matter',  name:'Dark Matter',  icon:'&#x1F311;',desc:'Black-hole vortex effect',cost:6,toggleable:false},
+  {id:'rainbow_trail',name:'Rainbow Trail',     icon:'&#x1F308;',desc:'Fireworks leave rainbow trails as they rise',      cost:2, toggleable:false},
+  {id:'golden_sparks',name:'Golden Sparks',     icon:'&#x2728;', desc:'All explosion particles shine gold',               cost:3, toggleable:true},
+  {id:'mega_burst',   name:'Mega Burst',        icon:'&#x1F4A5;',desc:'2x particles per explosion',                      cost:4, toggleable:false},
+  {id:'auto_combo',   name:'Auto-Combo',        icon:'&#x26A1;', desc:'Auto-launches count toward combo streak',          cost:5, toggleable:false},
+  {id:'dark_matter',  name:'Dark Matter',       icon:'&#x1F311;',desc:'Black-hole vortex pulls particles inward',         cost:6, toggleable:false},
+  {id:'double_value', name:'Double Value',      icon:'&#x1F4B0;',desc:'Each firework earns 2x base money permanently',    cost:8, toggleable:false},
+  {id:'speed_demon',  name:'Speed Demon',       icon:'&#x1F3CE;&#xFE0F;',desc:'Rockets fly 50% faster to target',        cost:5, toggleable:true},
+  {id:'neon_mode',    name:'Neon Mode',         icon:'&#x1F7E3;',desc:'Particles glow in ultra-bright neon colors',       cost:4, toggleable:true},
+  {id:'ghost_trail',  name:'Ghost Trail',       icon:'&#x1F47B;',desc:'Long translucent ghost trails on all fireworks',   cost:3, toggleable:true},
+  {id:'firework_size',name:'Big Bang',          icon:'&#x1F4AB;',desc:'Explosions are 1.5x larger spread',               cost:7, toggleable:false},
+  {id:'multi_launch', name:'Multi-Launch',      icon:'&#x1F387;',desc:'Each click fires 2 fireworks at once',            cost:10,toggleable:false},
+  {id:'color_cycle',  name:'Color Cycle',       icon:'&#x1F300;',desc:'Particles cycle through hues as they fade',        cost:4, toggleable:true},
+  {id:'star_burst',   name:'Star Core',         icon:'&#x1F31F;',desc:'Every explosion spawns a bright white core flash', cost:6, toggleable:true},
+  {id:'money_magnet', name:'Money Magnet',      icon:'&#x1F9F2;',desc:'10% bonus money from every launch permanently',    cost:9, toggleable:false},
+  {id:'long_life',    name:'Long Life',         icon:'&#x23F3;', desc:'Particles last 40% longer before fading',          cost:5, toggleable:false},
 ];
 let prestigeOwned={},goldenSparksActive=true;
 const ALL_EVENTS=[
@@ -494,7 +504,7 @@ const ACHIEVEMENTS=[
   {id:'rebirth3',    name:'Cycle Breaker',   icon:'&#x1F504;',desc:'3 rebirths',                  target:3,     stat:'rebirths'},
   {id:'rebirth5',    name:'Eternal',         icon:'&#x1F300;',desc:'5 rebirths',                  target:5,     stat:'rebirths'},
   {id:'rebirth10',   name:'Transcendent',    icon:'&#x1F30C;',desc:'10 rebirths',                 target:10,    stat:'rebirths'},
-  {id:'rebirth25',   name:'Godlike',         icon:'&#x1F451;',desc:'25 rebirths',                 target:25,    stat:'rebirths'},
+  {id:'rebirth25',   name:'Eternal Master',  icon:'&#x1F451;',desc:'25 rebirths',                 target:25,    stat:'rebirths'},
   {id:'shapes3',     name:'Shape Shifter',   icon:'&#x1F31F;',desc:'Own 3 shapes',                target:3,     stat:'shapes'},
   {id:'shapes6',     name:'Pattern Master',  icon:'&#x1F3A8;',desc:'Own 6 shapes',                target:6,     stat:'shapes'},
   {id:'shapes_all',  name:'Collector',       icon:'&#x1F3C5;',desc:'Own all 15 shapes',           target:15,    stat:'shapes'},
@@ -502,10 +512,10 @@ const ACHIEVEMENTS=[
   {id:'weather5',    name:'Weather Veteran', icon:'&#x1F32A;&#xFE0F;',desc:'Survive 5 weather events',target:5,stat:'weatherEvents'},
   {id:'weather10',   name:'Nature Master',   icon:'&#x1F30A;',desc:'Survive 10 weather events',   target:10,    stat:'weatherEvents'},
   {id:'prestige1',   name:'Prestige Buyer',  icon:'&#x1F451;',desc:'Buy first prestige item',     target:1,     stat:'prestigeBought'},
-  {id:'prestige_all',name:'Prestige Hoarder',icon:'&#x1F48E;',desc:'Own all prestige upgrades',   target:5,     stat:'prestigeBought'},
+  {id:'prestige_all',name:'Prestige Hoarder',icon:'&#x1F48E;',desc:'Own all prestige upgrades',   target:15,    stat:'prestigeBought'},
   {id:'ch_first',    name:'Challenger',      icon:'&#x26A1;', desc:'Complete first challenge',    target:1,     stat:'challengesDone'},
   {id:'ch_five',     name:'Challenge Champ', icon:'&#x1F3C6;',desc:'Complete 5 challenges',       target:5,     stat:'challengesDone'},
-  {id:'ch_all',      name:'Challenge God',   icon:'&#x1F31F;',desc:'Complete all 9 challenges',   target:9,     stat:'challengesDone'},
+  {id:'ch_all',      name:'Challenge Legend', icon:'&#x1F31F;',desc:'Complete all 9 challenges',   target:9,     stat:'challengesDone'},
   {id:'night_owl',   name:'Night Owl',       icon:'&#x1F989;',desc:'100 auto fireworks',          target:100,   stat:'autoLaunched'},
   {id:'clicker',     name:'Click Master',    icon:'&#x1F5B1;&#xFE0F;',desc:'Click 500 times',      target:500,   stat:'manualClicks'},
   {id:'patient',     name:'Patient Zero',    icon:'&#x23F3;', desc:'Wait for 10x combo',          target:10,    stat:'maxCombo'},
@@ -559,11 +569,11 @@ function getShapeVelocities(shape){
 }
 
 class Firework{
-  constructor(x,y,colorObj,isAuto){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;this.isAuto=!!isAuto;this.exploded=false;this.trail=[];this.hue=Math.random()*360;}
+  constructor(x,y,colorObj,isAuto){this.x=x;this.y=canvas.height;this.targetY=y;const spd=Math.random()*2+4;this.speed=prestigeOwned['speed_demon']?spd*1.5:spd;this.colorObj=colorObj;this.isAuto=!!isAuto;this.exploded=false;this.trail=[];this.trailMax=prestigeOwned['ghost_trail']?28:12;this.hue=Math.random()*360;}
   update(){
     if(glitchActive){this.x+=(Math.random()-0.5)*6;this.y+=(Math.random()-0.5)*6;}
     if(blackholeActive){const dx=blackholeX-this.x,dy=blackholeY-this.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<200){this.x+=dx/dist*2;this.y+=dy/dist*2;}}
-    if(!disableTrails)this.trail.push({x:this.x,y:this.y});if(this.trail.length>12)this.trail.shift();
+    if(!disableTrails)this.trail.push({x:this.x,y:this.y});if(this.trail.length>this.trailMax)this.trail.shift();
     this.y-=this.speed;
     if(this.y<=this.targetY&&!this.exploded){this.exploded=true;explode(this.x,this.y,this.colorObj,this.isAuto);return true;}
     return false;
@@ -580,17 +590,25 @@ class Firework{
 class Particle{
   constructor(x,y,colorObj,vx,vy){
     this.x=x;this.y=y;
-    this.color=(prestigeOwned['golden_sparks']&&goldenSparksActive)||activeWeather&&activeWeather.id==='golden_hour'?'hsl(48,100%,65%)':colorObj.color;
-    this.vx=vx!==undefined?vx:Math.cos(Math.random()*Math.PI*2)*Math.random()*4;
-    this.vy=vy!==undefined?vy:Math.sin(Math.random()*Math.PI*2)*Math.random()*4;
-    this.life=100+Math.random()*30;this.maxLife=this.life;this.size=2+Math.random();
+    const isGolden=(prestigeOwned['golden_sparks']&&goldenSparksActive)||activeWeather&&activeWeather.id==='golden_hour';
+    if(isGolden) this.color='hsl(48,100%,65%)';
+    else if(prestigeOwned['neon_mode']) this.color='hsl('+(Math.random()*360)+',100%,70%)';
+    else this.color=colorObj.color;
+    this.colorCycle=!!(prestigeOwned['color_cycle']);
+    this.baseHue=parseInt(colorObj.color&&colorObj.color.match?.(colorObj.color.match(/hsl\((\d+)/)?.[1]||0))||Math.floor(Math.random()*360);
+    const sizeScale=prestigeOwned['firework_size']?1.5:1;
+    this.vx=(vx!==undefined?vx:Math.cos(Math.random()*Math.PI*2)*Math.random()*4)*sizeScale;
+    this.vy=(vy!==undefined?vy:Math.sin(Math.random()*Math.PI*2)*Math.random()*4)*sizeScale;
+    const lifeBase=100+Math.random()*30;
+    this.life=prestigeOwned['long_life']?lifeBase*1.4:lifeBase;
+    this.maxLife=this.life;this.size=2+Math.random();
   }
   update(){
     if(activeWeather&&activeWeather.id==='storm')this.vx+=(Math.random()-0.5)*0.15;
     if(blackholeActive){const dx=blackholeX-this.x,dy=blackholeY-this.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<300){this.vx+=dx/dist*0.5;this.vy+=dy/dist*0.5;}}
     this.vy+=gravity;this.x+=this.vx;this.y+=this.vy;this.life--;
   }
-  draw(){const alpha=this.life/this.maxLife;ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=glitchActive?'hsl('+(Math.random()*360)+',100%,60%)':this.color;ctx.fill();ctx.globalAlpha=1;}
+  draw(){const alpha=this.life/this.maxLife;ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);let c=glitchActive?'hsl('+(Math.random()*360)+',100%,60%)':this.color;if(this.colorCycle){const cycleHue=(this.baseHue+(1-(this.life/this.maxLife))*180)%360;c='hsl('+cycleHue+',100%,65%)';}ctx.fillStyle=c;ctx.fill();ctx.globalAlpha=1;}
 }
 class WeatherParticle{
   constructor(){this.reset();}
@@ -615,10 +633,13 @@ function explode(x,y,colorObj,isAuto){
     if(activeWeather&&activeWeather.id==='meteor'){for(let i=0;i<Math.ceil(20*particleDensity);i++)particles.push(new Particle(x+(Math.random()-0.5)*60,y+(Math.random()-0.5)*40,{color:'hsl(30,100%,60%)'}));}
     if(activeWeather&&activeWeather.id==='volcano'){for(let i=0;i<Math.ceil(15*particleDensity);i++){const a=Math.random()*Math.PI*2;particles.push(new Particle(x,y,{color:'hsl('+(10+Math.random()*40)+',100%,60%)'},Math.cos(a)*Math.random()*5,Math.sin(a)*Math.random()*5-2));}}
     if(prestigeOwned['dark_matter']){for(let i=0;i<Math.ceil(30*particleDensity);i++){const a=(i/Math.ceil(30*particleDensity))*Math.PI*2,r=2+Math.random()*2;particles.push(new Particle(x,y,{color:'hsla(260,80%,40%,0.8)'},Math.cos(a)*r,Math.sin(a)*r));}}
+    if(prestigeOwned['star_burst']){for(let i=0;i<16;i++){const a=(i/16)*Math.PI*2;particles.push(new Particle(x,y,{color:'hsl(60,100%,95%)'},Math.cos(a)*6,Math.sin(a)*6));}}
   }
   const weatherBonus=activeWeather?activeWeather.bonus:1;
   const shapeMult=(SHAPES.find(s=>s.id===activeShape)||{mult:1.0}).mult;
-  const earned=Math.floor(colorObj.value*shapeMult*(1+rebirthCount+(getComboMultiplier()-1)+(globalMultiplier-1)+(weatherBonus-1)));
+  const doubleVal=prestigeOwned['double_value']?2:1;
+  const magnetBonus=prestigeOwned['money_magnet']?1.1:1;
+  const earned=Math.floor(colorObj.value*shapeMult*(1+rebirthCount+(getComboMultiplier()-1)+(globalMultiplier-1)+(weatherBonus-1))*doubleVal*magnetBonus);
   money+=earned;achStats.earned+=earned;
   document.getElementById('money').textContent=fmt(money);
   if(activeChallenge&&activeChallenge.def.stat==='earned_total') tickChallenge('earned_total');
@@ -660,7 +681,7 @@ function launchFirework(x,y,isAuto){
   if(activeChallenge&&activeChallenge.def.stat==='launched_timed'){chSessionLaunched++;tickChallenge('launched_timed');}
   achStats.launched++;addCombo(isAuto);checkAchievements();
 }
-canvas.addEventListener('click',e=>{if(Date.now()-lastClick>=clickDelay)launchFirework(e.clientX,e.clientY,false);});
+canvas.addEventListener('click',e=>{if(Date.now()-lastClick>=clickDelay){launchFirework(e.clientX,e.clientY,false);if(prestigeOwned['multi_launch']){const ox=(Math.random()-0.5)*60;launchFirework(e.clientX+ox,e.clientY+(Math.random()-0.5)*40,false);}}});
 
 function animate(){
   ctx.fillStyle=activeWeather?'rgba(0,0,0,0.15)':'rgba(0,0,0,0.2)';ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -713,7 +734,7 @@ function triggerEvent(evObj){
   if(weatherTimeout)clearTimeout(weatherTimeout);
   weatherTimeout=setTimeout(()=>{activeWeather=null;weatherParticles=[];hideBanner();},evObj.duration);
 }
-function showBanner(evObj){const b=document.getElementById('weatherBanner');b.style.display='block';b.style.background=evObj.bg;b.style.color=evObj.color;b.style.borderColor=evObj.color;b.textContent=evObj.icon+' '+evObj.name+' - '+evObj.desc;}
+function showBanner(evObj){const b=document.getElementById('weatherBanner');b.style.display='block';b.style.background=evObj.bg;b.style.color=evObj.color;b.style.borderColor=evObj.color;b.innerHTML=evObj.icon+'&nbsp;'+evObj.name+'&nbsp;&mdash;&nbsp;'+evObj.desc;}
 function hideBanner(){document.getElementById('weatherBanner').style.display='none';}
 function scheduleWeather(){const delay=120000+Math.random()*120000;setTimeout(()=>{if(!activeWeather){const e=WEATHER_EVENTS[Math.floor(Math.random()*WEATHER_EVENTS.length)];triggerEvent(e);}scheduleWeather();},delay);}
 scheduleWeather();
