@@ -559,21 +559,21 @@ function getShapeVelocities(shape){
 }
 
 class Firework{
-  constructor(x,y,colorObj){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;this.exploded=false;this.trail=[];this.hue=Math.random()*360;}
+  constructor(x,y,colorObj,isAuto){this.x=x;this.y=canvas.height;this.targetY=y;this.speed=Math.random()*2+4;this.colorObj=colorObj;this.isAuto=!!isAuto;this.exploded=false;this.trail=[];this.hue=Math.random()*360;}
   update(){
     if(glitchActive){this.x+=(Math.random()-0.5)*6;this.y+=(Math.random()-0.5)*6;}
     if(blackholeActive){const dx=blackholeX-this.x,dy=blackholeY-this.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<200){this.x+=dx/dist*2;this.y+=dy/dist*2;}}
-    this.trail.push({x:this.x,y:this.y});if(this.trail.length>12)this.trail.shift();
+    if(!disableTrails)this.trail.push({x:this.x,y:this.y});if(this.trail.length>12)this.trail.shift();
     this.y-=this.speed;
-    if(this.y<=this.targetY&&!this.exploded){this.exploded=true;explode(this.x,this.y,this.colorObj);return true;}
+    if(this.y<=this.targetY&&!this.exploded){this.exploded=true;explode(this.x,this.y,this.colorObj,this.isAuto);return true;}
     return false;
   }
   draw(){
-    this.trail.forEach((t,i)=>{
+    if(!disableTrails){this.trail.forEach((t,i)=>{
       const alpha=(i/this.trail.length)*0.6;ctx.beginPath();ctx.arc(t.x,t.y,1.5,0,Math.PI*2);
       const c=prestigeOwned['rainbow_trail']?'hsla('+(((this.hue+i*15)%360))+',100%,70%,'+alpha+')':this.colorObj.color.replace(')',','+alpha+')').replace('hsl','hsla');
       ctx.fillStyle=c;ctx.fill();
-    });
+    });}
     ctx.beginPath();ctx.arc(this.x,this.y,2.5,0,Math.PI*2);ctx.fillStyle=this.colorObj.color;ctx.fill();
   }
 }
@@ -644,7 +644,7 @@ function toggleGoldenSparks(){goldenSparksActive=!goldenSparksActive;renderPrest
 function launchFirework(x,y,isAuto){
   const max=Math.min(unlockedColors,colors.length);
   const colorObj=colors[Math.floor(Math.random()*Math.max(1,max))];
-  fireworks.push(new Firework(x,y,colorObj));
+  fireworks.push(new Firework(x,y,colorObj,isAuto));
   if(!isAuto){
     lastClick=Date.now();achStats.manualClicks++;
     if(activeChallenge&&activeChallenge.def.stat==='top_zone'&&y<canvas.height*0.2){chTopZone++;tickChallenge('top_zone');}
@@ -671,8 +671,8 @@ function animate(){
     ctx.fillStyle=grad;ctx.beginPath();ctx.arc(blackholeX,blackholeY,200,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle='rgba(150,0,255,0.5)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(blackholeX,blackholeY,80,0,Math.PI*2);ctx.stroke();
   }
-  if(activeWeather&&['blizzard','aurora','storm','volcano','rainbow'].includes(activeWeather.id)){weatherParticles.forEach(p=>{p.update();p.draw();});}
-  if(activeWeather&&(activeWeather.id==='aurora'||activeWeather.id==='rainbow')){
+  if(!disableWeatherFx&&activeWeather&&['blizzard','aurora','storm','volcano','rainbow'].includes(activeWeather.id)){weatherParticles.forEach(p=>{p.update();p.draw();});}
+  if(!disableWeatherFx&&activeWeather&&(activeWeather.id==='aurora'||activeWeather.id==='rainbow')){
     const rc=activeWeather.id==='rainbow'?'hsla('+(( Date.now()/50)%360)+',100%,70%,0.04)':'rgba(0,255,136,0.04)';
     for(let i=0;i<3;i++){const x=(canvas.width/4)*(i+1);const g=ctx.createLinearGradient(x,0,x,canvas.height*0.5);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(0.5,rc);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(x-40,0,80,canvas.height*0.5);}
   }
@@ -881,17 +881,68 @@ async function loadProgressOnline(uid){
   }else{colors=[...baseColors];updateButtons();startAutoLaunch();}
 }
 
+function applyBlurSetting(){
+  const val=disableBlur?'none':'';
+  document.querySelectorAll('.panel,.tool-btn,.modal,.notif,#weatherBanner').forEach(el=>{
+    el.style.backdropFilter=val;el.style.webkitBackdropFilter=val;
+  });
+}
+function setToggleBtn(id,active){
+  const btn=document.getElementById(id);if(!btn)return;
+  btn.textContent=active?'ON':'OFF';
+  btn.style.background=active?'rgba(0,212,255,0.18)':'rgba(255,255,255,0.06)';
+  btn.style.color=active?'var(--accent)':'var(--muted)';
+  btn.style.borderColor=active?'var(--accent)':'var(--border)';
+}
 function loadSettings(){
   const s=localStorage.getItem('fireworkSettings');if(!s)return;
   const st=JSON.parse(s);
-  document.getElementById('musicVolume').value=st.musicVolume||35;document.getElementById('gameVolume').value=st.gameVolume||100;
-  document.getElementById('bgMusic').volume=(st.musicVolume||35)/100;document.getElementById('fireworkSound').volume=(st.gameVolume||100)/100;
-  document.getElementById('musicVolDisplay').textContent=(st.musicVolume||35)+'%';document.getElementById('gameVolDisplay').textContent=(st.gameVolume||100)+'%';
+  // Audio
+  document.getElementById('musicVolume').value=st.musicVolume||35;
+  document.getElementById('gameVolume').value=st.gameVolume||100;
+  document.getElementById('bgMusic').volume=(st.musicVolume||35)/100;
+  document.getElementById('fireworkSound').volume=(st.gameVolume||100)/100;
+  document.getElementById('musicVolDisplay').textContent=(st.musicVolume||35)+'%';
+  document.getElementById('gameVolDisplay').textContent=(st.gameVolume||100)+'%';
+  // Particle density
+  const pd=st.particleDensity!==undefined?st.particleDensity:100;
+  document.getElementById('particleDensity').value=pd;
+  document.getElementById('particleDensityDisplay').textContent=pd+'%';
+  particleDensity=pd/100;
+  // Max particles
+  const mp=st.maxParticles!==undefined?st.maxParticles:2000;
+  document.getElementById('maxParticles').value=mp;
+  document.getElementById('maxParticlesDisplay').textContent=mp;
+  maxParticlesOnScreen=mp;
+  // Toggles
+  hideAutoParticles=!!st.hideAutoParticles;
+  disableBlur=!!st.disableBlur;
+  disableWeatherFx=!!st.disableWeatherFx;
+  disableTrails=!!st.disableTrails;
+  setToggleBtn('toggleAutoParticles',hideAutoParticles);
+  setToggleBtn('toggleBlur',disableBlur);
+  setToggleBtn('toggleWeatherFx',disableWeatherFx);
+  setToggleBtn('toggleTrails',disableTrails);
+  applyBlurSetting();
 }
-function saveSettings(){localStorage.setItem('fireworkSettings',JSON.stringify({musicVolume:document.getElementById('musicVolume').value,gameVolume:document.getElementById('gameVolume').value}));}
+function saveSettings(){
+  localStorage.setItem('fireworkSettings',JSON.stringify({
+    musicVolume:document.getElementById('musicVolume').value,
+    gameVolume:document.getElementById('gameVolume').value,
+    particleDensity:document.getElementById('particleDensity').value,
+    maxParticles:document.getElementById('maxParticles').value,
+    hideAutoParticles,disableBlur,disableWeatherFx,disableTrails
+  }));
+}
 loadSettings();
 document.getElementById('musicVolume').addEventListener('input',e=>{document.getElementById('bgMusic').volume=e.target.value/100;document.getElementById('musicVolDisplay').textContent=e.target.value+'%';if(e.target.value>0)document.getElementById('bgMusic').play().catch(()=>{});saveSettings();});
 document.getElementById('gameVolume').addEventListener('input',e=>{document.getElementById('fireworkSound').volume=e.target.value/100;document.getElementById('gameVolDisplay').textContent=e.target.value+'%';saveSettings();});
+document.getElementById('particleDensity').addEventListener('input',e=>{particleDensity=e.target.value/100;document.getElementById('particleDensityDisplay').textContent=e.target.value+'%';saveSettings();});
+document.getElementById('maxParticles').addEventListener('input',e=>{maxParticlesOnScreen=parseInt(e.target.value);document.getElementById('maxParticlesDisplay').textContent=e.target.value;saveSettings();});
+document.getElementById('toggleAutoParticles').addEventListener('click',()=>{hideAutoParticles=!hideAutoParticles;setToggleBtn('toggleAutoParticles',hideAutoParticles);saveSettings();});
+document.getElementById('toggleBlur').addEventListener('click',()=>{disableBlur=!disableBlur;setToggleBtn('toggleBlur',disableBlur);applyBlurSetting();saveSettings();});
+document.getElementById('toggleWeatherFx').addEventListener('click',()=>{disableWeatherFx=!disableWeatherFx;setToggleBtn('toggleWeatherFx',disableWeatherFx);saveSettings();});
+document.getElementById('toggleTrails').addEventListener('click',()=>{disableTrails=!disableTrails;setToggleBtn('toggleTrails',disableTrails);saveSettings();});
 document.addEventListener('click',function startBg(){document.getElementById('bgMusic').volume=document.getElementById('musicVolume').value/100;document.getElementById('bgMusic').play().catch(()=>{});document.removeEventListener('click',startBg);},{once:true});
 
 function openModal(id){document.getElementById(id).classList.add('open');}
