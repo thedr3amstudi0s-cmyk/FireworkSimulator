@@ -105,7 +105,6 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .owner-btn{padding:7px;border:1px solid rgba(255,107,53,0.3);border-radius:6px;background:rgba(255,107,53,0.08);color:var(--accent2);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;transition:all 0.2s}
 .owner-btn:hover{background:rgba(255,107,53,0.18);border-color:var(--accent2)}
-.event-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
 @keyframes glitch{0%{transform:translate(0,0);filter:hue-rotate(0deg)}20%{transform:translate(-2px,2px)}40%{transform:translate(2px,-2px);filter:hue-rotate(90deg)}60%{transform:translate(-2px,-1px)}80%{transform:translate(1px,2px);filter:hue-rotate(180deg)}100%{transform:translate(0,0)}}
 .glitch-ui{animation:glitch 0.15s infinite !important}
 #achPopup{position:fixed;bottom:60px;right:16px;z-index:500;padding:14px 18px;border-radius:10px;border:1px solid var(--gold);background:rgba(12,12,28,0.97);display:none;align-items:center;gap:12px;box-shadow:0 0 20px rgba(255,215,0,0.3);animation:slideInRight 0.4s cubic-bezier(0.34,1.56,0.64,1)}
@@ -227,9 +226,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
     <button class="owner-btn" id="adminFireworkBtnNuke">NUKE</button>
     <button class="owner-btn" id="adminFireworkBtnGalaxy">Galaxy</button>
     <button class="owner-btn" id="glitchEventBtn">Glitch</button>
-    <button class="owner-btn" id="megaBombBtn">+100 Mega PP</button>
-    <button class="owner-btn" id="ppRainBtn">PP Rain</button>
-    <button class="owner-btn" id="giveMegaBtn">+50 Mega PP</button>
+    <button class="owner-btn" id="givePPBtn">+10 PP</button>
     <button class="owner-btn" id="adminMessageBtn" style="grid-column:1/-1">Announcement</button>
     <button class="owner-btn" id="triggerWeatherBtn" style="grid-column:1/-1">Trigger Event</button>
   </div>
@@ -254,8 +251,12 @@ let fireworks=[],particles=[];
 const gravity=0.04;
 let globalMultiplier=1,glitchActive=false;
 let galaxyEventActive=false,galaxyEventEnd=0;
-// FIX #1+2: megaPP starts at 0, only gained via convert or owner gifts
-let prestigePoints=0,megaPP=0,maxAutos=1;
+
+// Auto launchers: player can always buy up to (1 + rebirthCount) slots.
+// maxAutos is derived dynamically — no separate stored value needed.
+function getMaxAutos(){return 1+rebirthCount;}
+
+let prestigePoints=0;
 const COMBO_THRESHOLDS=[5,11,18,26,35,45];
 const COMBO_MAX_LEVEL=10,COMBO_WINDOW=3000;
 let comboHits=0,comboLevel=0,lastFireworkTime=0,comboTimeout=null;
@@ -278,7 +279,7 @@ function addCombo(isAuto){
     const cur=COMBO_THRESHOLDS[comboLevel-5];
     const next=comboLevel<COMBO_MAX_LEVEL?COMBO_THRESHOLDS[comboLevel-5+1]:COMBO_THRESHOLDS[5];
     const prog=comboLevel<COMBO_MAX_LEVEL?((comboHits-cur)/(next-cur))*100:100;
-    document.getElementById('streakLabel').textContent='COMBO '+comboLevel+'x +' +(comboLevel-1)+' BONUS!';
+    document.getElementById('streakLabel').textContent='COMBO '+comboLevel+'x +'+(comboLevel-1)+' BONUS!';
     document.getElementById('streakFill').style.width=Math.min(100,prog)+'%';
     document.getElementById('streakFill').style.background='linear-gradient(90deg,var(--accent2),var(--gold))';
     if(leveledUp)showComboBanner();
@@ -344,22 +345,15 @@ const WEATHER_EVENTS=ALL_EVENTS.filter(e=>e.type==='weather');
 let activeWeather=null,weatherTimeout=null,weatherParticles=[];
 let blackholeActive=false,blackholeX=0,blackholeY=0,fireworkRainInterval=-1;
 
-// FIX #2: Challenge stat names updated to ones that are actually ticked
 const CHALLENGE_DEFS=[
   {id:'rapid_fire',   name:'Rapid Fire',       icon:'&#x1F525;',desc:'Launch 20 fireworks in 30s',         goal:20,   stat:'launched_timed', reward:5000,  timeLimit:30},
   {id:'color_burst',  name:'Color Burst',       icon:'&#x1F3A8;',desc:'Launch in 5 different spots in 10s', goal:5,    stat:'spots',           reward:4000,  timeLimit:10},
   {id:'auto_king',    name:'Auto Master',        icon:'&#x1F916;',desc:'50 auto launches',                   goal:50,   stat:'auto_count',      reward:7500},
   {id:'shape_shifter',name:'Shape Collector',    icon:'&#x1F31F;',desc:'Use 5 different shapes',             goal:5,    stat:'shapes_used',     reward:5000},
   {id:'weather_rider',name:'Weather Rider',      icon:'&#x1F329;',desc:'30 launches during weather event',   goal:30,   stat:'during_weather',  reward:12000},
-  // FIX #2: 'mega_pp' -> 'mega_pp_count' (ticked in convertToMega/owner gifts)
-  {id:'mega_accum',   name:'Mega Accumulator',   icon:'&#x1F48E;',desc:'Collect 50 Mega PP',                 goal:50,   stat:'mega_pp_count',   reward:25000},
-  // FIX #2: 'max_autos' -> 'max_autos_count' (ticked in upgradeAutoMax)
   {id:'auto_empire',  name:'Auto Empire',         icon:'&#x1F680;',desc:'Reach 8 Auto Launchers',             goal:8,    stat:'max_autos_count', reward:40000},
-  // FIX #2: 'earned' -> 'earned_total' (ticked in explode via achStats.earned)
   {id:'legendary',    name:'Legendary Score',     icon:'&#x1F30C;',desc:'Earn 1,000,000 total points',        goal:1000000,stat:'earned_total',   reward:100000},
-  // FIX #4: 'shapes' -> 'shapes_owned' (ticked when shape purchased)
   {id:'shape_god',    name:'Master Collector',    icon:'&#x1F451;',desc:'Own 12 different shapes',            goal:12,   stat:'shapes_owned',    reward:75000},
-  // FIX #2: 'prestigePoints' -> 'pp_count' (ticked when PP changes)
   {id:'pp_storm',     name:'PP Storm',            icon:'&#x2728;', desc:'Reach 10,000 Prestige Points',       goal:10000,stat:'pp_count',        reward:50000}
 ];
 let activeChallenge=null,challengeCompleted={};
@@ -402,9 +396,8 @@ function tickChallenge(eventType,value){
   else if(eventType==='top_zone') prog=chTopZone;
   else if(eventType==='simultaneous') prog=chSimultaneous;
   else if(eventType==='spots') prog=chSpots.length;
-  // FIX #2: PP-based stats all receive explicit value argument
   else if(eventType==='earned_total') prog=Math.min(def.goal,achStats.earned);
-  else if(eventType==='mega_pp_count'||eventType==='max_autos_count'||eventType==='shapes_owned'||eventType==='pp_count') prog=value!==undefined?value:prog;
+  else if(eventType==='max_autos_count'||eventType==='shapes_owned'||eventType==='pp_count') prog=value!==undefined?value:prog;
   else prog++;
   activeChallenge.progress=prog;
   updateChallengeBar();
@@ -480,7 +473,7 @@ const ACHIEVEMENTS=[
   {id:'prestige_all',name:'Prestige Hoarder',icon:'&#x1F48E;',desc:'Own all prestige upgrades',   target:5,     stat:'prestigeBought'},
   {id:'ch_first',    name:'Challenger',      icon:'&#x26A1;', desc:'Complete first challenge',    target:1,     stat:'challengesDone'},
   {id:'ch_five',     name:'Challenge Champ', icon:'&#x1F3C6;',desc:'Complete 5 challenges',       target:5,     stat:'challengesDone'},
-  {id:'ch_all',      name:'Challenge God',   icon:'&#x1F31F;',desc:'Complete all 10 challenges',  target:10,    stat:'challengesDone'},
+  {id:'ch_all',      name:'Challenge God',   icon:'&#x1F31F;',desc:'Complete all 9 challenges',   target:9,     stat:'challengesDone'},
   {id:'night_owl',   name:'Night Owl',       icon:'&#x1F989;',desc:'100 auto fireworks',          target:100,   stat:'autoLaunched'},
   {id:'clicker',     name:'Click Master',    icon:'&#x1F5B1;&#xFE0F;',desc:'Click 500 times',      target:500,   stat:'manualClicks'},
   {id:'patient',     name:'Patient Zero',    icon:'&#x23F3;', desc:'Wait for 10x combo',          target:10,    stat:'maxCombo'},
@@ -503,9 +496,6 @@ function normalizeName(n){return n.toLowerCase().split('').map(c=>leetMap[c]||c)
 function censorUsername(u){let n=normalizeName(u);bannedWords.forEach(w=>{if(n.includes(w))u=u.replace(new RegExp(w,'gi'),'*'.repeat(w.length));});return u;}
 function fmt(n){if(n>=1e12)return(n/1e12).toFixed(1).replace(/\.0$/,'')+'T';if(n>=1e9)return(n/1e9).toFixed(1).replace(/\.0$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1000)return(n/1000).toFixed(1).replace(/\.0$/,'')+'k';return Math.floor(n);}
 
-// ===================================================================
-// FIX #3: getShapeVelocities — all 6 missing shapes now implemented
-// ===================================================================
 function getShapeVelocities(shape){
   const extra=prestigeOwned['mega_burst']?2:1;
   const vels=[];
@@ -525,78 +515,12 @@ function getShapeVelocities(shape){
     case 'snowflake':{for(let arm=0;arm<6;arm++){const a=(arm/6)*Math.PI*2;for(let j=0;j<20*extra;j++){const d=(j/(20*extra))*5;vels.push({vx:Math.cos(a)*d,vy:Math.sin(a)*d});if(j===Math.floor(12*extra)){vels.push({vx:Math.cos(a+Math.PI/3)*2,vy:Math.sin(a+Math.PI/3)*2});vels.push({vx:Math.cos(a-Math.PI/3)*2,vy:Math.sin(a-Math.PI/3)*2});}}}break;}
     case 'crown':{for(let i=0;i<60*extra;i++){const t=(i/(60*extra))*Math.PI;vels.push({vx:Math.cos(t)*4,vy:Math.sin(t)*1.5+1});}for(let s=0;s<5;s++){const x=-4+(s/4)*8;for(let j=0;j<12*extra;j++){const f=j/(12*extra);vels.push({vx:x+(Math.random()-0.5)*0.4,vy:-f*4-0.5});}}break;}
     case 'infinity':{for(let i=0;i<120*extra;i++){const t=(i/(120*extra))*Math.PI*2,sc=1/(1+Math.sin(t)*Math.sin(t));vels.push({vx:Math.cos(t)*sc*4.5,vy:Math.sin(t)*Math.cos(t)*sc*3});}break;}
-
-    // --- FIX #3: Previously missing shapes ---
-
-    case 'phoenix':{
-      // Sweeping wing arcs
-      const wc=60*extra;
-      for(let i=0;i<wc;i++){const t=(i/wc)*Math.PI*2,r=3+1.5*Math.sin(t*2),angle=t+Math.PI/4;vels.push({vx:Math.cos(angle)*r,vy:Math.sin(angle)*r-2});}
-      // Downward tail feathers
-      for(let i=0;i<40*extra;i++){const sp=((i/(40*extra))-0.5)*3,len=2+Math.random()*3;vels.push({vx:sp+(Math.random()-0.5)*0.5,vy:len+Math.random()});}
-      // Rising flame core
-      for(let i=0;i<30*extra;i++){const a=(Math.random()-0.5)*1.2;vels.push({vx:a,vy:-(2+Math.random()*4)});}
-      break;
-    }
-    case 'nebula':{
-      // Multiple offset cloud clusters
-      for(let c=0;c<5;c++){
-        const cx=(Math.random()-0.5)*3,cy=(Math.random()-0.5)*3,r=1.5+Math.random()*3;
-        for(let i=0;i<30*extra;i++){const a=Math.random()*Math.PI*2,rr=r*(0.6+Math.random()*0.8);vels.push({vx:cx+Math.cos(a)*rr,vy:cy+Math.sin(a)*rr});}
-      }
-      // Fill scatter
-      for(let i=0;i<60*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*5;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}
-      break;
-    }
-    case 'dragonfly':{
-      // 4 elliptical wings (2 pairs)
-      [{cx:-2,cy:-1,rx:3,ry:1.5,ra:-0.5},{cx:2,cy:-1,rx:3,ry:1.5,ra:0.5},{cx:-1.5,cy:1,rx:2,ry:1,ra:-0.3},{cx:1.5,cy:1,rx:2,ry:1,ra:0.3}].forEach(w=>{
-        for(let i=0;i<25*extra;i++){const t=(i/(25*extra))*Math.PI*2,lx=w.rx*Math.cos(t),ly=w.ry*Math.sin(t);vels.push({vx:w.cx+lx*Math.cos(w.ra)-ly*Math.sin(w.ra),vy:w.cy+lx*Math.sin(w.ra)+ly*Math.cos(w.ra)});}
-      });
-      // Elongated body
-      for(let i=0;i<20*extra;i++){const f=(i/(20*extra))*6-3;vels.push({vx:(Math.random()-0.5)*0.3,vy:f});}
-      break;
-    }
-    case 'butterfly':{
-      // Upper wings (larger cardioid per side)
-      for(let side=-1;side<=1;side+=2){
-        for(let i=0;i<50*extra;i++){const t=(i/(50*extra))*Math.PI*2,r=4*Math.abs(Math.sin(t/2));vels.push({vx:side*(Math.cos(t)*r+0.5),vy:Math.sin(t)*r-1});}
-      }
-      // Lower wings (smaller)
-      for(let side=-1;side<=1;side+=2){
-        for(let i=0;i<30*extra;i++){const t=(i/(30*extra))*Math.PI*2,r=2*Math.abs(Math.sin(t/2));vels.push({vx:side*(Math.cos(t)*r+0.3),vy:Math.sin(t)*r+2});}
-      }
-      // Body
-      for(let i=0;i<15*extra;i++){const f=(i/(15*extra))*5-2.5;vels.push({vx:(Math.random()-0.5)*0.2,vy:f});}
-      break;
-    }
-    case 'galaxy':{
-      // 4 logarithmic spiral arms
-      for(let arm=0;arm<4;arm++){
-        const offset=(arm/4)*Math.PI*2;
-        for(let i=0;i<60*extra;i++){
-          const t=(i/(60*extra))*Math.PI*3,r=0.3*Math.exp(0.25*t),sc=(Math.random()-0.5)*0.4;
-          vels.push({vx:Math.cos(t+offset)*r+sc,vy:Math.sin(t+offset)*r+sc});
-        }
-      }
-      // Dense core
-      for(let i=0;i<40*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*0.8;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}
-      break;
-    }
-    case 'sunburst':{
-      // 16 alternating long/short rays
-      for(let ray=0;ray<16;ray++){
-        const angle=(ray/16)*Math.PI*2,isLong=ray%2===0,rayLen=isLong?5.5:3,pCount=(isLong?20:12)*extra;
-        for(let j=0;j<pCount;j++){
-          const d=(j/pCount)*rayLen,sp=(Math.random()-0.5)*0.3;
-          vels.push({vx:Math.cos(angle)*d+Math.cos(angle+Math.PI/2)*sp,vy:Math.sin(angle)*d+Math.sin(angle+Math.PI/2)*sp});
-        }
-      }
-      // Bright core
-      for(let i=0;i<50*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*1.2;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}
-      break;
-    }
-
+    case 'phoenix':{const wc=60*extra;for(let i=0;i<wc;i++){const t=(i/wc)*Math.PI*2,r=3+1.5*Math.sin(t*2),angle=t+Math.PI/4;vels.push({vx:Math.cos(angle)*r,vy:Math.sin(angle)*r-2});}for(let i=0;i<40*extra;i++){const sp=((i/(40*extra))-0.5)*3,len=2+Math.random()*3;vels.push({vx:sp+(Math.random()-0.5)*0.5,vy:len+Math.random()});}for(let i=0;i<30*extra;i++){const a=(Math.random()-0.5)*1.2;vels.push({vx:a,vy:-(2+Math.random()*4)});}break;}
+    case 'nebula':{for(let c=0;c<5;c++){const cx=(Math.random()-0.5)*3,cy=(Math.random()-0.5)*3,r=1.5+Math.random()*3;for(let i=0;i<30*extra;i++){const a=Math.random()*Math.PI*2,rr=r*(0.6+Math.random()*0.8);vels.push({vx:cx+Math.cos(a)*rr,vy:cy+Math.sin(a)*rr});}}for(let i=0;i<60*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*5;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}break;}
+    case 'dragonfly':{[{cx:-2,cy:-1,rx:3,ry:1.5,ra:-0.5},{cx:2,cy:-1,rx:3,ry:1.5,ra:0.5},{cx:-1.5,cy:1,rx:2,ry:1,ra:-0.3},{cx:1.5,cy:1,rx:2,ry:1,ra:0.3}].forEach(w=>{for(let i=0;i<25*extra;i++){const t=(i/(25*extra))*Math.PI*2,lx=w.rx*Math.cos(t),ly=w.ry*Math.sin(t);vels.push({vx:w.cx+lx*Math.cos(w.ra)-ly*Math.sin(w.ra),vy:w.cy+lx*Math.sin(w.ra)+ly*Math.cos(w.ra)});}});for(let i=0;i<20*extra;i++){const f=(i/(20*extra))*6-3;vels.push({vx:(Math.random()-0.5)*0.3,vy:f});}break;}
+    case 'butterfly':{for(let side=-1;side<=1;side+=2){for(let i=0;i<50*extra;i++){const t=(i/(50*extra))*Math.PI*2,r=4*Math.abs(Math.sin(t/2));vels.push({vx:side*(Math.cos(t)*r+0.5),vy:Math.sin(t)*r-1});}}for(let side=-1;side<=1;side+=2){for(let i=0;i<30*extra;i++){const t=(i/(30*extra))*Math.PI*2,r=2*Math.abs(Math.sin(t/2));vels.push({vx:side*(Math.cos(t)*r+0.3),vy:Math.sin(t)*r+2});}}for(let i=0;i<15*extra;i++){const f=(i/(15*extra))*5-2.5;vels.push({vx:(Math.random()-0.5)*0.2,vy:f});}break;}
+    case 'galaxy':{for(let arm=0;arm<4;arm++){const offset=(arm/4)*Math.PI*2;for(let i=0;i<60*extra;i++){const t=(i/(60*extra))*Math.PI*3,r=0.3*Math.exp(0.25*t),sc=(Math.random()-0.5)*0.4;vels.push({vx:Math.cos(t+offset)*r+sc,vy:Math.sin(t+offset)*r+sc});}}for(let i=0;i<40*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*0.8;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}break;}
+    case 'sunburst':{for(let ray=0;ray<16;ray++){const angle=(ray/16)*Math.PI*2,isLong=ray%2===0,rayLen=isLong?5.5:3,pCount=(isLong?20:12)*extra;for(let j=0;j<pCount;j++){const d=(j/pCount)*rayLen,sp=(Math.random()-0.5)*0.3;vels.push({vx:Math.cos(angle)*d+Math.cos(angle+Math.PI/2)*sp,vy:Math.sin(angle)*d+Math.sin(angle+Math.PI/2)*sp});}}for(let i=0;i<50*extra;i++){const a=Math.random()*Math.PI*2,r=Math.random()*1.2;vels.push({vx:Math.cos(a)*r,vy:Math.sin(a)*r});}break;}
     default:{const count=prestigeOwned['mega_burst']?200:100;for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,s=Math.random()*4;vels.push({vx:Math.cos(a)*s,vy:Math.sin(a)*s});}}
   }
   return vels;
@@ -655,7 +579,6 @@ function explode(x,y,colorObj){
   const earned=Math.floor(colorObj.value*shapeMult*(1+rebirthCount+(getComboMultiplier()-1)+(globalMultiplier-1)+(weatherBonus-1)));
   money+=earned;achStats.earned+=earned;
   document.getElementById('money').textContent=fmt(money);
-  // FIX #2: tick earned_total challenge
   if(activeChallenge&&activeChallenge.def.stat==='earned_total') tickChallenge('earned_total');
   if(activeChallenge&&activeChallenge.def.stat==='simultaneous'){chSimultaneous=fireworks.length+1;tickChallenge('simultaneous');}
   if(activeChallenge&&activeChallenge.def.stat==='during_weather'&&activeWeather){chDuringWeather++;tickChallenge('during_weather');}
@@ -663,26 +586,6 @@ function explode(x,y,colorObj){
   checkAchievements();
 }
 
-// FIX #2: convertToMega ticks mega_pp_count
-function convertToMega(amount){
-  if(prestigePoints>=amount){
-    const gain=Math.floor(amount/10);
-    prestigePoints-=amount;megaPP+=gain;
-    showNotification('Converted '+amount+' PP -> '+gain+' Mega PP!','event',3000);
-    if(activeChallenge&&activeChallenge.def.stat==='mega_pp_count') tickChallenge('mega_pp_count',megaPP);
-    if(activeChallenge&&activeChallenge.def.stat==='pp_count') tickChallenge('pp_count',prestigePoints);
-    renderPrestigeShop();saveProgressOnline();
-  }else showNotification('Not enough Prestige Points!','',2000);
-}
-// FIX #2: upgradeAutoMax ticks max_autos_count
-function upgradeAutoMax(){
-  if(megaPP>=1){
-    megaPP-=1;maxAutos+=1;autoAmount=Math.min(autoAmount+1,maxAutos);
-    showNotification('Auto Launchers increased! New max: '+maxAutos,'event');
-    if(activeChallenge&&activeChallenge.def.stat==='max_autos_count') tickChallenge('max_autos_count',maxAutos);
-    startAutoLaunch();saveProgressOnline();renderPrestigeShop();
-  }else showNotification('Need 1 Mega PP (have '+megaPP+')');
-}
 function buyPrestige(id){
   const item=PRESTIGE_ITEMS.find(i=>i.id===id);
   if(!item||prestigePoints<item.cost){showNotification('Not enough PP!','',2000);return;}
@@ -691,7 +594,6 @@ function buyPrestige(id){
   if(id==='golden_sparks')goldenSparksActive=true;
   achStats.prestigeBought=Object.keys(prestigeOwned).length;
   showNotification(item.name+' purchased!','event');
-  // FIX #2: tick pp_count after spend
   if(activeChallenge&&activeChallenge.def.stat==='pp_count') tickChallenge('pp_count',prestigePoints);
   renderPrestigeShop();checkAchievements();saveProgressOnline();
 }
@@ -810,7 +712,6 @@ function renderShapeShop(){
       else if(money>=shape.price){
         money-=shape.price;ownedShapes[shape.id]=true;achStats.shapes=Object.keys(ownedShapes).length;
         document.getElementById('money').textContent=fmt(money);showNotification(shape.name+' unlocked!');
-        // FIX #4: tick shapes_owned challenge when shape bought
         if(activeChallenge&&activeChallenge.def.stat==='shapes_owned') tickChallenge('shapes_owned',achStats.shapes);
         renderShapeShop();checkAchievements();saveProgressOnline().catch(()=>{});
       }else showNotification('Need $'+fmt(shape.price)+' to unlock!');
@@ -820,7 +721,7 @@ function renderShapeShop(){
 }
 
 function renderPrestigeShop(){
-  document.getElementById('ppDisplay').innerHTML=prestigePoints+' <span style="color:#ffd700">PP</span> | '+megaPP+' <span style="color:#00ffcc">Mega PP</span>';
+  document.getElementById('ppDisplay').innerHTML=prestigePoints+' <span style="color:#ffd700">PP</span>';
   const grid=document.getElementById('prestigeGrid');grid.innerHTML='';
   PRESTIGE_ITEMS.forEach(item=>{
     const owned=!!prestigeOwned[item.id],el=document.createElement('div');el.className='prestige-item';
@@ -828,7 +729,6 @@ function renderPrestigeShop(){
     el.innerHTML='<div class="pi-icon">'+item.icon+'</div><div class="pi-info"><div class="pi-name">'+item.name+'</div><div class="pi-desc">'+item.desc+'</div></div>'+btn;
     grid.appendChild(el);
   });
-  grid.innerHTML+='<div class="prestige-item"><div class="pi-icon">&#x1F504;</div><div class="pi-info"><div class="pi-name">Convert to Mega PP</div><div class="pi-desc">100 PP = 10 Mega PP</div></div><button class="pi-btn" onclick="convertToMega(100)">Convert 100 PP</button></div><div class="prestige-item"><div class="pi-icon">&#x1F680;</div><div class="pi-info"><div class="pi-name">Increase Max Autos</div><div class="pi-desc">+1 Max Auto Launcher (1 Mega PP)</div></div><button class="pi-btn" onclick="upgradeAutoMax()">Upgrade (1 Mega PP)</button></div>';
 }
 
 async function renderTags(){
@@ -853,12 +753,16 @@ async function renderTags(){
 }
 
 function getRebirthColors(rc){const num=Math.min(10+rc,50);return Array.from({length:num},(_,i)=>({color:'hsl('+(Math.floor(Math.random()*360))+','+(80+rc%20)+'%,60%)',value:i+1}));}
+
+// Auto button label shows current slots / max slots
 function updateButtons(){
-  const maxC=unlockedColors>=colors.length,maxD=clickDelay<=100,maxA=autoAmount>=maxAutos;
+  const maxC=unlockedColors>=colors.length,maxD=clickDelay<=100,maxA=autoAmount>=getMaxAutos();
   document.getElementById('buyColor').innerHTML=maxC?'<span>Buy Color</span><span class="max-tag">MAX</span>':'<span>Buy Color</span><span class="price">$'+fmt(colorPrice)+'</span>';
   document.getElementById('reduceDelay').innerHTML=maxD?'<span>Reduce Delay</span><span class="max-tag">MAX</span>':'<span>Reduce Delay</span><span class="price">$'+fmt(delayPrice)+'</span>';
-  document.getElementById('buyAuto').innerHTML=maxA?'<span>Auto-Launch</span><span class="max-tag">MAX</span>':'<span>Auto-Launch</span><span class="price">$'+fmt(autoPrice)+'</span>';
-  document.getElementById('rebirthBtn').innerHTML='<span>Rebirth</span><span class="price">$'+fmt(rebirthPrice)+'</span>';
+  document.getElementById('buyAuto').innerHTML=maxA
+    ?'<span>Auto-Launch ('+autoAmount+'/'+getMaxAutos()+')</span><span class="max-tag">MAX</span>'
+    :'<span>Auto-Launch ('+autoAmount+'/'+getMaxAutos()+')</span><span class="price">$'+fmt(autoPrice)+'</span>';
+  document.getElementById('rebirthBtn').innerHTML='<span>&#x26A1; Rebirth (+1 slot)</span><span class="price">$'+fmt(rebirthPrice)+'</span>';
   document.getElementById('unlockedColors').textContent=unlockedColors;
   document.getElementById('delayDisplay').textContent=clickDelay;
   document.getElementById('autoSpeedDisplay').textContent=autoSpeed.toFixed(2);
@@ -866,27 +770,32 @@ function updateButtons(){
 }
 document.getElementById('buyColor').addEventListener('click',()=>{if(money>=colorPrice&&unlockedColors<colors.length){money-=colorPrice;unlockedColors++;colorPrice=Math.floor(colorPrice*1.5);document.getElementById('money').textContent=fmt(money);updateButtons();saveProgressOnline().catch(()=>{});}});
 document.getElementById('reduceDelay').addEventListener('click',()=>{if(money>=delayPrice&&clickDelay>100){money-=delayPrice;clickDelay=Math.max(100,clickDelay-100);delayPrice=Math.floor(delayPrice*1.7);document.getElementById('money').textContent=fmt(money);updateButtons();saveProgressOnline().catch(()=>{});}});
-document.getElementById('buyAuto').addEventListener('click',()=>{if(money>=autoPrice&&autoAmount<maxAutos){money-=autoPrice;autoAmount++;autoSpeed/=1.2;autoPrice=Math.floor(autoPrice*1.7);document.getElementById('money').textContent=fmt(money);updateButtons();startAutoLaunch();saveProgressOnline().catch(()=>{});}});
+document.getElementById('buyAuto').addEventListener('click',()=>{
+  if(money>=autoPrice&&autoAmount<getMaxAutos()){
+    money-=autoPrice;autoAmount++;autoSpeed/=1.2;autoPrice=Math.floor(autoPrice*1.7);
+    document.getElementById('money').textContent=fmt(money);updateButtons();startAutoLaunch();saveProgressOnline().catch(()=>{});
+    // tick auto_empire challenge
+    if(activeChallenge&&activeChallenge.def.stat==='max_autos_count') tickChallenge('max_autos_count',autoAmount);
+  }
+});
 
-// ===================================================================
-// FIX #1 + #2: Rebirth — removed free megaPP grant, only +1 PP
-// ===================================================================
+// Rebirth: reset progress, +1 PP, auto slot cap increases by 1
 document.getElementById('rebirthBtn').addEventListener('click',async()=>{
   if(money<rebirthPrice){showNotification('Need $'+fmt(rebirthPrice)+' to rebirth!');return;}
-  if(!confirm('Rebirth for $'+fmt(rebirthPrice)+'?'))return;
+  if(!confirm('Rebirth for $'+fmt(rebirthPrice)+'? You\'ll lose progress but gain +1 PP and unlock another Auto Launcher slot.'))return;
   fireworks=[];particles=[];weatherParticles=[];
   if(fireworkRainInterval!==-1)clearInterval(fireworkRainInterval);
   blackholeActive=false;galaxyEventActive=false;activeWeather=null;comboHits=0;comboLevel=0;
-  money=0;unlockedColors=1;clickDelay=1200;colorPrice=50;delayPrice=100;autoAmount=0;autoSpeed=2.5;autoPrice=200;
+  money=0;unlockedColors=1;clickDelay=1200;colorPrice=50;delayPrice=100;
+  // Keep autoAmount within new max — on rebirth maxAutos grows by 1
+  autoAmount=0;autoSpeed=2.5;autoPrice=200;
   rebirthCount++;rebirthPrice=Math.floor(500*Math.pow(1.5,rebirthCount));
-  // FIX #1: Only +1 PP per rebirth. No free megaPP.
   prestigePoints+=1;
-  // FIX #2: tick pp_count challenge after PP increases
   if(activeChallenge&&activeChallenge.def.stat==='pp_count') tickChallenge('pp_count',prestigePoints);
   colors=[...baseColors,...getRebirthColors(rebirthCount)];achStats.rebirths=rebirthCount;
   updateButtons();document.getElementById('money').textContent=fmt(money);
   await saveProgressOnline().catch(()=>{});
-  showNotification('Rebirth #'+rebirthCount+' complete! +1 PP','event',4000);
+  showNotification('Rebirth #'+rebirthCount+'! +1 PP  |  Auto slots: '+getMaxAutos(),'event',4000);
   checkAchievements();renderPrestigeShop();
 });
 
@@ -904,7 +813,8 @@ function startGlitchEvent(duration){if(glitchActive)return;glitchActive=true;glo
 
 async function saveProgressOnline(){
   if(!currentUser)return;
-  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,prestigePoints,megaPP,maxAutos,achStats,unlockedAchs,ownedShapes,activeShape,prestigeOwned,goldenSparksActive,challengeCompleted});
+  // maxAutos is now derived from rebirthCount, no need to store separately
+  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,prestigePoints,achStats,unlockedAchs,ownedShapes,activeShape,prestigeOwned,goldenSparksActive,challengeCompleted});
 }
 async function loadProgressOnline(uid){
   const snap=await db.ref('progress/'+uid).once('value');
@@ -913,7 +823,9 @@ async function loadProgressOnline(uid){
     money=p.money||0;unlockedColors=p.unlockedColors||1;clickDelay=p.clickDelay||1200;
     rebirthCount=p.rebirthCount||0;autoAmount=p.autoAmount||0;autoSpeed=p.autoSpeed||2.5;
     colorPrice=p.colorPrice||50;delayPrice=p.delayPrice||100;rebirthPrice=p.rebirthPrice||500;autoPrice=p.autoPrice||200;
-    prestigePoints=p.prestigePoints||0;megaPP=p.megaPP||0;maxAutos=p.maxAutos||1;
+    prestigePoints=p.prestigePoints||0;
+    // maxAutos derived: always 1 + rebirthCount
+    autoAmount=Math.min(autoAmount,getMaxAutos());
     if(p.achStats)achStats={...achStats,...p.achStats};
     if(p.unlockedAchs)unlockedAchs=p.unlockedAchs;
     if(p.ownedShapes)ownedShapes=p.ownedShapes;
@@ -963,10 +875,10 @@ document.getElementById('resetBtn').addEventListener('click',async()=>{
   if(!currentUser||!confirm('Reset all progress?'))return;
   money=0;unlockedColors=1;clickDelay=1200;rebirthCount=0;autoAmount=0;autoSpeed=2.5;colorPrice=50;delayPrice=100;rebirthPrice=500;autoPrice=200;colors=[...baseColors];
   achStats={launched:0,earned:0,maxCombo:0,rebirths:0,shapes:1,weatherEvents:0,prestigeBought:0,challengesDone:0,autoLaunched:0,manualClicks:0};
-  unlockedAchs={};ownedShapes={circle:true};activeShape='circle';prestigePoints=0;megaPP=0;maxAutos=1;prestigeOwned={};goldenSparksActive=true;challengeCompleted={};
+  unlockedAchs={};ownedShapes={circle:true};activeShape='circle';prestigePoints=0;prestigeOwned={};goldenSparksActive=true;challengeCompleted={};
   comboHits=0;comboLevel=0;autoInterval=-1;activeChallenge=null;
   document.getElementById('challengeBar').style.display='none';document.getElementById('money').textContent=0;updateButtons();startAutoLaunch();
-  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints,megaPP,maxAutos,prestigeOwned,goldenSparksActive,challengeCompleted});
+  await db.ref('progress/'+currentUser).set({money,unlockedColors,clickDelay,rebirthCount,autoAmount,autoSpeed,colorPrice,delayPrice,rebirthPrice,autoPrice,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints,prestigeOwned,goldenSparksActive,challengeCompleted});
   showNotification('Progress reset!');
 });
 document.getElementById('logoutBtn').addEventListener('click',()=>{if(confirm('Log out?'))auth.signOut().then(()=>location.reload());});
@@ -975,7 +887,7 @@ async function createNewPlayer(user,username){
   const uid=user.uid;username=(username||'Player').trim();if(username.length<3)username='Player';username=censorUsername(username);
   const userRef=db.ref('users/'+uid),snap=await userRef.once('value');if(snap.exists())return;
   await userRef.set({username,created:Date.now(),tags:{regular:true}});
-  await db.ref('progress/'+uid).set({money:0,unlockedColors:1,clickDelay:1200,rebirthCount:0,autoAmount:0,autoSpeed:2.5,colorPrice:50,delayPrice:100,rebirthPrice:500,autoPrice:200,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints:0,megaPP:0,maxAutos:1,prestigeOwned:{},goldenSparksActive:true,challengeCompleted:{}});
+  await db.ref('progress/'+uid).set({money:0,unlockedColors:1,clickDelay:1200,rebirthCount:0,autoAmount:0,autoSpeed:2.5,colorPrice:50,delayPrice:100,rebirthPrice:500,autoPrice:200,achStats,unlockedAchs,ownedShapes,activeShape,prestigePoints:0,prestigeOwned:{},goldenSparksActive:true,challengeCompleted:{}});
 }
 document.getElementById('loginBtn').addEventListener('click',async()=>{
   const email=document.getElementById('email').value.trim(),pw=document.getElementById('password').value;
@@ -1029,7 +941,7 @@ async function sendAdminEvent(type,eventId,duration){
 }
 document.getElementById('giveMoneyBtn').addEventListener('click',()=>{money+=10000;document.getElementById('money').textContent=fmt(money);saveProgressOnline().catch(()=>{});});
 document.getElementById('unlockColorsBtn').addEventListener('click',()=>{unlockedColors=colors.length;updateButtons();saveProgressOnline().catch(()=>{});});
-document.getElementById('maxAutoBtn').addEventListener('click',()=>{autoAmount=maxAutos;autoSpeed=0.5;updateButtons();startAutoLaunch();saveProgressOnline().catch(()=>{});});
+document.getElementById('maxAutoBtn').addEventListener('click',()=>{autoAmount=getMaxAutos();autoSpeed=0.5;updateButtons();startAutoLaunch();saveProgressOnline().catch(()=>{});});
 document.getElementById('viewUsersBtn').addEventListener('click',()=>showNotification('Check Firebase console.'));
 document.getElementById('adminFireworkBtn').addEventListener('click',()=>{for(let i=0;i<30;i++)fireworks.push(new Firework(Math.random()*canvas.width,Math.random()*canvas.height/2+50,{color:'hsl('+(Math.random()*360)+',100%,60%)',value:50}));});
 document.getElementById('adminFireworkBtnNuke').addEventListener('click',()=>{const ev=ALL_EVENTS.find(e=>e.id==='nuke');if(ev)sendAdminEvent('SPECIAL',ev.id,ev.duration);});
@@ -1041,15 +953,10 @@ document.getElementById('adminMessageBtn').addEventListener('click',async()=>{
   await db.ref('adminEvents/latest').set({type:'MESSAGE',eventId:'',message:msg.trim(),duration:isNaN(dur)?8000:Math.min(Math.max(dur*1000,3000),20000),timestamp:Date.now()});
 });
 document.getElementById('triggerWeatherBtn').addEventListener('click',()=>{renderEventPicker();openModal('eventModal');});
-document.getElementById('megaBombBtn').addEventListener('click',()=>{
-  megaPP+=100;showNotification('+100 Mega PP','event');
-  if(activeChallenge&&activeChallenge.def.stat==='mega_pp_count') tickChallenge('mega_pp_count',megaPP);
-  saveProgressOnline();renderPrestigeShop();
-});
-document.getElementById('ppRainBtn').addEventListener('click',()=>triggerEvent({id:'pp_rain',name:'PP Rain',icon:'&#x2728;',bonus:3,duration:30000,type:'special',desc:'Triple PP gains',color:'#ffd700',bg:'rgba(30,20,0,0.8)'}));
-document.getElementById('giveMegaBtn').addEventListener('click',()=>{
-  megaPP+=50;showNotification('+50 Mega PP from Owner!','event');
-  if(activeChallenge&&activeChallenge.def.stat==='mega_pp_count') tickChallenge('mega_pp_count',megaPP);
+// Owner can give PP directly
+document.getElementById('givePPBtn').addEventListener('click',()=>{
+  prestigePoints+=10;showNotification('+10 PP','event');
+  if(activeChallenge&&activeChallenge.def.stat==='pp_count') tickChallenge('pp_count',prestigePoints);
   saveProgressOnline();renderPrestigeShop();
 });
 </script>
