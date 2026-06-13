@@ -213,7 +213,32 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 <div class="modal" id="shapeModal"><div class="modal-box panel"><button class="modal-close" id="closeShape">&#x2715;</button><h2>&#x2728; Firework Shapes</h2><p style="font-size:13px;color:var(--muted);margin-bottom:16px">Unlock special explosion patterns. Click owned to equip.</p><div class="shape-grid" id="shapeGrid"></div></div></div>
 <div class="modal" id="prestigeModal"><div class="modal-box panel"><button class="modal-close" id="closePrestige">&#x2715;</button><h2>&#x1F451; Prestige Shop</h2><p style="font-size:13px;color:var(--muted);margin-bottom:16px">Spend Prestige Points earned from Rebirths.</p><div style="font-family:'Orbitron',sans-serif;font-size:18px;color:var(--gold);margin-bottom:16px">&#x2B50; <span id="ppDisplay">0</span> PP</div><div class="prestige-grid" id="prestigeGrid"></div></div></div>
 <div class="modal" id="tagModal"><div class="modal-box panel"><button class="modal-close" id="closeTag">&#x2715;</button><h2>&#x1F3F7; Tag Inventory</h2><div id="tagList"></div></div></div>
-<div class="modal" id="settingsModal"><div class="modal-box panel" id="settingsPanel" style="width:300px"><button class="modal-close" id="closeSettings">&#x2715;</button><h3>Settings</h3><div class="setting-row"><label>Music Volume <span class="setting-val" id="musicVolDisplay">35%</span></label><input type="range" id="musicVolume" min="0" max="100" value="35"/></div><div class="setting-row"><label>SFX Volume <span class="setting-val" id="gameVolDisplay">100%</span></label><input type="range" id="gameVolume" min="0" max="100" value="100"/></div><button class="btn btn-secondary" id="creditsBtn" style="margin-top:12px">Credits</button><a href="https://thedr3amstudi0s-cmyk.github.io/dr3am-studi0s/" target="_blank" style="display:block;text-align:center;color:var(--accent);font-size:13px;margin-top:10px;text-decoration:none">Visit Our Website</a></div></div>
+<div class="modal" id="settingsModal"><div class="modal-box panel" id="settingsPanel" style="width:320px"><button class="modal-close" id="closeSettings">&#x2715;</button><h3>Settings</h3>
+<div style="font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">&#x1F508; Audio</div>
+<div class="setting-row"><label>Music Volume <span class="setting-val" id="musicVolDisplay">35%</span></label><input type="range" id="musicVolume" min="0" max="100" value="35"/></div>
+<div class="setting-row"><label>SFX Volume <span class="setting-val" id="gameVolDisplay">100%</span></label><input type="range" id="gameVolume" min="0" max="100" value="100"/></div>
+<div style="font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:2px;margin:14px 0 10px">&#x26A1; Performance</div>
+<div class="setting-row"><label>Particle Density <span class="setting-val" id="particleDensityDisplay">100%</span></label><input type="range" id="particleDensity" min="10" max="100" step="10" value="100"/><div style="font-size:10px;color:var(--muted);margin-top:3px">Reduces particles on ALL explosions</div></div>
+<div class="setting-row"><label>Max Particles on Screen <span class="setting-val" id="maxParticlesDisplay">2000</span></label><input type="range" id="maxParticles" min="200" max="4000" step="200" value="2000"/><div style="font-size:10px;color:var(--muted);margin-top:3px">Hard cap — older particles removed first</div></div>
+<div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+  <div><label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Hide Auto-Launch Particles</label><div style="font-size:10px;color:var(--muted);margin-top:2px">Money still earned, no visuals</div></div>
+  <button id="toggleAutoParticles" style="padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.06);color:var(--muted);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;white-space:nowrap;transition:all 0.2s">OFF</button>
+</div>
+<div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+  <div><label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Disable Backdrop Blur</label><div style="font-size:10px;color:var(--muted);margin-top:2px">Removes blur on panels (big fps gain)</div></div>
+  <button id="toggleBlur" style="padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.06);color:var(--muted);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;white-space:nowrap;transition:all 0.2s">OFF</button>
+</div>
+<div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+  <div><label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Disable Weather Particles</label><div style="font-size:10px;color:var(--muted);margin-top:2px">No snow/rain/lava during events</div></div>
+  <button id="toggleWeatherFx" style="padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.06);color:var(--muted);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;white-space:nowrap;transition:all 0.2s">OFF</button>
+</div>
+<div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+  <div><label style="display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Disable Firework Trails</label><div style="font-size:10px;color:var(--muted);margin-top:2px">Removes the trail as rockets rise</div></div>
+  <button id="toggleTrails" style="padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.06);color:var(--muted);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;white-space:nowrap;transition:all 0.2s">OFF</button>
+</div>
+<button class="btn btn-secondary" id="creditsBtn" style="margin-top:6px">Credits</button>
+<a href="https://thedr3amstudi0s-cmyk.github.io/dr3am-studi0s/" target="_blank" style="display:block;text-align:center;color:var(--accent);font-size:13px;margin-top:10px;text-decoration:none">Visit Our Website</a>
+</div></div>
 <div class="modal" id="eventModal"><div class="modal-box panel" id="eventModalBox"><button class="modal-close" id="closeEvent">&#x2715;</button><h2>&#x1F329; Trigger Event</h2><p style="font-size:13px;color:var(--muted);margin-bottom:16px">Choose an event to broadcast to all players.</p><div class="event-list" id="eventList"></div></div></div>
 <div id="ownerPanel" class="panel" style="position:fixed;bottom:60px;left:12px;width:250px;display:none;z-index:150">
   <div style="padding:12px 16px 0;font-family:'Orbitron',sans-serif;font-size:11px;color:var(--accent2);letter-spacing:2px">OWNER TOOLS</div>
@@ -249,6 +274,13 @@ let rebirthCount=0,colorPrice=50,delayPrice=100,rebirthPrice=500;
 let autoAmount=0,autoSpeed=2.5,autoInterval=-1,autoPrice=200;
 let fireworks=[],particles=[];
 const gravity=0.04;
+// Performance settings
+let particleDensity=1.0;
+let maxParticlesOnScreen=2000;
+let hideAutoParticles=false;
+let disableBlur=false;
+let disableWeatherFx=false;
+let disableTrails=false;
 let globalMultiplier=1,glitchActive=false;
 let galaxyEventActive=false,galaxyEventEnd=0;
 
@@ -567,13 +599,23 @@ class WeatherParticle{
   draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}
 }
 
-function explode(x,y,colorObj){
+function explode(x,y,colorObj,isAuto){
   try{const s=document.getElementById('fireworkSound');s.currentTime=0;s.play();}catch(e){}
-  const vels=getShapeVelocities(activeShape);
-  vels.forEach(v=>particles.push(new Particle(x,y,colorObj,v.vx,v.vy)));
-  if(activeWeather&&activeWeather.id==='meteor'){for(let i=0;i<20;i++)particles.push(new Particle(x+(Math.random()-0.5)*60,y+(Math.random()-0.5)*40,{color:'hsl(30,100%,60%)'}));}
-  if(activeWeather&&activeWeather.id==='volcano'){for(let i=0;i<15;i++){const a=Math.random()*Math.PI*2;particles.push(new Particle(x,y,{color:'hsl('+(10+Math.random()*40)+',100%,60%)'},Math.cos(a)*Math.random()*5,Math.sin(a)*Math.random()*5-2));}}
-  if(prestigeOwned['dark_matter']){for(let i=0;i<30;i++){const a=(i/30)*Math.PI*2,r=2+Math.random()*2;particles.push(new Particle(x,y,{color:'hsla(260,80%,40%,0.8)'},Math.cos(a)*r,Math.sin(a)*r));}}
+  // Skip visuals for auto launches if that setting is on
+  if(!(isAuto&&hideAutoParticles)){
+    const vels=getShapeVelocities(activeShape);
+    // Apply particle density — randomly subsample the velocity array
+    const filtered=particleDensity>=1?vels:vels.filter(()=>Math.random()<particleDensity);
+    // Enforce max particles cap before adding more
+    if(particles.length+filtered.length>maxParticlesOnScreen){
+      const toRemove=particles.length+filtered.length-maxParticlesOnScreen;
+      particles.splice(0,Math.min(toRemove,particles.length));
+    }
+    filtered.forEach(v=>particles.push(new Particle(x,y,colorObj,v.vx,v.vy)));
+    if(activeWeather&&activeWeather.id==='meteor'){for(let i=0;i<Math.ceil(20*particleDensity);i++)particles.push(new Particle(x+(Math.random()-0.5)*60,y+(Math.random()-0.5)*40,{color:'hsl(30,100%,60%)'}));}
+    if(activeWeather&&activeWeather.id==='volcano'){for(let i=0;i<Math.ceil(15*particleDensity);i++){const a=Math.random()*Math.PI*2;particles.push(new Particle(x,y,{color:'hsl('+(10+Math.random()*40)+',100%,60%)'},Math.cos(a)*Math.random()*5,Math.sin(a)*Math.random()*5-2));}}
+    if(prestigeOwned['dark_matter']){for(let i=0;i<Math.ceil(30*particleDensity);i++){const a=(i/Math.ceil(30*particleDensity))*Math.PI*2,r=2+Math.random()*2;particles.push(new Particle(x,y,{color:'hsla(260,80%,40%,0.8)'},Math.cos(a)*r,Math.sin(a)*r));}}
+  }
   const weatherBonus=activeWeather?activeWeather.bonus:1;
   const shapeMult=(SHAPES.find(s=>s.id===activeShape)||{mult:1.0}).mult;
   const earned=Math.floor(colorObj.value*shapeMult*(1+rebirthCount+(getComboMultiplier()-1)+(globalMultiplier-1)+(weatherBonus-1)));
